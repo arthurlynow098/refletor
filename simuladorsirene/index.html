@@ -60,7 +60,7 @@
             width: 100%;
             height: 100%;
         }
-        /* Não mexer nessa desgraça a menos que seja para adicionar outra opção do excel */
+
         .output-item { background-color: #f8f9fa; padding: 8px; margin-bottom: 8px; border-radius: 4px; border-left: 3px solid #f39c12; }
         .output-label { font-weight: 600; color: #495057; margin-bottom: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
         .output-value { color: #6c757d; font-size: 11.5px; font-weight: 400; }
@@ -134,7 +134,20 @@
         .cell-selected { background-color: #d0e3ff !important; outline: 1px solid #4a89dc; }
         .row-counter-column { background-color: #e9ecef; font-weight: bold; font-size: 9px; color: #333; }
         .block-container { position: absolute; overflow: visible; }
-        .block-part-single { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 8px; color: #1f2937; transition: all 0.1s ease-in-out; border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; }
+        .block-part-single {
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 8px; color: #1f2937; transition: all 0.1s ease-in-out;
+            border: 1px solid rgba(0,0,0,0.2); border-radius: 4px;
+        }
+        .block-part-container {
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;
+        }
+        .block-part-top, .block-part-bottom {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 8px; color: #1f2937; transition: all 0.1s ease-in-out;
+        }
+        .block-part-top { border-bottom: 1px solid rgba(0,0,0,0.2); }
         .layout-color-red { background-color: #ff0000; color: white; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
         .layout-color-blue { background-color: #2563eb; color: white; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
         .layout-color-green { background-color: #2ecc71; color: white; text-shadow: 1px 1px 1px rgba(0,0,0,0.5); }
@@ -148,7 +161,6 @@
         .resize-handle { width: 12px; height: 12px; bottom: -6px; right: -6px; cursor: nwse-resize; }
         .rotate-handle { width: 14px; height: 14px; top: -20px; left: calc(50% - 7px); border-radius: 50%; cursor: grab; }
         .rotate-handle:active { cursor: grabbing; }
-
         .layout-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .layout-category-title { font-size: 16px; font-weight: 600; color: #2c3e50; margin-top: 20px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid #f39c12; grid-column: 1 / -1; }
         .layout-category-title:first-child { margin-top: 0; }
@@ -156,49 +168,24 @@
         .layout-preview-item:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #f39c12; }
         .layout-preview-item img { width: 100%; height: 120px; object-fit: contain; background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; }
         .layout-preview-item p { padding: 10px; font-size: 12px; font-weight: 500; text-align: center; color: #495057; margin: 0; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-
         #color-context-menu {
-            display: none;
-            position: absolute;
-            z-index: 10000;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            border-radius: 5px;
-            padding: 5px 0;
-            list-style: none;
-            font-size: 12px;
+            display: none; position: absolute; z-index: 10000; background-color: #fff;
+            border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-radius: 5px; padding: 5px 0; list-style: none; font-size: 12px;
         }
-        #color-context-menu li {
-            padding: 8px 15px;
-            cursor: pointer;
-        }
-        #color-context-menu li:hover {
-            background-color: #f39c12;
-            color: white;
-        }
-        #color-context-menu hr {
-            border: none;
-            border-top: 1px solid #eee;
-            margin: 4px 0;
-        }
-        /* cores dos módulos nas células */
+        #color-context-menu li { padding: 8px 15px; cursor: pointer; }
+        #color-context-menu li:hover { background-color: #f39c12; color: white; }
+        #color-context-menu hr { border: none; border-top: 1px solid #eee; margin: 4px 0; }
         .persistent-color-red { background-color: #f8d7da !important; color: black !important; }
         .persistent-color-green { background-color: #d1e7dd !important; color: black !important; }
         .persistent-color-blue { background-color: #cce5ff !important; color: black !important; }
         .persistent-color-white { background-color: #e9ecef !important; color: black !important; }
         .persistent-color-yellow { background-color: #fff3cd !important; color: black !important; }
-
-        .instruction-text {
-            font-size: 11px;
-            color: #6c757d;
-            margin-bottom: 8px;
-            padding-left: 4px;
-        }
+        .instruction-text { font-size: 11px; color: #6c757d; margin-bottom: 8px; padding-left: 4px; }
     </style>
 </head>
 <body>
-    /* Verde não existe, adicionar quando encontrar uma layout que tenha ele */
+    
     <ul id="color-context-menu">
         <li data-color="red">Vermelha</li>
         <li data-color="green">Verde</li>
@@ -333,7 +320,6 @@
                             </div>
                             <div class="function-table-container">
                                 <table class="function-table">
-                                    /* Módulos para duplicar eles mas não passar do número de 24 */
                                     <thead><tr><th>Instrução</th><script>for(let i=1; i<=24; i++) document.write(`<th>${i}</th>`);</script></tr></thead>
                                     <tbody><tr><td>Acender Blocos</td><script>for(let i=1; i<=24; i++) document.write(`<td contenteditable="true" data-function="cut_dt_on" data-block="${i}"></td>`);</script></tr></tbody>
                                 </table>
@@ -458,15 +444,15 @@
         </div>
         
         <div class="right-panel-container">
-             <div class="center-panel">
+            <div class="center-panel">
                 <div style="width:100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                     <div class="panel-title" style="border-bottom: none; margin-bottom: 0;">
                         Simulação: <span id="current-layout-name" style="font-weight: 500;"></span>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                         <button id="open-layout-panel-btn" class="btn" style="background-color: #16a085; font-size:10px; padding: 4px 8px;">
-                             <i class="fa fa-th"></i> Selecionar Modelo
-                         </button>
+                       <button id="open-layout-panel-btn" class="btn" style="background-color: #16a085; font-size:10px; padding: 4px 8px;">
+                            <i class="fa fa-th"></i> Selecionar Modelo
+                        </button>
                         <button id="edit-layout-btn" class="btn" style="background-color: #3498db; font-size:10px; padding: 4px 8px;">
                             <i class="fa fa-pencil"></i> Editar Layout
                         </button>
@@ -476,8 +462,8 @@
                     <img src="" alt="Modelo da Sirene" id="siren-model-image">
                     <div id="blocks-container"></div>
                 </div>
-             </div>
-             <div class="right-panel">
+            </div>
+            <div class="right-panel">
                 <div class="panel-title">Resultado da Configuração</div>
                 <div class="config-image-container" style="position: relative; width: 100%; max-width: 500px; margin: 15px auto;">
                     <img src="Imagemcontrole.png" alt="Controle da Barra" style="width: 100%; height: auto; display: block; border-radius: 15px; opacity: 0.5;">
@@ -519,47 +505,39 @@
                     </div>
                 </div>
                 <button class="btn" id="edit-config-btn" style="width: 100%; margin-top: 10px;">Editar Configuração</button>
-             </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- CÓDIGO JAVASCRIPT COMPLETO ---
+
         // === REFERÊNCIAS DE ELEMENTOS DO DOM ===
         let configModal, openModalBtn, closeModalBtn, saveAndCloseModalBtn, executeMacroBtn, blocksContainer, macroTableBody, macroHeader, sheetSelectorContainer, gravarBtn, restaurarBtn, limpaBtn, colorContextMenu, layoutPanelModal, openLayoutPanelBtn, closeLayoutPanelBtn, layoutPanelBody, currentLayoutNameSpan, advancedSettingsModal, openAdvancedSettingsBtn, closeAdvancedSettingsBtn, saveAdvancedSettingsBtn, tabButtons, tabContents, jumpTabelaCheckboxes, specialFunctionCells, jumpTabelaStatusContainer, specialFunctionsStatusContainer;
 
-        function assignDomElements() {
-             configModal = document.getElementById('config-modal');
-             openModalBtn = document.getElementById('edit-config-btn');
-             closeModalBtn = document.getElementById('close-modal-btn');
-             saveAndCloseModalBtn = document.getElementById('save-and-close-modal-btn');
-             executeMacroBtn = document.getElementById('execute-macro-btn');
-             blocksContainer = document.getElementById('blocks-container');
-             macroTableBody = document.getElementById('macro-body');
-             macroHeader = document.getElementById('macro-header');
-             sheetSelectorContainer = document.getElementById('sheet-selector-container');
-             gravarBtn = document.getElementById('gravar-btn');
-             restaurarBtn = document.getElementById('restaurar-btn');
-             limpaBtn = document.getElementById('limpa-btn');
-             colorContextMenu = document.getElementById('color-context-menu');
-            
-             layoutPanelModal = document.getElementById('layout-panel-modal');
-             openLayoutPanelBtn = document.getElementById('open-layout-panel-btn');
-             closeLayoutPanelBtn = document.getElementById('close-layout-panel-btn');
-             layoutPanelBody = document.getElementById('layout-panel-body');
-             currentLayoutNameSpan = document.getElementById('current-layout-name');
-            
-             advancedSettingsModal = document.getElementById('advanced-settings-modal');
-             openAdvancedSettingsBtn = document.getElementById('advanced-settings-btn');
-             closeAdvancedSettingsBtn = document.getElementById('close-advanced-modal-btn');
-             saveAdvancedSettingsBtn = document.getElementById('save-advanced-settings-btn');
-             tabButtons = document.querySelectorAll('.modal-tab-btn');
-             tabContents = document.querySelectorAll('.modal-tab-content');
-             jumpTabelaCheckboxes = document.querySelectorAll('#tab-jumptabela input[type="checkbox"]');
-             specialFunctionCells = document.querySelectorAll('#tab-special-functions td[data-block]');
-            
-             jumpTabelaStatusContainer = document.getElementById('jumptabela-active-list');
-             specialFunctionsStatusContainer = document.getElementById('special-functions-active-list');
-        }
+        // === GERENCIAMENTO DE ESTADO ===
+        let simulationStopper = null;
+        let isSimulationRunning = false;
+        const sheetNames = ['FP1','FP2', 'FP3', 'FP4', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'DS-L', 'DS-C', 'DS-R', 'HZD', 'EM1'];
+        let allMacroData = {};
+        let activeSheet = 'FP1';
+        let savedSpecialFunctionConfigs = {};
+        let savedJumpTabelaSettings = {};
+        let columnColors = {};
+        let clipboardData = null;
+        let copiedBlockData = null; 
+        let isEditMode = false;
+        let activeBlock = null;
+        let action = null; 
+        let activeSpecialFunctions = {};
+        const selection = new Set();
+        let undoHistory = {};
+        let redoHistory = {};
+        let debounceTimer;
+        let gifWorkerBlobURL = null;
+        let backgroundImageDataURL = null;
+        let currentLayout;
+        let activeBlockLayout; 
         
         // ================================================================================= //
         // ======================= MAPA DE CÓDIGOS DE ARQUIVO PARA LAYOUT ====================== //
@@ -583,42 +561,14 @@
             "00228": "primus47p16mRef", "00229": "primus54p22mRef", "00232": "venus15m",
             "00233": "primus47p20mRef", "00234": "primus47p24mCol", "00235": "primus47p13mRef",
         };
-        // ================================================================================= //
         
-        // === GERENCIAMENTO DE ESTADO ===
-        let simulationStopper = null;
-        let isSimulationRunning = false;
-        const sheetNames = ['FP1','FP2', 'FP3', 'FP4', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'DS-L', 'DS-C', 'DS-R', 'HZD', 'EM1'];
-        let allMacroData = {};
-        let activeSheet = 'FP1';
-        
-        let savedSpecialFunctionConfigs = {};
-        let savedJumpTabelaSettings = {};
-        let columnColors = {};
+        const s_slim_bicolor_example = [
+            { text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
+            { text: ['3', '4'], top: '45%', left: '40%', width: 77, height: 30, rotate: 0 },
+            { text: '20', top: '14.6%', left: '10%', width: 77, height: 30, rotate: 0 },
+            { text: '20', top: '14.6%', left: '80%', width: 77, height: 30, rotate: 0 }
+        ];
 
-        let clipboardData = null;
-        let copiedBlockData = null; 
-        let isEditMode = false;
-        let activeBlock = null;
-        let action = null; 
-        let activeSpecialFunctions = {};
-        const selection = new Set();
-        
-        let undoHistory = {};
-        let redoHistory = {};
-        let debounceTimer;
-        
-        let gifWorkerBlobURL = null;
-        let backgroundImageDataURL = null;
-
-        let currentLayout;
-        let activeBlockLayout; 
-        
-        // ================================================================================= //
-        // ======================= LÓGICA DE LAYOUT DE BLOCOS ============================== //
-        // ================================================================================= //
-        
-        // --- DEFINIÇÃO DO LAYOUT CORRETO ---
         const s_slim_24_default_BlockLayout = [
             { text: '1', top: '14.6%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '2', top: '14.6%', left: '58.5%', width: 77, height: 30, rotate: 0 },
             { text: '3', top: '14.6%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '4', top: '14.6%', left: '77%', width: 77, height: 30, rotate: 0 },
@@ -634,10 +584,9 @@
             { text: '23', top: '45%', left: '58.5%', width: 77, height: 30, rotate: 0 }, { text: '24', top: '45%', left: '77%', width: 77, height: 30, rotate: 0 }
         ];
 
-        // --- LISTA PRINCIPAL DE LAYOUTS (CORRIGIDA) ---
-        // Todos os modelos agora usam o mesmo layout visual para posicionamento dos blocos.
         const layouts = [
             { id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
+            { id: 's_slim_bicolor_example', name: 'S-SLIM Bicolor Exemplo', image: 'simulação.png', category: 'Padrão', blocks: s_slim_bicolor_example },
             
             // 40 Polegadas
             { id: 'primus40p12mCol', name: 'Primus 40p 12m Col', image: 'ImagensSirene40p/primus40p12mCol.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
@@ -713,14 +662,12 @@
         
         // === FUNÇÕES DE INICIALIZAÇÃO E LAYOUT ===
         function initializeApp() {
-            assignDomElements(); // Atribui as variáveis aos elementos do DOM
+            assignDomElements();
             initializeDataStructure();
             createSheetSelectorTabs();
             createTableHeader();
-            
             populateLayoutPanel();
             switchLayout(layouts[0].id); 
-            
             renderTable(allMacroData[activeSheet]);
             updateActiveSheetUI();
             initializeEventListeners();
@@ -729,43 +676,105 @@
             updateConsumptionDisplay();
         }
 
-        function populateLayoutPanel() {
-            layoutPanelBody.innerHTML = '';
-            const layoutGroups = layouts.reduce((groups, layout) => {
-                const category = layout.category || 'Outros Modelos';
-                if (!groups[category]) {
-                    groups[category] = [];
+        function assignDomElements() {
+            configModal = document.getElementById('config-modal');
+            openModalBtn = document.getElementById('edit-config-btn');
+            closeModalBtn = document.getElementById('close-modal-btn');
+            saveAndCloseModalBtn = document.getElementById('save-and-close-modal-btn');
+            executeMacroBtn = document.getElementById('execute-macro-btn');
+            blocksContainer = document.getElementById('blocks-container');
+            macroTableBody = document.getElementById('macro-body');
+            macroHeader = document.getElementById('macro-header');
+            sheetSelectorContainer = document.getElementById('sheet-selector-container');
+            gravarBtn = document.getElementById('gravar-btn');
+            restaurarBtn = document.getElementById('restaurar-btn');
+            limpaBtn = document.getElementById('limpa-btn');
+            colorContextMenu = document.getElementById('color-context-menu');
+            layoutPanelModal = document.getElementById('layout-panel-modal');
+            openLayoutPanelBtn = document.getElementById('open-layout-panel-btn');
+            closeLayoutPanelBtn = document.getElementById('close-layout-panel-btn');
+            layoutPanelBody = document.getElementById('layout-panel-body');
+            currentLayoutNameSpan = document.getElementById('current-layout-name');
+            advancedSettingsModal = document.getElementById('advanced-settings-modal');
+            openAdvancedSettingsBtn = document.getElementById('advanced-settings-btn');
+            closeAdvancedSettingsBtn = document.getElementById('close-advanced-modal-btn');
+            saveAdvancedSettingsBtn = document.getElementById('save-advanced-settings-btn');
+            tabButtons = document.querySelectorAll('.modal-tab-btn');
+            tabContents = document.querySelectorAll('.modal-tab-content');
+            jumpTabelaCheckboxes = document.querySelectorAll('#tab-jumptabela input[type="checkbox"]');
+            specialFunctionCells = document.querySelectorAll('#tab-special-functions td[data-block]');
+            jumpTabelaStatusContainer = document.getElementById('jumptabela-active-list');
+            specialFunctionsStatusContainer = document.getElementById('special-functions-active-list');
+            simulationArea = document.getElementById('simulation-area');
+            saveLayoutBtn = document.getElementById('save-layout-btn');
+        }
+
+        async function populateLayoutPanel() {
+            layoutPanelBody.innerHTML = 'Carregando layouts...';
+            let allLayouts = [...layouts]; // Começa com a lista de layouts padrão
+
+            try {
+                const response = await fetch('api/carregar_layouts.php');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                const customLayouts = await response.json();
+
+                // Adiciona os layouts do banco de dados à lista
+                customLayouts.forEach(custom => {
+                    allLayouts.push({
+                        id: `custom-${custom.layout_id}`, // ID único para evitar conflitos
+                        name: custom.nome_layout,
+                        image: custom.imagem_base,
+                        category: 'Layouts Personalizados',
+                        blocks: custom.dados_layout 
+                    });
+                });
+            } catch (error) {
+                console.error("Erro ao carregar layouts personalizados:", error);
+            }
+            
+            renderLayoutGrid(allLayouts);
+        }
+
+        function renderLayoutGrid(layoutsToRender) {
+            const layoutGroups = layoutsToRender.reduce((groups, layout) => {
+                const category = layout.category || 'Outros Modelos';
+                if (!groups[category]) groups[category] = [];
                 groups[category].push(layout);
                 return groups;
             }, {});
-            const categoryOrder = ['Padrão', '40 Polegadas', '47 Polegadas', '54 Polegadas', '61 Polegadas', 'Venus', 'Outros Modelos'];
+            
+            const categoryOrder = ['Padrão', 'Layouts Personalizados', '40 Polegadas', '47 Polegadas', '54 Polegadas', '61 Polegadas', 'Venus', 'Outros Modelos'];
             const gridContainer = document.createElement('div');
             gridContainer.className = 'layout-panel-grid';
+            
             categoryOrder.forEach(categoryName => {
                 if (layoutGroups[categoryName]) {
                     const title = document.createElement('h3');
                     title.className = 'layout-category-title';
-                    title.textContent = `Modelos de Sinalizadores de ${categoryName}`;
+                    title.textContent = categoryName;
                     gridContainer.appendChild(title);
+                    
                     layoutGroups[categoryName].forEach(layout => {
                         const item = document.createElement('div');
                         item.className = 'layout-preview-item';
                         item.dataset.layoutId = layout.id;
                         item.innerHTML = `<img src="${layout.image}" alt="${layout.name}"><p>${layout.name}</p>`;
                         item.addEventListener('click', () => {
-                            switchLayout(layout.id);
+                            switchLayout(layout.id, layoutsToRender); 
                             layoutPanelModal.style.display = 'none';
                         });
                         gridContainer.appendChild(item);
                     });
                 }
             });
+            layoutPanelBody.innerHTML = '';
             layoutPanelBody.appendChild(gridContainer);
         }
 
-        function switchLayout(layoutId) {
-            const selectedLayout = layouts.find(l => l.id === layoutId);
+        function switchLayout(layoutId, allLayoutsList = layouts) {
+            const selectedLayout = allLayoutsList.find(l => l.id === layoutId);
             if (!selectedLayout) {
                 console.error("Layout não encontrado:", layoutId);
                 return;
@@ -773,11 +782,7 @@
             currentLayout = selectedLayout;
             activeBlockLayout = JSON.parse(JSON.stringify(selectedLayout.blocks)); 
             currentLayoutNameSpan.textContent = currentLayout.name;
-            
-            const sirenImage = document.getElementById('siren-model-image');
-            
-            sirenImage.src = currentLayout.image;
-            
+            document.getElementById('siren-model-image').src = currentLayout.image;
             initializeBlocks(activeBlockLayout);
             stopSimulation();
         }
@@ -789,6 +794,69 @@
                 redoHistory[name] = [];
             });
             columnColors = {};
+        }
+
+        function initializeBlocks(blocksArray) {
+            blocksContainer.innerHTML = '';
+            if (!blocksArray) return;
+
+            blocksArray.forEach((blockData, index) => {
+                const blockElement = document.createElement('div');
+                blockElement.className = 'block-container';
+                blockElement.dataset.index = index;
+                blockElement.style.top = blockData.top;
+                blockElement.style.left = blockData.left;
+                blockElement.style.width = `${blockData.width}px`;
+                blockElement.style.height = `${blockData.height}px`;
+                blockElement.style.transform = `rotate(${blockData.rotate}deg)`;
+
+                if (Array.isArray(blockData.text)) { // Bloco dividido (Bicolor)
+                    const container = document.createElement('div');
+                    container.className = 'block-part-container';
+                    
+                    const topPart = document.createElement('div');
+                    topPart.className = 'block-part-top layout-color-off';
+                    topPart.textContent = blockData.text[0];
+                    topPart.dataset.blockNum = blockData.text[0];
+                    
+                    const bottomPart = document.createElement('div');
+                    bottomPart.className = 'block-part-bottom layout-color-off';
+                    bottomPart.textContent = blockData.text[1];
+                    bottomPart.dataset.blockNum = blockData.text[1];
+                    
+                    container.appendChild(topPart);
+                    container.appendChild(bottomPart);
+                    blockElement.appendChild(container);
+                } else { // Bloco único
+                    const singlePart = document.createElement('div');
+                    singlePart.className = 'block-part-single layout-color-off';
+                    singlePart.textContent = blockData.text;
+                    singlePart.dataset.blockNum = blockData.text;
+                    
+                    singlePart.addEventListener('dblclick', (e) => {
+                        if (isEditMode) {
+                            e.stopPropagation();
+                            singlePart.contentEditable = true;
+                            singlePart.focus();
+                        }
+                    });
+                    singlePart.addEventListener('blur', () => {
+                        singlePart.contentEditable = false;
+                        activeBlockLayout[index].text = singlePart.textContent;
+                    });
+                     singlePart.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            singlePart.blur();
+                        }
+                    });
+
+                    blockElement.appendChild(singlePart);
+                }
+
+                blockElement.innerHTML += `<div class="interaction-handle resize-handle"></div><div class="interaction-handle rotate-handle"></div>`;
+                blocksContainer.appendChild(blockElement);
+            });
         }
         
         function loadDataIntoUI(loadedData) {
@@ -837,7 +905,7 @@
             updateConsumptionDisplay();
             alert('Template carregado com sucesso!');
         }
-                                        
+                                
         function pushStateToUndoHistory() {
             const currentData = getCurrentTableData();
             const lastState = undoHistory[activeSheet][undoHistory[activeSheet].length - 1];
@@ -943,217 +1011,207 @@
             else if (value === '4') cell.classList.add('cell-yellow');
         }
         
-        function initializeBlocks(blocksArray) {
-            blocksContainer.innerHTML = '';
-            if (!blocksArray) return;
-            blocksArray.forEach((blockData, index) => {
-                const blockElement = document.createElement('div');
-                blockElement.className = 'block-container';
-                blockElement.dataset.index = index;
-                blockElement.style.top = blockData.top;
-                blockElement.style.left = blockData.left;
-                blockElement.style.width = `${blockData.width}px`;
-                blockElement.style.height = `${blockData.height}px`;
-                blockElement.style.transform = `rotate(${blockData.rotate}deg)`;
-                const blockPart = document.createElement('div');
-                blockPart.className = 'block-part-single layout-color-off';
-                blockPart.textContent = blockData.text;
-
-                // **NOVA LÓGICA: Torna o texto editável com duplo clique no modo de edição**
-                blockPart.addEventListener('dblclick', (e) => {
-                    if (isEditMode) {
-                        e.stopPropagation(); // Impede que o 'mousedown' do container seja acionado
-                        blockPart.contentEditable = true;
-                        blockPart.focus();
-                    }
-                });
-                blockPart.addEventListener('blur', () => {
-                    blockPart.contentEditable = false;
-                    // Salva a alteração no array de layout
-                    activeBlockLayout[index].text = blockPart.textContent;
-                });
-                 blockPart.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        blockPart.blur();
-                    }
-                });
-
-                blockElement.appendChild(blockPart);
-                blockElement.innerHTML += `<div class="interaction-handle resize-handle"></div><div class="interaction-handle rotate-handle"></div>`;
-                blocksContainer.appendChild(blockElement);
-            });
-        }
         
-        // ================================================================================= //
-        // =================== LÓGICA DE EXTRAÇÃO DO EXCEL (JS) ============================ //
-        // ================================================================================= //
-
-        /**
-         * Função principal para processar o arquivo Excel selecionado.
-         * @param {File} file - O arquivo .xlsx ou .xlsm selecionado pelo usuário.
-         * @returns {Promise<Object>} Uma promessa que resolve com o objeto de layout de cores.
-         */
+        // ========================================================================================//
+        // =================== FUNÇÃO PRINCIPAL DE EXTRAÇÃO DO EXCEL (VERSÃO FINAL) ================== //
+        // ========================================================================================//
         async function processExcelLayout(file) {
+            const START_ROW = 1, END_ROW = 13, START_COL = 0, END_COL = 31;
+            const COLOR_MAP = { 'VM': 'red', 'AZ': 'blue', 'BR': 'white', 'AB': 'yellow' };
+
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
+                reader.onerror = () => reject(new Error("Erro ao ler o arquivo."));
 
                 reader.onload = (event) => {
                     try {
                         const data = new Uint8Array(event.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetNames = workbook.SheetNames;
 
-                        // 1. Encontrar a planilha que contém "POL"
                         let targetSheetName = '';
-                        for (const sheetName of workbook.SheetNames) {
-                            if (sheetName.toUpperCase().includes("POL")) {
-                                targetSheetName = sheetName;
-                                break;
+                        const polSheets = sheetNames.filter(name => name.toUpperCase().includes("POL"));
+
+                        if (polSheets.length > 0) {
+                            targetSheetName = polSheets[0]; // Usa a primeira por padrão
+                            const filenameMatch = file.name.match(/(\d{2})/);
+                            if (filenameMatch) {
+                                const identifier = filenameMatch[1];
+                                const matchedSheet = polSheets.find(sheet => sheet.includes(identifier));
+                                if (matchedSheet) targetSheetName = matchedSheet;
                             }
-                        }
-
-                        if (!targetSheetName) {
-                            console.warn("Nenhuma planilha com 'POL' encontrada. Usando a primeira.");
-                            targetSheetName = workbook.SheetNames[0];
+                        } else {
+                            targetSheetName = sheetNames[0];
+                            if (!targetSheetName) return reject(new Error("Nenhuma planilha encontrada."));
                         }
                         
-                        if (!targetSheetName) {
-                            return reject(new Error("Nenhuma planilha encontrada no arquivo Excel."));
-                        }
-                        
-                        console.log(`Planilha encontrada: '${targetSheetName}'`);
+                        console.log(`Usando a planilha: '${targetSheetName}'`);
                         const worksheet = workbook.Sheets[targetSheetName];
-                        const df = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
 
-                        // 2. Encontrar todos os números de módulo (1 a 24)
-                        const allNumbers = [];
-                        for (let r = 0; r < df.length; r++) {
-                            for (let c = 0; c < (df[r] ? df[r].length : 0); c++) {
-                                const cellValue = df[r][c];
-                                if (cellValue !== null && !isNaN(parseFloat(cellValue))) {
-                                    const num = parseInt(cellValue, 10);
-                                    if (num >= 1 && num <= 24) {
-                                        allNumbers.push({ value: num, r: r, c: c });
+                        const sheetData = [];
+                        for (let r = START_ROW; r <= END_ROW; r++) {
+                            const rowData = [];
+                            for (let c = START_COL; c <= END_COL; c++) {
+                                const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                                const cell = worksheet[cellAddress];
+                                rowData.push(cell ? cell.v : null);
+                            }
+                            sheetData.push(rowData);
+                        }
+                        
+                        (worksheet['!merges'] || []).forEach(merge => {
+                            const { s, e } = merge;
+                            if (s.r >= START_ROW && s.r <= END_ROW && s.c >= START_COL && s.c <= END_COL) {
+                                const value = sheetData[s.r - START_ROW][s.c - START_COL];
+                                for (let r = s.r; r <= e.r; r++) {
+                                    for (let c = s.c; c <= e.c; c++) {
+                                        if (r >= START_ROW && r <= END_ROW && c >= START_COL && c <= END_COL) {
+                                            if (sheetData[r - START_ROW]) {
+                                                sheetData[r - START_ROW][c - START_COL] = value;
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-
-                        // 3. Encontrar todas as células 'L411' com cores
-                        const l411Colors = findL411CellsWithColors(df);
+                        });
                         
-                        console.log(`Módulos encontrados: ${allNumbers.map(n => n.value).sort((a,b)=>a-b)}`);
-                        console.log(`Células L411 com cores: ${l411Colors.length}`);
-                        console.log("Detalhes das células L411:", l411Colors);
-
-
-                        if (allNumbers.length === 0 || l411Colors.length === 0) {
-                            return reject(new Error("ERRO CRÍTICO: Nenhum número de módulo ou célula L411 com cor foi encontrada."));
-                        }
+                        const numeros = [];
+                        const cores = [];
                         
-                        // 4. Mapear módulos às cores pela proximidade (mesma lógica do Python)
-                        const layoutFinal = {};
-                        const usedColors = new Set();
-                        
-                        // Ordena os números por posição (linha, depois coluna)
-                        allNumbers.sort((a, b) => a.r - b.r || a.c - b.c);
-
-                        for (const numData of allNumbers) {
-                            let bestColor = null;
-                            let minDistance = Infinity;
-
-                            for (const cell of l411Colors) {
-                                const cellId = `${cell.r}_${cell.c}`;
-                                // Calcula distância (Manhattan distance)
-                                const distance = Math.abs(numData.r - cell.r) + Math.abs(numData.c - cell.c);
+                        sheetData.forEach((row, r_idx) => {
+                            (row || []).forEach((cellValue, c_idx) => {
+                                if (cellValue === null || cellValue === undefined) return;
+                                const cellText = String(cellValue).trim();
                                 
-                                if (distance < minDistance && !usedColors.has(cellId)) {
-                                    minDistance = distance;
-                                    bestColor = cell;
+                                try {
+                                    const num = parseInt(parseFloat(cellText));
+                                    if (!isNaN(num) && num >= 1 && num <= 24) {
+                                        numeros.push({ value: num, r: r_idx, c: c_idx });
+                                        return;
+                                    }
+                                } catch (e) {}
+
+                                const cellUpper = cellText.toUpperCase();
+                                for (const [codigo, nomeCor] of Object.entries(COLOR_MAP)) {
+                                    if (cellUpper.includes(codigo)) {
+                                        cores.push({ color: nomeCor, r: r_idx, c: c_idx });
+                                        break; 
+                                    }
                                 }
-                            }
-
-                            // Associa apenas se a distância for razoável (limite ajustável)
-                            if (bestColor && minDistance <= 8) {
-                                layoutFinal[numData.value.toString()] = bestColor.color;
-                                const cellId = `${bestColor.r}_${bestColor.c}`;
-                                usedColors.add(cellId);
-                                console.log(` -> Módulo ${numData.value} (${numData.r},${numData.c}) -> ${bestColor.color} (${bestColor.r},${bestColor.c}) [dist: ${minDistance}]`);
-                            } else {
-                                 console.log(` -> Módulo ${numData.value} IGNORADO (sem cor próxima disponível)`);
-                            }
+                            });
+                        });
+                        
+                        if (numeros.length === 0) {
+                           return reject(new Error("Nenhum módulo numérico (1-24) foi encontrado na planilha."));
                         }
+                         if (cores.length === 0) {
+                           return reject(new Error("Nenhuma célula com código de cor (VM, AZ, BR, etc.) foi encontrada."));
+                        }
+                        
+                        const layoutAssociado = [];
+                        let coresDisponiveis = [...cores];
 
-                        resolve(layoutFinal);
+                        numeros.forEach(num_data => {
+                            let melhorCorInfo = null;
+                            let distanciaMinima = Infinity;
+                            let melhorCorIndex = -1;
+
+                            coresDisponiveis.forEach((cor_data, index) => {
+                                const distancia = Math.abs(num_data.r - cor_data.r) + Math.abs(num_data.c - cor_data.c);
+                                if (distancia < distanciaMinima) {
+                                    distanciaMinima = distancia;
+                                    melhorCorInfo = cor_data;
+                                    melhorCorIndex = index;
+                                }
+                            });
+
+                            if (melhorCorInfo) {
+                                layoutAssociado.push({
+                                    module: num_data.value,
+                                    color: melhorCorInfo.color,
+                                    r: num_data.r,
+                                    c: num_data.c
+                                });
+                                coresDisponiveis.splice(melhorCorIndex, 1);
+                            }
+                        });
+                        
+                        layoutAssociado.sort((a, b) => a.r - b.r || a.c - b.c);
+
+                        const minR = Math.min(...layoutAssociado.map(item => item.r));
+                        const maxR = Math.max(...layoutAssociado.map(item => item.r));
+                        const minC = Math.min(...layoutAssociado.map(item => item.c));
+                        const maxC = Math.max(...layoutAssociado.map(item => item.c));
+
+                        const layoutHeight = (maxR - minR) > 0 ? (maxR - minR) : 1;
+                        const layoutWidth = (maxC - minC) > 0 ? (maxC - minC) : 1;
+
+                        const newBlockLayout = layoutAssociado.map(item => {
+                            const relativeY = item.r - minR;
+                            const relativeX = item.c - minC;
+                            
+                            const topPercent = (relativeY / layoutHeight) * 80 + 10;
+                            const leftPercent = (relativeX / layoutWidth) * 90 + 5;
+
+                            return {
+                                text: String(item.module),
+                                top: `${topPercent}%`,
+                                left: `${leftPercent}%`,
+                                width: 60,
+                                height: 30,
+                                rotate: 0
+                            };
+                        });
+
+                        resolve({ layout: layoutAssociado, newBlockLayout: newBlockLayout });
 
                     } catch (error) {
-                        console.error("Erro ao processar o arquivo Excel:", error);
+                        console.error("Erro detalhado ao processar Excel:", error);
                         reject(error);
                     }
                 };
-
-                reader.onerror = (error) => {
-                    reject(error);
-                };
-
                 reader.readAsArrayBuffer(file);
             });
         }
-
-        /**
-         * Mapeamento dos códigos de cor para os nomes.
-         */
-        const COLOR_MAP = {
-            'AZ': 'blue',   // Azul
-            'AB': 'yellow', // Âmbar (Amarelo)
-            'BR': 'white',  // Branco
-            'VM': 'red'     // Vermelho
-        };
-
-        /**
-         * Verifica se uma célula contém um código de cor conhecido.
-         * @param {string} cellValue - O conteúdo da célula.
-         * @returns {string|null} O nome da cor ou nulo.
-         */
-        function findColorInCell(cellValue) {
-            if (typeof cellValue !== 'string') {
-                return null;
+        
+        async function saveLayoutToDatabase() {
+            if (!currentLayout) {
+                alert("Nenhum layout base selecionado para salvar.");
+                return;
             }
-            const cellUpper = cellValue.toUpperCase();
-            for (const [codigo, nomeCor] of Object.entries(COLOR_MAP)) {
-                if (cellUpper.includes(codigo)) {
-                    return nomeCor;
+
+            const layoutName = prompt("Digite um nome para este layout personalizado:", currentLayout.name || "Novo Layout");
+            if (!layoutName) {
+                alert("Salvamento cancelado.");
+                return;
+            }
+
+            const payload = {
+                nome: layoutName,
+                imagem: currentLayout.image,
+                layout: activeBlockLayout // A variável global com as posições editadas
+            };
+
+            try {
+                const response = await fetch('api/salvar_layout.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Sucesso! O layout foi salvo no banco de dados.');
+                    populateLayoutPanel(); // Atualiza a lista de layouts para incluir o novo
+                } else {
+                    throw new Error(result.error || 'Erro desconhecido no servidor.');
                 }
+            } catch (error) {
+                console.error('ERRO AO SALVAR LAYOUT:', error);
+                alert(`FALHA! Ocorreu um erro ao salvar o layout: ${error.message}`);
             }
-            return null;
         }
-
-        /**
-         * Encontra todas as células que contêm 'L411' e um código de cor.
-         * @param {Array<Array<any>>} df - Os dados da planilha como um array de arrays.
-         * @returns {Array<Object>} Um array de objetos representando as células de cor encontradas.
-         */
-        function findL411CellsWithColors(df) {
-            const l411Colors = [];
-            for (let r = 0; r < df.length; r++) {
-                for (let c = 0; c < (df[r] ? df[r].length : 0); c++) {
-                    const cellValue = df[r][c];
-                    if (cellValue && typeof cellValue === 'string' && cellValue.toUpperCase().includes('L411')) {
-                        const color = findColorInCell(cellValue);
-                        if (color) {
-                            l411Colors.push({
-                                color: color,
-                                r: r,
-                                c: c,
-                                content: cellValue
-                            });
-                        }
-                    }
-                }
-            }
-            return l411Colors;
-        }
-
+        
         function initializeEventListeners() {
             if (openModalBtn) openModalBtn.addEventListener('click', () => configModal.style.display = 'flex');
             if (closeModalBtn) closeModalBtn.addEventListener('click', () => configModal.style.display = 'none');
@@ -1161,7 +1219,10 @@
             if (openAdvancedSettingsBtn) openAdvancedSettingsBtn.addEventListener('click', () => { clearSelection(); advancedSettingsModal.style.display = 'flex'; });
             if (closeAdvancedSettingsBtn) closeAdvancedSettingsBtn.addEventListener('click', () => advancedSettingsModal.style.display = 'none');
             if (saveAdvancedSettingsBtn) saveAdvancedSettingsBtn.addEventListener('click', saveAdvancedSettings);
-            if (openLayoutPanelBtn) openLayoutPanelBtn.addEventListener('click', () => layoutPanelModal.style.display = 'flex');
+            if (openLayoutPanelBtn) openLayoutPanelBtn.addEventListener('click', () => {
+                populateLayoutPanel();
+                layoutPanelModal.style.display = 'flex';
+            });
             if (closeLayoutPanelBtn) closeLayoutPanelBtn.addEventListener('click', () => layoutPanelModal.style.display = 'none');
             if (tabButtons) tabButtons.forEach(button => { button.addEventListener('click', () => { tabButtons.forEach(btn => btn.classList.remove('active')); tabContents.forEach(content => content.classList.remove('active')); button.classList.add('active'); document.getElementById(button.dataset.tab).classList.add('active'); }); });
             if (jumpTabelaCheckboxes) jumpTabelaCheckboxes.forEach(checkbox => { checkbox.addEventListener('change', updateJumpTabelaVisuals); });
@@ -1171,8 +1232,8 @@
             if (gravarBtn) gravarBtn.addEventListener('click', saveSimulationToDatabase);
             if (restaurarBtn) restaurarBtn.addEventListener('click', () => { alert("Lembrar de ativar essa função"); });
             if (executeMacroBtn) executeMacroBtn.addEventListener('click', executeMacro);
+            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', saveLayoutToDatabase);
             
-            // Lógica de importação de TXT
             const importBtn = document.getElementById('import-txt-btn');
             if (importBtn) {
                 const fileInput = document.createElement('input');
@@ -1187,13 +1248,11 @@
             const extractExcelBtn = document.getElementById('extract-excel-layout-btn');
             const excelLayoutInput = document.getElementById('excel-layout-input');
 
-            // Conecta o clique no BOTÃO VISÍVEL ao INPUT DE ARQUIVO (escondido)
             if (extractExcelBtn && excelLayoutInput) {
                 extractExcelBtn.addEventListener('click', () => {
                     excelLayoutInput.click(); 
                 });
 
-                // Adiciona o listener para QUANDO UM ARQUIVO É SELECIONADO
                 excelLayoutInput.addEventListener('change', async (event) => {
                     const file = event.target.files[0];
                     if (!file) return;
@@ -1201,51 +1260,31 @@
                     extractExcelBtn.disabled = true;
                     extractExcelBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processando...';
                     
-                    // Trecho adicionado:
                     try {
-                        const filename = file.name;
-                        const parts = filename.split('.');
-                        if (parts.length > 2) { // Verificamos se há pelo menos um ponto no nome
-                            // Tentamos encontrar uma parte que seja um código de produto conhecido
-                            let productCode = null;
-                            for(const part of parts){
-                                if(fileCodeToLayoutMap[part]){
-                                    productCode = part;
-                                    break;
-                                }
-                            }
-                            
-                            if(productCode){
-                                const foundLayoutId = fileCodeToLayoutMap[productCode];
-                                if (foundLayoutId) {
-                                    console.log(`Modelo encontrado para o código ${productCode}: ${foundLayoutId}`);
-                                    switchLayout(foundLayoutId);
-                                    alert(`Modelo "${foundLayoutId}" selecionado automaticamente com base no nome do arquivo.`);
-                                }
-                            } else {
-                                 console.warn("Nenhum código de produto encontrado no nome do arquivo Excel. O layout de cores será aplicado ao modelo atual.");
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Erro ao tentar detectar o modelo pelo nome do arquivo Excel:", error);
-                    }
-                    try {
-                        const layoutData = await processExcelLayout(file);
+                        const { layout, newBlockLayout } = await processExcelLayout(file);
                         
-                        if (Object.keys(layoutData).length === 0) {
-                            alert('Nenhum layout de cores pôde ser extraído do arquivo Excel. Verifique o console (F12) para detalhes.');
-                            return;
-                        }
+                        if (layout.length > 0) {
+                            activeBlockLayout = newBlockLayout;
+                            initializeBlocks(activeBlockLayout);
 
-                        columnColors = {}; // Limpa as cores existentes
-                        for (const moduleNumber in layoutData) {
-                            const color = layoutData[moduleNumber];
-                            const colIndex = parseInt(moduleNumber, 10) - 1; // Converte módulo 1 para índice 0
-                            if (colIndex >= 0 && colIndex < 24) {
-                                 applyColumnColor(colIndex.toString(), color);
+                            columnColors = {}; 
+                            const uniqueColorMapping = {};
+                            
+                            layout.forEach(item => {
+                                if (!uniqueColorMapping[item.module]) {
+                                    uniqueColorMapping[item.module] = item.color;
+                                }
+                            });
+
+                            for (const moduleNumber in uniqueColorMapping) {
+                                const color = uniqueColorMapping[moduleNumber];
+                                const colIndex = parseInt(moduleNumber, 10) - 1;
+                                if (colIndex >= 0 && colIndex < 24) {
+                                    applyColumnColor(colIndex.toString(), color);
+                                }
                             }
+                            alert('Layout de cores e visual extraídos e aplicados com sucesso!');
                         }
-                        alert('Layout de cores extraído e aplicado com sucesso!');
 
                     } catch (error) {
                         console.error("Erro ao extrair layout do Excel:", error);
@@ -1253,7 +1292,7 @@
                     } finally {
                         extractExcelBtn.disabled = false;
                         extractExcelBtn.innerHTML = '<i class="fa fa-file-excel"></i> Extrair Layout Excel';
-                        excelLayoutInput.value = ''; // Limpa o input
+                        excelLayoutInput.value = '';
                     }
                 });
             } else {
@@ -1264,7 +1303,6 @@
             if(exportGifBtn) { exportGifBtn.addEventListener('click', exportAllSimulationsAsGifs); }
             
             const editLayoutBtn = document.getElementById('edit-layout-btn');
-            const simulationArea = document.getElementById('simulation-area');
             if (editLayoutBtn && simulationArea) {
                 editLayoutBtn.addEventListener('click', () => {
                     isEditMode = !isEditMode;
@@ -1272,10 +1310,12 @@
                     if (isEditMode) {
                         editLayoutBtn.innerHTML = '<i class="fa fa-check"></i> Concluir Edição';
                         editLayoutBtn.style.backgroundColor = '#2ecc71';
+                        if (saveLayoutBtn) saveLayoutBtn.style.display = 'inline-block';
                         stopSimulation(); 
                     } else {
                         editLayoutBtn.innerHTML = '<i class="fa fa-pencil"></i> Editar Layout';
                         editLayoutBtn.style.backgroundColor = '#3498db';
+                        if (saveLayoutBtn) saveLayoutBtn.style.display = 'none';
                         if (currentLayout) {
                             currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
                         }
@@ -1321,7 +1361,7 @@
             if (blocksContainer) blocksContainer.addEventListener('mousedown', (e) => {
                 if (!isEditMode) return;
                 const target = e.target;
-                 // **CORREÇÃO: Não inicia o movimento se o alvo for editável**
+                
                 if (target.isContentEditable) {
                     return;
                 }
@@ -1530,14 +1570,8 @@
         function renderLights(macroValues = []) {
             const finalOnColors = {};
             const finalOffList = [];
-            const colorClassMap = {
-                red: 'layout-color-red',
-                green: 'layout-color-green',
-                blue: 'layout-color-blue',
-                white: 'layout-color-white',
-                yellow: 'layout-color-yellow'
-            };
-
+            const colorClassMap = { red: 'layout-color-red', green: 'layout-color-green', blue: 'layout-color-blue', white: 'layout-color-white', yellow: 'layout-color-yellow' };
+            
             for (const funcName in activeSpecialFunctions) {
                 const offConfig = savedSpecialFunctionConfigs[funcName] || [];
                 offConfig.forEach(blockNum => finalOffList.push(blockNum));
@@ -1552,29 +1586,45 @@
             if (savedJumpTabelaSettings['jt2_bit7']) brightness = 0.75;
             if (savedJumpTabelaSettings['jt2_bit6']) brightness = 0.50;
 
-            document.querySelectorAll('.block-container').forEach((block) => {
-                const blockNumber = parseInt(block.querySelector('.block-part-single').textContent, 10);
-                const blockPart = block.querySelector('.block-part-single');
-                const columnIndex = blockNumber - 1;
+            document.querySelectorAll('[data-block-num]').forEach((partElement) => {
+                const blockNumber = parseInt(partElement.dataset.blockNum, 10);
+                if (isNaN(blockNumber)) return;
 
-                let finalColorValue = macroValues[columnIndex] || 0; 
+                const blockContainer = partElement.closest('.block-container');
+                const columnIndex = blockNumber - 1;
+                
+                let finalColorValue = macroValues[columnIndex] || 0;
                 if (finalOnColors.hasOwnProperty(blockNumber)) { finalColorValue = finalOnColors[blockNumber]; }
                 if (finalOffList.includes(blockNumber)) { finalColorValue = 0; }
+                
+                partElement.className = partElement.className.replace(/layout-color-\w+/g, '').trim();
+                partElement.classList.add('layout-color-off');
 
-                blockPart.className = 'block-part-single layout-color-off';
-                block.style.opacity = 1.0;
+                if (blockContainer) {
+                    blockContainer.style.opacity = 1.0;
+                }
 
                 if (finalColorValue > 0) {
-                    block.style.opacity = brightness;
+                    if (blockContainer) {
+                        blockContainer.style.opacity = brightness;
+                    }
                     const persistentColor = columnColors[columnIndex];
+                    let colorToApply = '';
 
                     if (persistentColor && colorClassMap[persistentColor]) {
-                        blockPart.className = `block-part-single ${colorClassMap[persistentColor]}`;
+                        colorToApply = colorClassMap[persistentColor];
                     } else {
-                        if (finalColorValue === 1) blockPart.className = 'block-part-single layout-color-red';
-                        else if (finalColorValue === 2) blockPart.className = 'block-part-single layout-color-blue';
-                        else if (finalColorValue === 3) blockPart.className = 'block-part-single layout-color-white';
-                        else if (finalColorValue === 4) blockPart.className = 'block-part-single layout-color-yellow';
+                        switch (finalColorValue) {
+                            case 1: colorToApply = 'layout-color-red'; break;
+                            case 2: colorToApply = 'layout-color-blue'; break;
+                            case 3: colorToApply = 'layout-color-white'; break;
+                            case 4: colorToApply = 'layout-color-yellow'; break;
+                        }
+                    }
+                    
+                    if (colorToApply) {
+                        partElement.classList.remove('layout-color-off');
+                        partElement.classList.add(colorToApply);
                     }
                 }
             });
@@ -1659,7 +1709,7 @@
                     }
                 });
                 if(currentValues.length > 0) {
-                     specialFunctions[funcName] = currentValues;
+                   specialFunctions[funcName] = currentValues;
                 }
             });
             
@@ -1684,7 +1734,7 @@
         }
         
         function updateSpecialFunctionVisuals(cell) {
-             cell.classList.toggle('cell-active-function', cell.textContent.trim() === '1');
+           cell.classList.toggle('cell-active-function', cell.textContent.trim() === '1');
         }
         
         function renderAllActiveSettings() {
@@ -1753,147 +1803,124 @@
             }
         }
         
-       function initializeInteractionHandlers() {
-            let isMouseDown = false, startCell = null;
-            if (macroTableBody) macroTableBody.addEventListener('mousedown', e => {
-                const targetCell = e.target.closest('td[contenteditable="true"]');
-                if (!targetCell) return;
-                isMouseDown = true;
-                startCell = targetCell;
-                if (!e.shiftKey) {
-                    clearSelection();
-                    selection.add(targetCell);
-                    targetCell.classList.add('cell-selected');
-                }
-            });
-            if (macroTableBody) macroTableBody.addEventListener('mousemove', e => {
-                if (!isMouseDown) return;
-                document.body.style.userSelect = 'none';
-                const endCell = e.target.closest('td[contenteditable="true"]');
-                if (!endCell) return;
-                clearSelection();
-                const allRows = Array.from(macroTableBody.rows);
-                const startRowIndex = startCell.parentElement.rowIndex; const endRowIndex = endCell.parentElement.rowIndex;
-                const startCellIndex = startCell.cellIndex; const endCellIndex = endCell.cellIndex;
-                const minRow = Math.min(startRowIndex, endRowIndex); const maxRow = Math.max(startRowIndex, endRowIndex);
-                const minCol = Math.min(startCellIndex, endCellIndex); const maxCol = Math.max(startCellIndex, endCellIndex);
-                for (let i = minRow; i <= maxRow; i++) {
-                    const row = allRows[i - 1];
-                    if (row) {
-                        for (let j = minCol; j <= maxCol; j++) {
-                            const cell = row.cells[j];
-                            if (cell && cell.hasAttribute('contenteditable')) {
-                                cell.classList.add('cell-selected');
-                                selection.add(cell);
-                            }
-                        }
-                    }
-                }
-            });
-            document.addEventListener('mouseup', () => {
-                isMouseDown = false;
-                document.body.style.userSelect = '';
-                startCell = null;
-            });
-            document.addEventListener('keydown', e => {
-                if (isEditMode && activeBlock) {
-                    if (e.key === 'Delete') {
-                        e.preventDefault();
-                        const indexToRemove = parseInt(activeBlock.dataset.index, 10);
-                        activeBlockLayout.splice(indexToRemove, 1);
-                        activeBlock = null;
-                        // A renumeração automática foi removida daqui
-                        initializeBlocks(activeBlockLayout);
-                        return;
-                    }
-                    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
-                        e.preventDefault();
-                        const indexToCopy = parseInt(activeBlock.dataset.index, 10);
-                        copiedBlockData = JSON.parse(JSON.stringify(activeBlockLayout[indexToCopy]));
-                        activeBlock.style.outline = '2px dashed green';
-                        setTimeout(() => { if(activeBlock) activeBlock.style.outline = ''; }, 300);
-                        return;
-                    }
-                }
-                if (isEditMode && e.ctrlKey && e.key.toLowerCase() === 'v' && copiedBlockData) {
-                    e.preventDefault();
-                    const newBlock = JSON.parse(JSON.stringify(copiedBlockData));
-                    const currentLeft = parseFloat(newBlock.left);
-                    const currentTop = parseFloat(newBlock.top);
-                    newBlock.left = `${currentLeft + 2}%`;
-                    newBlock.top = `${currentTop + 2}%`;
-                    // ### CORREÇÃO APLICADA AQUI ###
-                    // A linha abaixo que causava o problema foi REMOVIDA.
-                    // newBlock.text = `${activeBlockLayout.length + 1}`; 
-                    activeBlockLayout.push(newBlock);
-                    initializeBlocks(activeBlockLayout);
-                    return;
-                }
+        function initializeInteractionHandlers() {
+            let isMouseDown = false, startCell = null;
+            if (macroTableBody) macroTableBody.addEventListener('mousedown', e => {
+                const targetCell = e.target.closest('td[contenteditable="true"]');
+                if (!targetCell) return;
+                isMouseDown = true;
+                startCell = targetCell;
+                if (!e.shiftKey) {
+                    clearSelection();
+                    selection.add(targetCell);
+                    targetCell.classList.add('cell-selected');
+                }
+            });
+            if (macroTableBody) macroTableBody.addEventListener('mousemove', e => {
+                if (!isMouseDown) return;
+                document.body.style.userSelect = 'none';
+                const endCell = e.target.closest('td[contenteditable="true"]');
+                if (!endCell) return;
+                clearSelection();
+                const allRows = Array.from(macroTableBody.rows);
+                const startRowIndex = startCell.parentElement.rowIndex; const endRowIndex = endCell.parentElement.rowIndex;
+                const startCellIndex = startCell.cellIndex; const endCellIndex = endCell.cellIndex;
+                const minRow = Math.min(startRowIndex, endRowIndex); const maxRow = Math.max(startRowIndex, endRowIndex);
+                const minCol = Math.min(startCellIndex, endCellIndex); const maxCol = Math.max(startCellIndex, endCellIndex);
+                for (let i = minRow; i <= maxRow; i++) {
+                    const row = allRows[i - 1];
+                    if (row) {
+                        for (let j = minCol; j <= maxCol; j++) {
+                            const cell = row.cells[j];
+                            if (cell && cell.hasAttribute('contenteditable')) {
+                                cell.classList.add('cell-selected');
+                                selection.add(cell);
+                            }
+                        }
+                    }
+                }
+            });
+            document.addEventListener('mouseup', () => {
+                isMouseDown = false;
+                document.body.style.userSelect = '';
+                startCell = null;
+            });
+            document.addEventListener('keydown', e => {
+                if (isEditMode && activeBlock) {
+                    if (e.key === 'Delete') {
+                        e.preventDefault();
+                        const indexToRemove = parseInt(activeBlock.dataset.index, 10);
+                        activeBlockLayout.splice(indexToRemove, 1);
+                        activeBlock = null;
+                        initializeBlocks(activeBlockLayout);
+                        return;
+                    }
+                    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+                        e.preventDefault();
+                        const indexToCopy = parseInt(activeBlock.dataset.index, 10);
+                        copiedBlockData = JSON.parse(JSON.stringify(activeBlockLayout[indexToCopy]));
+                        activeBlock.style.outline = '2px dashed green';
+                        setTimeout(() => { if(activeBlock) activeBlock.style.outline = ''; }, 300);
+                        return;
+                    }
+                }
+                if (isEditMode && e.ctrlKey && e.key.toLowerCase() === 'v' && copiedBlockData) {
+                    e.preventDefault();
+                    const newBlock = JSON.parse(JSON.stringify(copiedBlockData));
+                    const currentLeft = parseFloat(newBlock.left);
+                    const currentTop = parseFloat(newBlock.top);
+                    newBlock.left = `${currentLeft + 2}%`;
+                    newBlock.top = `${currentTop + 2}%`;
+                    activeBlockLayout.push(newBlock);
+                    initializeBlocks(activeBlockLayout);
+                    return;
+                }
 
-                if (e.ctrlKey) {
-                    switch (e.key.toLowerCase()) {
-                        case 'c': if (selection.size > 0) { e.preventDefault(); const cells = Array.from(selection); const minRow = Math.min(...cells.map(c => c.parentElement.rowIndex)); const minCol = Math.min(...cells.map(c => c.cellIndex)); clipboardData = cells.map(cell => ({ row: cell.parentElement.rowIndex - minRow, col: cell.cellIndex - minCol, value: cell.textContent })); cells.forEach(c => { c.style.outline = '1px dashed #0070c0'; }); setTimeout(() => cells.forEach(c => { c.style.outline = ''; }), 200); } break;
-                        case 'v': if (clipboardData && selection.size > 0) { e.preventDefault(); pushStateToUndoHistory(); let affectedCellsForSync = []; if (selection.size > 1) { const clipboardHeight = Math.max(...clipboardData.map(c => c.row)) + 1; const clipboardWidth = Math.max(...clipboardData.map(c => c.col)) + 1; const clipboardMap = new Map(); clipboardData.forEach(c => clipboardMap.set(`${c.row},${c.col}`, c.value)); const selectedCells = Array.from(selection); affectedCellsForSync = selectedCells; const minSelectedRow = Math.min(...selectedCells.map(c => c.parentElement.rowIndex)); const minSelectedCol = Math.min(...selectedCells.map(c => c.cellIndex)); selectedCells.forEach(cell => { const relativeRow = cell.parentElement.rowIndex - minSelectedRow; const relativeCol = cell.cellIndex - minSelectedCol; const sourceRow = relativeRow % clipboardHeight; const sourceCol = relativeCol % clipboardWidth; const valueToPaste = clipboardMap.get(`${sourceRow},${sourceCol}`); if (valueToPaste !== undefined) { cell.textContent = valueToPaste; updateCellColor(cell); } }); } else if (selection.size === 1) { const targetCell = Array.from(selection)[0]; const startRow = targetCell.parentElement.rowIndex; const startCol = targetCell.cellIndex; const allRows = Array.from(macroTableBody.rows); clipboardData.forEach(clip => { const targetRowIndex = startRow + clip.row - 1; const targetColIndex = startCol + clip.col; if (allRows[targetRowIndex]) { const finalCell = allRows[targetRowIndex].cells[targetColIndex]; if (finalCell && finalCell.isContentEditable) { finalCell.textContent = clip.value; updateCellColor(finalCell); affectedCellsForSync.push(finalCell); } } }); } affectedCellsForSync.forEach(cell => { if (cell.classList.contains('ms25-column')) { const msCell = cell.nextElementSibling; if (msCell) syncTimeValues(cell, msCell, 'from_ms25'); } else if (cell.classList.contains('ms-column')) { const ms25Cell = cell.previousElementSibling; if (ms25Cell) syncTimeValues(ms25Cell, cell, 'from_ms'); } }); updateConsumptionDisplay(); } break;
-                        case 'z': e.preventDefault(); const undoHistoryForSheet = undoHistory[activeSheet]; if (undoHistoryForSheet && undoHistoryForSheet.length > 0) { const previousState = undoHistoryForSheet.pop(); redoHistory[activeSheet].push(getCurrentTableData()); allMacroData[activeSheet] = previousState; renderTable(allMacroData[activeSheet]); updateConsumptionDisplay(); } break;
-                        case 'y': e.preventDefault(); const redoHistoryForSheet = redoHistory[activeSheet]; if(redoHistoryForSheet && redoHistoryForSheet.length > 0) { const nextState = redoHistoryForSheet.pop(); undoHistory[activeSheet].push(getCurrentTableData()); allMacroData[activeSheet] = nextState; renderTable(allMacroData[activeSheet]); updateConsumptionDisplay(); } break;
-                    }
-                    return; 
-                }
-                const activeEl = document.activeElement;
-                if (activeEl && activeEl.closest('.function-table')) { const currentCell = activeEl; if (currentCell.tagName !== 'TD' || !currentCell.isContentEditable) return; const currentRow = currentCell.parentElement; const currentCellIndex = currentCell.cellIndex; let nextCell; switch (e.key) { case 'Enter': case 'ArrowDown': e.preventDefault(); let nextRow = currentRow.nextElementSibling; if (nextRow) { nextCell = nextRow.cells[currentCellIndex]; } else { const currentTableContainer = currentRow.closest('.function-table-container'); const nextTableContainer = currentTableContainer.nextElementSibling; if (nextTableContainer && nextTableContainer.classList.contains('function-table-container')) { nextCell = nextTableContainer.querySelector('tbody tr').cells[currentCellIndex]; } } break; case 'ArrowUp': e.preventDefault(); let prevRow = currentRow.previousElementSibling; if (prevRow) { nextCell = prevRow.cells[currentCellIndex]; } else { const currentTableContainer = currentRow.closest('.function-table-container'); const prevTableContainer = currentTableContainer.previousElementSibling; if (prevTableContainer && prevTableContainer.classList.contains('function-table-container')) { nextCell = prevTableContainer.querySelector('tbody tr:last-child').cells[currentCellIndex]; } } break; case 'ArrowLeft': if (window.getSelection().anchorOffset === 0) { e.preventDefault(); nextCell = currentCell.previousElementSibling; } break; case 'ArrowRight': if (window.getSelection().anchorOffset === currentCell.textContent.length || currentCell.textContent.length === 0) { e.preventDefault(); nextCell = currentCell.nextElementSibling; } break; } if (nextCell && nextCell.hasAttribute('contenteditable')) { nextCell.focus(); } return; }
-                if (selection.size > 0 || (activeEl && activeEl.closest('.macro-table'))) { 
-                    if (e.key === 'Delete' || e.key === 'Backspace') { 
-                        e.preventDefault(); 
-                        pushStateToUndoHistory(); 
-                        selection.forEach(cell => { 
-                            if (cell.isContentEditable) { 
-                                cell.textContent = ''; 
-                                if(cell.classList.contains('editable-cell')) updateCellColor(cell); 
-                            } 
-                        }); 
-                        updateConsumptionDisplay(); 
-                        return; 
-                    } 
-                    if (selection.size > 1 && /[1-4]/.test(e.key)) { 
-                        e.preventDefault(); 
-                        pushStateToUndoHistory(); 
-                        selection.forEach(cell => { 
-                            if (cell.classList.contains('editable-cell')) { 
-                                cell.textContent = e.key; 
-                                updateCellColor(cell); 
-                            } 
-                        }); 
-                        updateConsumptionDisplay(); 
-                        return; 
-                    } 
-                    if (activeEl.isContentEditable) { const currentCell = activeEl; const currentRow = currentCell.parentElement; const currentCellIndex = currentCell.cellIndex; let nextCell; switch (e.key) { case 'Enter': case 'ArrowDown': e.preventDefault(); if (currentRow.nextElementSibling) nextCell = currentRow.nextElementSibling.cells[currentCellIndex]; break; case 'ArrowUp': e.preventDefault(); if(currentRow.previousElementSibling) nextCell = currentRow.previousElementSibling.cells[currentCellIndex]; break; case 'ArrowLeft': if (window.getSelection().anchorOffset === 0) { e.preventDefault(); nextCell = currentCell.previousElementSibling; } break; case 'ArrowRight': if (window.getSelection().anchorOffset === currentCell.textContent.length || currentCell.textContent.length === 0) { e.preventDefault(); nextCell = currentCell.nextElementSibling; } break; } if (nextCell && nextCell.hasAttribute('contenteditable')) { nextCell.focus(); clearSelection(); selection.add(nextCell); nextCell.classList.add('cell-selected'); } } 
-                }
-            });
-        }
+                if (e.ctrlKey) {
+                    switch (e.key.toLowerCase()) {
+                        case 'c': if (selection.size > 0) { e.preventDefault(); const cells = Array.from(selection); const minRow = Math.min(...cells.map(c => c.parentElement.rowIndex)); const minCol = Math.min(...cells.map(c => c.cellIndex)); clipboardData = cells.map(cell => ({ row: cell.parentElement.rowIndex - minRow, col: cell.cellIndex - minCol, value: cell.textContent })); cells.forEach(c => { c.style.outline = '1px dashed #0070c0'; }); setTimeout(() => cells.forEach(c => { c.style.outline = ''; }), 200); } break;
+                        case 'v': if (clipboardData && selection.size > 0) { e.preventDefault(); pushStateToUndoHistory(); let affectedCellsForSync = []; if (selection.size > 1) { const clipboardHeight = Math.max(...clipboardData.map(c => c.row)) + 1; const clipboardWidth = Math.max(...clipboardData.map(c => c.col)) + 1; const clipboardMap = new Map(); clipboardData.forEach(c => clipboardMap.set(`${c.row},${c.col}`, c.value)); const selectedCells = Array.from(selection); affectedCellsForSync = selectedCells; const minSelectedRow = Math.min(...selectedCells.map(c => c.parentElement.rowIndex)); const minSelectedCol = Math.min(...selectedCells.map(c => c.cellIndex)); selectedCells.forEach(cell => { const relativeRow = cell.parentElement.rowIndex - minSelectedRow; const relativeCol = cell.cellIndex - minSelectedCol; const sourceRow = relativeRow % clipboardHeight; const sourceCol = relativeCol % clipboardWidth; const valueToPaste = clipboardMap.get(`${sourceRow},${sourceCol}`); if (valueToPaste !== undefined) { cell.textContent = valueToPaste; updateCellColor(cell); } }); } else if (selection.size === 1) { const targetCell = Array.from(selection)[0]; const startRow = targetCell.parentElement.rowIndex; const startCol = targetCell.cellIndex; const allRows = Array.from(macroTableBody.rows); clipboardData.forEach(clip => { const targetRowIndex = startRow + clip.row - 1; const targetColIndex = startCol + clip.col; if (allRows[targetRowIndex]) { const finalCell = allRows[targetRowIndex].cells[targetColIndex]; if (finalCell && finalCell.isContentEditable) { finalCell.textContent = clip.value; updateCellColor(finalCell); affectedCellsForSync.push(finalCell); } } }); } affectedCellsForSync.forEach(cell => { if (cell.classList.contains('ms25-column')) { const msCell = cell.nextElementSibling; if (msCell) syncTimeValues(cell, msCell, 'from_ms25'); } else if (cell.classList.contains('ms-column')) { const ms25Cell = cell.previousElementSibling; if (ms25Cell) syncTimeValues(ms25Cell, cell, 'from_ms'); } }); updateConsumptionDisplay(); } break;
+                        case 'z': e.preventDefault(); const undoHistoryForSheet = undoHistory[activeSheet]; if (undoHistoryForSheet && undoHistoryForSheet.length > 0) { const previousState = undoHistoryForSheet.pop(); redoHistory[activeSheet].push(getCurrentTableData()); allMacroData[activeSheet] = previousState; renderTable(allMacroData[activeSheet]); updateConsumptionDisplay(); } break;
+                        case 'y': e.preventDefault(); const redoHistoryForSheet = redoHistory[activeSheet]; if(redoHistoryForSheet && redoHistoryForSheet.length > 0) { const nextState = redoHistoryForSheet.pop(); undoHistory[activeSheet].push(getCurrentTableData()); allMacroData[activeSheet] = nextState; renderTable(allMacroData[activeSheet]); updateConsumptionDisplay(); } break;
+                    }
+                    return; 
+                }
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.closest('.function-table')) { const currentCell = activeEl; if (currentCell.tagName !== 'TD' || !currentCell.isContentEditable) return; const currentRow = currentCell.parentElement; const currentCellIndex = currentCell.cellIndex; let nextCell; switch (e.key) { case 'Enter': case 'ArrowDown': e.preventDefault(); let nextRow = currentRow.nextElementSibling; if (nextRow) { nextCell = nextRow.cells[currentCellIndex]; } else { const currentTableContainer = currentRow.closest('.function-table-container'); const nextTableContainer = currentTableContainer.nextElementSibling; if (nextTableContainer && nextTableContainer.classList.contains('function-table-container')) { nextCell = nextTableContainer.querySelector('tbody tr').cells[currentCellIndex]; } } break; case 'ArrowUp': e.preventDefault(); let prevRow = currentRow.previousElementSibling; if (prevRow) { nextCell = prevRow.cells[currentCellIndex]; } else { const currentTableContainer = currentRow.closest('.function-table-container'); const prevTableContainer = currentTableContainer.previousElementSibling; if (prevTableContainer && prevTableContainer.classList.contains('function-table-container')) { nextCell = prevTableContainer.querySelector('tbody tr:last-child').cells[currentCellIndex]; } } break; case 'ArrowLeft': if (window.getSelection().anchorOffset === 0) { e.preventDefault(); nextCell = currentCell.previousElementSibling; } break; case 'ArrowRight': if (window.getSelection().anchorOffset === currentCell.textContent.length || currentCell.textContent.length === 0) { e.preventDefault(); nextCell = currentCell.nextElementSibling; } break; } if (nextCell && nextCell.hasAttribute('contenteditable')) { nextCell.focus(); } return; }
+                if (selection.size > 0 || (activeEl && activeEl.closest('.macro-table'))) { 
+                    if (e.key === 'Delete' || e.key === 'Backspace') { 
+                        e.preventDefault(); 
+                        pushStateToUndoHistory(); 
+                        selection.forEach(cell => { 
+                            if (cell.isContentEditable) { 
+                                cell.textContent = ''; 
+                                if(cell.classList.contains('editable-cell')) updateCellColor(cell); 
+                            } 
+                        }); 
+                        updateConsumptionDisplay(); 
+                        return; 
+                    } 
+                    if (selection.size > 1 && /[1-4]/.test(e.key)) { 
+                        e.preventDefault(); 
+                        pushStateToUndoHistory(); 
+                        selection.forEach(cell => { 
+                            if (cell.classList.contains('editable-cell')) { 
+                                cell.textContent = e.key; 
+                                updateCellColor(cell); 
+                            } 
+                        }); 
+                        updateConsumptionDisplay(); 
+                        return; 
+                    } 
+                    if (activeEl.isContentEditable) { const currentCell = activeEl; const currentRow = currentCell.parentElement; const currentCellIndex = currentCell.cellIndex; let nextCell; switch (e.key) { case 'Enter': case 'ArrowDown': e.preventDefault(); if (currentRow.nextElementSibling) nextCell = currentRow.nextElementSibling.cells[currentCellIndex]; break; case 'ArrowUp': e.preventDefault(); if(currentRow.previousElementSibling) nextCell = currentRow.previousElementSibling.cells[currentCellIndex]; break; case 'ArrowLeft': if (window.getSelection().anchorOffset === 0) { e.preventDefault(); nextCell = currentCell.previousElementSibling; } break; case 'ArrowRight': if (window.getSelection().anchorOffset === currentCell.textContent.length || currentCell.textContent.length === 0) { e.preventDefault(); nextCell = currentCell.nextElementSibling; } break; } if (nextCell && nextCell.hasAttribute('contenteditable')) { nextCell.focus(); clearSelection(); selection.add(nextCell); nextCell.classList.add('cell-selected'); } } 
+                }
+            });
+        }
         
         function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-
-            try {
-                const filename = file.name;
-                const parts = filename.split('.');
-                if (parts.length > 3) {
-                    const productCode = parts[3];
-                    const foundLayoutId = fileCodeToLayoutMap[productCode];
-
-                    if (foundLayoutId) {
-                        console.log(`Modelo encontrado para o código ${productCode}: ${foundLayoutId}`);
-                        switchLayout(foundLayoutId);
-                        alert(`Modelo "${foundLayoutId}" selecionado automaticamente com base no nome do arquivo.`);
-                    } else {
-                        alert(`Atenção: Nenhum modelo correspondente ao código "${productCode}" foi encontrado. Selecione o modelo manualmente, se necessário.`);
-                    }
-                }
-            } catch (error) {
-                console.error("Erro ao tentar detectar o modelo pelo nome do arquivo:", error);
-            }
-
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 const content = e.target.result;
@@ -1941,101 +1968,98 @@
         }
         
         function parseAndApplyTxtData(content) {
-             const populatedSheets = new Set();
-             const tempData = {}; // Objeto temporário para guardar os dados lidos
+            const populatedSheets = new Set();
+            const tempData = {}; // Objeto temporário para guardar os dados lidos
 
-             const paternsRegex = /Paterns\s*\[\s*[^\]]+\]\s*=\s*\{([\s\S]*?)\};/;
-             const paternsMatch = content.match(paternsRegex);
-             if (!paternsMatch) {
-                 throw new Error("Bloco de dados 'Paterns' não foi encontrado no arquivo.");
-             }
-             const paternsData = paternsMatch[1];
-             const sheetMap = { 'DS-Right': 'DS-R', 'DS-Left': 'DS-L', 'DS-Center': 'DS-C', 'Hazard': 'HZD', 'Emergency': 'EM1', 'FP1': 'FP1', 'FP2': 'FP2', 'FP3': 'FP3', 'FP4': 'FP4', 'AUX1': 'AUX1', 'AUX2': 'AUX2', 'AUX3': 'AUX3', 'AUX4': 'AUX4'};
-             const sheetMapKeys = Object.keys(sheetMap).sort((a, b) => b.length - a.length);
+            const paternsRegex = /Paterns\s*\[\s*[^\]]+\]\s*=\s*\{([\s\S]*?)\};/;
+            const paternsMatch = content.match(paternsRegex);
+            if (!paternsMatch) {
+                throw new Error("Bloco de dados 'Paterns' não foi encontrado no arquivo.");
+            }
+            const paternsData = paternsMatch[1];
+            const sheetMap = { 'DS-Right': 'DS-R', 'DS-Left': 'DS-L', 'DS-Center': 'DS-C', 'Hazard': 'HZD', 'Emergency': 'EM1', 'FP1': 'FP1', 'FP2': 'FP2', 'FP3': 'FP3', 'FP4': 'FP4', 'AUX1': 'AUX1', 'AUX2': 'AUX2', 'AUX3': 'AUX3', 'AUX4': 'AUX4'};
+            const sheetMapKeys = Object.keys(sheetMap).sort((a, b) => b.length - a.length);
 
-             const lines = paternsData.split('\n');
-             let currentSheetName = null;
-             let firstPopulatedSheet = null;
+            const lines = paternsData.split('\n');
+            let currentSheetName = null;
+            let firstPopulatedSheet = null;
 
-             for (const line of lines) {
-                 const cleanedLine = line.trim();
-                 if (!cleanedLine) continue;
+            for (const line of lines) {
+                const cleanedLine = line.trim();
+                if (!cleanedLine) continue;
 
-                 let isHeader = false;
-                 if (cleanedLine.startsWith('//')) {
-                     for (const key of sheetMapKeys) {
-                         const headerRegex = new RegExp(`//.*${key.replace('-', '\\-')}`, 'i');
-                          if (headerRegex.test(cleanedLine)) {
-                               if (/inicio de/i.test(cleanedLine)) {
-                                   currentSheetName = sheetMap[key];
-                                   if (currentSheetName && !populatedSheets.has(currentSheetName)) {
-                                       tempData[currentSheetName] = []; // Inicia um array temporário
-                                       populatedSheets.add(currentSheetName);
-                                   }
-                                   if (!firstPopulatedSheet) firstPopulatedSheet = currentSheetName;
-                               } else if (/fim de/i.test(cleanedLine)) {
-                                   currentSheetName = null;
-                               }
-                               isHeader = true;
-                               break;
-                          }
-                     }
-                 }
-
-                 if (isHeader) continue;
-
-                 if (currentSheetName && /^\d|,/.test(cleanedLine)) {
-                     const dataLine = cleanedLine.replace(/\/\/.*$/, '').trim();
-                     let parts = dataLine.split(',').map(p => p.trim()).filter(Boolean);
-                     
-                     const numericParts = parts.filter(p => /^(-?\d+|0B[01]+|0X[0-9A-F]+)$/i.test(p));
-                     
-                     if (numericParts.length >= 4) {
-                         const timeTicks = parseNumericValue(numericParts[0]);
-                         const flags = /0x80/i.test(parts.join(',')) ? 0x80 : 0x00;
-                         const byteA = parseNumericValue(numericParts[numericParts.length - 3]);
-                         const byteB = parseNumericValue(numericParts[numericParts.length - 2]);
-                         const byteC = parseNumericValue(numericParts[numericParts.length - 1]);
-
-                         if (timeTicks !== null) {
-                             const values = bytesToTableValues(byteA, byteB, byteC);
-                             tempData[currentSheetName].push({ ms: (timeTicks * 25).toString(), values: values });
-                             
-                             if ((flags & 0x80) !== 0) {
-                                 tempData[currentSheetName].push({ ms: '0', values: Array(24).fill('') });
+                let isHeader = false;
+                if (cleanedLine.startsWith('//')) {
+                    for (const key of sheetMapKeys) {
+                        const headerRegex = new RegExp(`//.*${key.replace('-', '\\-')}`, 'i');
+                         if (headerRegex.test(cleanedLine)) {
+                             if (/inicio de/i.test(cleanedLine)) {
+                                 currentSheetName = sheetMap[key];
+                                 if (currentSheetName && !populatedSheets.has(currentSheetName)) {
+                                     tempData[currentSheetName] = []; // Inicia um array temporário
+                                     populatedSheets.add(currentSheetName);
+                                 }
+                                 if (!firstPopulatedSheet) firstPopulatedSheet = currentSheetName;
+                             } else if (/fim de/i.test(cleanedLine)) {
                                  currentSheetName = null;
                              }
+                             isHeader = true;
+                             break;
                          }
-                     }
-                 }
-             }
-             
-             // **CORREÇÃO APLICADA: Mescla os dados lidos na estrutura fixa**
-             sheetNames.forEach(name => {
-                 const newSheetData = JSON.parse(JSON.stringify(baseSheetStructure)); 
+                       }
+                }
 
-                 if (populatedSheets.has(name)) {
-                     const parsedRows = tempData[name];
-                     // Substitui as linhas iniciais da base com os dados lidos
-                     for (let i = 0; i < parsedRows.length; i++) {
-                         if (i < newSheetData.length) { // Garante que não ultrapasse o limite
-                             newSheetData[i] = parsedRows[i];
-                         }
-                     }
-                 }
-                 
-                 // Renumera todas as linhas
-                 newSheetData.forEach((row, index) => {
-                     row.row = index + 1;
-                 });
-                 
-                 // Atribui a planilha final (mesclada e com 200 linhas) à estrutura principal
-                 allMacroData[name] = newSheetData;
-             });
+                if (isHeader) continue;
 
-             switchSheet(firstPopulatedSheet || 'FP1', true);
-             renderAllActiveSettings();
-             updateConsumptionDisplay();
+                if (currentSheetName && /^\d|,/.test(cleanedLine)) {
+                    const dataLine = cleanedLine.replace(/\/\/.*$/, '').trim();
+                    let parts = dataLine.split(',').map(p => p.trim()).filter(Boolean);
+                    
+                    const numericParts = parts.filter(p => /^(-?\d+|0B[01]+|0X[0-9A-F]+)$/i.test(p));
+                    
+                    if (numericParts.length >= 4) {
+                        const timeTicks = parseNumericValue(numericParts[0]);
+                        const flags = /0x80/i.test(parts.join(',')) ? 0x80 : 0x00;
+                        const byteA = parseNumericValue(numericParts[numericParts.length - 3]);
+                        const byteB = parseNumericValue(numericParts[numericParts.length - 2]);
+                        const byteC = parseNumericValue(numericParts[numericParts.length - 1]);
+
+                        if (timeTicks !== null) {
+                            const values = bytesToTableValues(byteA, byteB, byteC);
+                            tempData[currentSheetName].push({ ms: (timeTicks * 25).toString(), values: values });
+                            
+                            if ((flags & 0x80) !== 0) {
+                                tempData[currentSheetName].push({ ms: '0', values: Array(24).fill('') });
+                                currentSheetName = null;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Mescla os dados lidos na estrutura fixa
+            sheetNames.forEach(name => {
+                const newSheetData = JSON.parse(JSON.stringify(baseSheetStructure)); 
+
+                if (populatedSheets.has(name)) {
+                    const parsedRows = tempData[name];
+                    for (let i = 0; i < parsedRows.length; i++) {
+                        if (i < newSheetData.length) { 
+                            newSheetData[i] = parsedRows[i];
+                        }
+                    }
+                }
+                
+                newSheetData.forEach((row, index) => {
+                    row.row = index + 1;
+                });
+                
+                allMacroData[name] = newSheetData;
+            });
+
+            switchSheet(firstPopulatedSheet || 'FP1', true);
+            renderAllActiveSettings();
+            updateConsumptionDisplay();
         }
 
         function calculateConsumption(sheetData) {
@@ -2084,7 +2108,7 @@
             const consumptionData = calculateConsumption(allMacroData[activeSheet]);
             
             if (currentLayout) {
-                 currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
+               currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
             }
 
             const payload = {
@@ -2250,7 +2274,7 @@
                     }
                 }
                 if (Object.keys(zip.files).length === 0) {
-                     alert("Nenhuma simulação com dados válidos encontrada para exportar.");
+                   alert("Nenhuma simulação com dados válidos encontrada para exportar.");
                 } else {
                     btn.innerHTML = '<i class="fa fa-cog fa-spin"></i> Compactando...';
                     const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -2305,7 +2329,6 @@
             if (templateDataJSON) {
                 try {
                     const loadedData = JSON.parse(templateDataJSON);
-                    // Passa o objeto completo para a função, sem a linha que causava o erro
                     loadDataIntoUI(loadedData);
                     localStorage.removeItem('simulation_template');
                 } catch (error) {
@@ -2317,5 +2340,4 @@
         });
     </script>
 </body>
-
 </html>

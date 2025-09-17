@@ -1,273 +1,239 @@
+import os
 import re
 import pandas as pd
 import tkinter as tk
-from tkinter import filedialog, simpledialog
-import os
-import json
+from tkinter import filedialog, simpledialog, messagebox
+from openpyxl import load_workbook
 from openpyxl.utils import column_index_from_string
+import json
 
-# --- CONFIGURAÇÃO DE MODELOS ---
-# Adicione ou ajuste as regras para cada modelo de sinalizador aqui
-MODEL_RULES = {
-    "40": {"row_start": 1, "row_end": 20, "col_start": "A", "col_end": "AD", "use_l411": True},
-    "47": {"row_start": 2, "row_end": 23, "col_start": "A", "col_end": "AG", "use_l411": False},
-    "54": {"row_start": 2, "row_end": 25, "col_start": "A", "col_end": "AL", "use_l411": False},
-    # Adicione outros modelos conforme necessário. Ex:
-    # "61": {"row_start": 2, "row_end": 27, "col_start": "A", "col_end": "AP", "use_l411": False}
+# ------------------ CONFIGURAÇÃO ------------------
+# Intervalo de leitura. Se um arquivo falhar, ajuste estes valores.
+START_ROW = 2
+END_ROW = 14
+START_COL = "A"
+END_COL = "AF"
+
+# Mapeamento de códigos de texto para nomes de cores (usado no JSON)
+COLOR_MAP = {
+    'VM': 'red',
+    'AZ': 'blue',
+    'BR': 'white',
+    'AB': 'yellow'
 }
+# Mapeamento para nomes em português (usado no relatório .txt)
+COLOR_NAME_PT = {
+    'red': 'vermelho',
+    'blue': 'azul',
+    'white': 'branco',
+    'yellow': 'âmbar'
+}
+VALID_MODULE_NUMBERS = range(1, 25)
+# --------------------------------------------------
 
-COLOR_MAP = {'AZ': 'blue', 'AB': 'yellow', 'BR': 'white', 'VM': 'red', 'RG': 'green'}
-SVG_COLOR_MAP = {'blue': '#0070c0', 'yellow': '#ffc000', 'white': '#ffffff', 'red': '#ff0000', 'green': '#00b050'}
-
-# --- FUNÇÕES DE INTERAÇÃO ---
 def selecionar_arquivo_excel():
-    """Abre uma janela gráfica para o usuário selecionar um arquivo Excel."""
+    """Abre uma janela para o usuário selecionar um arquivo Excel."""
     root = tk.Tk()
     root.withdraw()
-    filetypes = (('Arquivos Excel', '*.xlsx *.xlsm'), ('Todos os arquivos', '*.*'))
-    return filedialog.askopenfilename(title='Selecione o arquivo Excel com o layout', filetypes=filetypes)
+    filetypes = (("Arquivos Excel", "*.xlsx *.xlsm"), ("Todos os arquivos", "*.*"))
+    caminho = filedialog.askopenfilename(title="Selecione o arquivo Excel com o layout", filetypes=filetypes)
+    return caminho
 
-def escolher_modelo():
-    """Abre uma janela para o usuário digitar o modelo desejado."""
-    root = tk.Tk()
-    root.withdraw()
-    modelos = ", ".join(MODEL_RULES.keys())
-    modelo = simpledialog.askstring("Modelo do Sinalizador", f"Informe o modelo ({modelos}):")
-    if modelo and modelo in MODEL_RULES:
-        return modelo
-    print(f"Modelo inválido ou não informado. Modelos válidos: {modelos}")
-    return None
-
-def encontrar_planilha_pol(caminho_arquivo):
-    """Encontra a primeira planilha que CONTÉM 'POL' no nome."""
+def escolher_planilha_pol(caminho_arquivo):
+    """Lista as planilhas 'POL' e permite que o usuário escolha uma, se houver várias."""
     try:
-        xl = pd.ExcelFile(caminho_arquivo, engine='openpyxl')
-        for nome_planilha in xl.sheet_names:
-            if "POL" in nome_planilha.strip().upper():
-                return nome_planilha
-        print("ERRO: Nenhuma planilha com 'POL' no nome foi encontrada.")
-        return None
+        wb = load_workbook(caminho_arquivo, read_only=True)
+        sheet_names = wb.sheetnames
+        pol_sheets = [s for s in sheet_names if "POL" in s.upper()]
+
+        if not pol_sheets:
+            messagebox.showinfo("Aviso", f"Nenhuma planilha com 'POL' no nome foi encontrada. Usando a primeira planilha: '{sheet_names[0]}'")
+            return sheet_names[0] if sheet_names else None
+        
+        if len(pol_sheets) == 1:
+            return pol_sheets[0]
+
+        # Diálogo para o usuário escolher a planilha
+        root = tk.Tk()
+        root.withdraw()
+        escolha = tk.StringVar(root)
+        escolha.set(pol_sheets[0])
+        
+        popup = tk.Toplevel()
+        popup.title("Selecione a Planilha")
+        tk.Label(popup, text="Múltiplas planilhas 'POL' encontradas. Qual você deseja usar?").pack(padx=20, pady=10)
+        
+        option_menu = tk.OptionMenu(popup, escolha, *pol_sheets)
+        option_menu.pack(padx=20, pady=5)
+        
+        planilha_selecionada = None
+        def on_ok():
+            nonlocal planilha_selecionada
+            planilha_selecionada = escolha.get()
+            popup.destroy()
+
+        tk.Button(popup, text="Confirmar", command=on_ok).pack(padx=20, pady=10)
+        popup.wait_window()
+        return planilha_selecionada
+
     except Exception as e:
-        print(f"Erro ao ler o arquivo Excel: {e}")
+        messagebox.showerror("Erro de Leitura", f"Não foi possível ler as planilhas do arquivo:\n{e}")
         return None
 
-# --- FUNÇÕES DE PROCESSAMENTO ---
-def extract_module_info(cell_content):
-    """
-    Extrai informações de cor e quantidade APENAS de células que contêm um código de cor conhecido.
-    Ignora números isolados como '61'.
-    """
-    if not isinstance(cell_content, str):
-        return None
-    
-    content_upper = cell_content.upper().strip()
-    
-    found_color_code = None
-    for code in COLOR_MAP.keys():
-        if code in content_upper:
-            found_color_code = code
-            break
+def extrair_dados_da_planilha(caminho_arquivo, nome_planilha):
+    """Extrai dados do intervalo, preenchendo corretamente as células mescladas."""
+    try:
+        wb = load_workbook(caminho_arquivo, data_only=True)
+        ws = wb[nome_planilha]
+
+        col_start_idx = column_index_from_string(START_COL)
+        col_end_idx = column_index_from_string(END_COL)
+        
+        # Cria uma grade de dados vazia
+        grid_data = []
+        for r in range(START_ROW, END_ROW + 1):
+            row_data = [ws.cell(row=r, column=c).value for c in range(col_start_idx, col_end_idx + 1)]
+            grid_data.append(row_data)
+
+        # Preenche os valores das células mescladas
+        for merged_range in list(ws.merged_cells.ranges):
+            min_col, min_row, max_col, max_row = merged_range.bounds
+            top_left_cell_value = ws.cell(row=min_row, column=min_col).value
             
-    if not found_color_code:
+            for r in range(min_row, max_row + 1):
+                for c in range(min_col, max_col + 1):
+                    # Verifica se a célula está dentro do nosso intervalo de interesse
+                    if START_ROW <= r <= END_ROW and col_start_idx <= c <= col_end_idx:
+                        grid_r_idx = r - START_ROW
+                        grid_c_idx = c - col_start_idx
+                        grid_data[grid_r_idx][grid_c_idx] = top_left_cell_value
+        
+        return pd.DataFrame(grid_data)
+    except Exception as e:
+        print(f"Erro ao ler o intervalo do Excel: {e}")
         return None
 
-    color = COLOR_MAP[found_color_code]
+def encontrar_elementos(df):
+    """Encontra todas as ocorrências de números de módulo e células de cor."""
+    numeros = []
+    cores = []
     
-    quantity = 1
-    match_num = re.match(r'^(\d+)', content_upper)
-    if match_num:
-        quantity = int(match_num.group(1))
-
-    return {
-        'color': color,
-        'quantity': quantity,
-        'original_text': cell_content
-    }
-
-def find_module_cells(df, use_l411):
-    """Encontra células que contêm padrões de módulos, respeitando a regra 'use_l411'."""
-    module_cells = []
-    
-    for r in range(df.shape[0]):
-        for c in range(df.shape[1]):
-            cell_value = df.iat[r, c]
+    for r_idx, row in df.iterrows():
+        for c_idx, cell_value in enumerate(row):
             if pd.isna(cell_value):
                 continue
             
-            if use_l411:
-                if not isinstance(cell_value, str) or 'L411' not in cell_value.upper():
-                    continue
+            cell_text = str(cell_value).strip()
             
-            module_info = extract_module_info(cell_value)
-            if module_info:
-                module_cells.append({
-                    'row': r,
-                    'col': c,
-                    'color': module_info['color'],
-                    'quantity': module_info['quantity'],
-                    'content': module_info['original_text']
-                })
-                print(f"Célula Válida Encontrada: '{cell_value}' -> {module_info['quantity']}x {module_info['color']}")
+            # Tenta converter para número
+            try:
+                num = int(float(cell_text))
+                if num in VALID_MODULE_NUMBERS:
+                    numeros.append({'value': num, 'r': r_idx, 'c': c_idx})
+                    continue 
+            except (ValueError, TypeError):
+                pass
+
+            # Encontra códigos de cor
+            cell_upper = cell_text.upper()
+            for codigo, nome_cor in COLOR_MAP.items():
+                if codigo in cell_upper:
+                    cores.append({'color': nome_cor, 'r': r_idx, 'c': c_idx, 'content': str(cell_value).replace('\n', ' ')})
+                    break 
     
-    return module_cells
+    return numeros, cores
 
-def recortar_dataframe(df, modelo):
-    """Recorta o DataFrame para a área de interesse definida nas regras do modelo."""
-    regra = MODEL_RULES.get(modelo)
-    if not regra:
-        raise ValueError(f"Modelo '{modelo}' não está configurado!")
+def associar_por_proximidade(numeros, cores):
+    """Para cada ocorrência de número, encontra sua cor mais próxima."""
+    layout_final = []
+
+    for num_data in numeros:
+        melhor_cor = None
+        distancia_minima = float('inf')
+        
+        for cor_data in cores:
+            distancia = abs(num_data['r'] - cor_data['r']) + abs(num_data['c'] - cor_data['c'])
+            
+            if distancia < distancia_minima:
+                distancia_minima = distancia
+                melhor_cor = cor_data['color']
+        
+        if melhor_cor:
+            layout_final.append({
+                'module': num_data['value'],
+                'color': melhor_cor
+            })
+            
+    return layout_final
+
+def salvar_arquivos_resultado(layout, caminho_arquivo):
+    """Salva os resultados em arquivos .txt (legível) e .json (para o site)."""
+    nome_base = os.path.splitext(os.path.basename(caminho_arquivo))[0]
+    diretorio = os.path.dirname(caminho_arquivo)
     
-    row_start = regra["row_start"] - 1
-    row_end = regra["row_end"]
-    col_start = column_index_from_string(regra["col_start"]) - 1
-    col_end = column_index_from_string(regra["col_end"])
+    caminho_saida_txt = os.path.join(diretorio, f"{nome_base}_layout_extraido.txt")
+    caminho_saida_json = os.path.join(diretorio, f"{nome_base}_layout.json")
+
+    layout_ordenado = sorted(layout, key=lambda k: k['module'])
     
-    print(f"Recortando planilha para o modelo '{modelo}': Linhas {row_start+1}-{row_end}, Colunas {regra['col_start']}-{regra['col_end']}")
-    return df.iloc[row_start:row_end, col_start:col_end], regra["use_l411"]
+    # Salvar em .txt
+    with open(caminho_saida_txt, 'w', encoding='utf-8') as f:
+        f.write(f"--- Layout de Cores Extraído ---\n")
+        f.write(f"Arquivo: {os.path.basename(caminho_arquivo)}\n")
+        f.write("="*40 + "\n\n")
+        if not layout_ordenado:
+            f.write("Nenhum módulo foi associado a uma cor.\n")
+        else:
+            for item in layout_ordenado:
+                cor_pt = COLOR_NAME_PT.get(item['color'], item['color'])
+                f.write(f"Módulo {item['module']}: {cor_pt}\n")
 
-def processar_layout_excel(caminho_arquivo, nome_planilha, modelo):
-    """Função principal que orquestra a leitura, recorte e extração de dados."""
-    try:
-        df = pd.read_excel(caminho_arquivo, sheet_name=nome_planilha, header=None, engine='openpyxl')
-        df_recortado, use_l411 = recortar_dataframe(df, modelo)
-        
-        print("Procurando células com padrões de módulos na área recortada...")
-        module_cells = find_module_cells(df_recortado, use_l411)
-        
-        if not module_cells:
-            print("ERRO CRÍTICO: Nenhuma célula com padrão de módulo e cor foi encontrada na área definida.")
-            return {}, {}
-        
-        module_cells_sorted = sorted(module_cells, key=lambda x: (x['row'], x['col']))
-        
-        layout_final = {}
-        module_counter = 1
-        
-        for cell in module_cells_sorted:
-            for i in range(cell['quantity']):
-                # *** NOVA VERIFICAÇÃO DE LIMITE ***
-                if module_counter > 60:
-                    print("AVISO: Limite de 40 módulos atingido. A lista foi truncada.")
-                    break
-                
-                layout_final[str(module_counter)] = cell['color']
-                module_counter += 1
-            
-            # Se o limite foi atingido no loop interno, para o loop externo também
-            if module_counter > 40:
-                break
-        
-        print(f"\nProcessamento concluído. Total de módulos sequenciais gerados: {len(layout_final)}")
-        return layout_final, module_cells_sorted
-        
-    except Exception as e:
-        print(f"Ocorreu um erro inesperado ao processar o layout: {e}")
-        import traceback
-        traceback.print_exc()
-        return None, None
+    # Salvar em .json
+    with open(caminho_saida_json, 'w', encoding='utf-8') as f:
+        json.dump(layout_ordenado, f, indent=4)
 
-# --- FUNÇÕES DE EXPORTAÇÃO (sem alterações) ---
-def gerar_arquivo_txt(dados_ordenados, caminho_saida):
-    try:
-        with open(caminho_saida, 'w', encoding='utf-8') as f:
-            f.write("--- Layout de Cores dos Módulos ---\n\n")
-            for modulo, cor in dados_ordenados.items():
-                f.write(f"Módulo {modulo}: {cor.capitalize()}\n")
-        print(f"SUCESSO! Arquivo TXT salvo em: '{caminho_saida}'")
-    except Exception as e:
-        print(f"ERRO ao salvar o arquivo TXT: {e}")
+    print(f"\nLayout legível salvo em: '{caminho_saida_txt}'")
+    print(f"Layout JSON para o site salvo em: '{caminho_saida_json}'")
 
-def gerar_arquivo_svg(dados_ordenados, module_cells, caminho_saida):
-    try:
-        if not module_cells:
-            print("AVISO: Nenhuma célula de módulo para gerar SVG.")
-            return
-            
-        CELL_SIZE = 40
-        PADDING = 20
-        
-        min_row = min(cell['row'] for cell in module_cells)
-        max_row = max(cell['row'] for cell in module_cells)
-        min_col = min(cell['col'] for cell in module_cells)
-        max_col = max(cell['col'] for cell in module_cells)
+def salvar_debug_data(df, caminho_arquivo):
+    """NOVO: Salva os dados brutos lidos em um CSV para depuração."""
+    nome_base = os.path.splitext(os.path.basename(caminho_arquivo))[0]
+    diretorio = os.path.dirname(caminho_arquivo)
+    caminho_saida_csv = os.path.join(diretorio, f"{nome_base}_DADOS_LIDOS_PARA_DEBUG.csv")
+    df.to_csv(caminho_saida_csv, index=False, header=False, sep=';')
+    print(f"\nArquivo de depuração foi salvo em: '{caminho_saida_csv}'")
+    print("Abra este arquivo para ver exatamente o que o script está lendo.")
 
-        svg_width = (max_col - min_col + 1) * CELL_SIZE + 2 * PADDING
-        svg_height = (max_row - min_row + 1) * CELL_SIZE + 2 * PADDING
-
-        svg_content = f'<svg width="{svg_width}" height="{svg_height}" xmlns="http://www.w3.org/2000/svg" style="background-color:#f0f0f0;">\n'
-        svg_content += f' 	<style>.text {{ font: bold {int(CELL_SIZE/2.5)}px sans-serif; text-anchor: middle; dominant-baseline: middle; fill: black; }} .text-white {{ fill: white; }}</style>\n'
-
-        module_counter = 1
-        for cell in module_cells:
-            if module_counter > 40: # Garante que o SVG também não desenhe mais de 40
-                break
-
-            x = (cell['col'] - min_col) * CELL_SIZE + PADDING
-            y = (cell['row'] - min_row) * CELL_SIZE + PADDING
-            fill_color = SVG_COLOR_MAP.get(cell['color'], '#cccccc')
-            text_class = "text-white" if cell['color'] in ['blue', 'red', 'green'] else "text"
-            
-            svg_content += f' 	<rect x="{x}" y="{y}" width="{CELL_SIZE}" height="{CELL_SIZE}" fill="{fill_color}" stroke="#333" stroke-width="1.5" rx="3"/>\n'
-            
-            # Ajusta a lógica para não ultrapassar 40 no texto do SVG
-            num_to_add = cell['quantity']
-            end_range = module_counter + num_to_add - 1
-            if end_range > 40:
-                end_range = 40
-            
-            if num_to_add == 1 or module_counter == end_range:
-                 svg_content += f' 	<text x="{x + CELL_SIZE/2}" y="{y + CELL_SIZE/2}" class="text {text_class}">{module_counter}</text>\n'
-            else:
-                svg_content += f' 	<text x="{x + CELL_SIZE/2}" y="{y + CELL_SIZE/2}" class="text {text_class}">{module_counter}-{end_range}</text>\n'
-            
-            module_counter += num_to_add
-
-        svg_content += '</svg>'
-        
-        with open(caminho_saida, 'w', encoding='utf-8') as f:
-            f.write(svg_content)
-        print(f"SUCESSO! Arquivo SVG salvo em: '{caminho_saida}'")
-        
-    except Exception as e:
-        print(f"ERRO ao gerar o arquivo SVG: {e}")
-
-# --- EXECUÇÃO PRINCIPAL ---
+# --- Execução Principal ---
 if __name__ == "__main__":
     arquivo_excel = selecionar_arquivo_excel()
+
     if not arquivo_excel:
         print("Nenhum arquivo selecionado. Encerrando.")
     else:
-        modelo = escolher_modelo()
-        if not modelo:
-            input("\nEncerrando. Pressione Enter para fechar...")
-            exit()
-
-        planilha_alvo = encontrar_planilha_pol(arquivo_excel)
-        if not planilha_alvo:
-            input("\nEncerrando. Pressione Enter para fechar...")
-            exit()
-
         print(f"\nProcessando arquivo: {os.path.basename(arquivo_excel)}")
-        dados_layout, module_cells = processar_layout_excel(arquivo_excel, planilha_alvo, modelo)
+        planilha_alvo = escolher_planilha_pol(arquivo_excel)
 
-        if dados_layout:
-            print(f"\n--- Layout de Cores Extraído com Sucesso ({len(dados_layout)} módulos) ---")
-            print(json.dumps(dados_layout, indent=4))
-
-            nome_base_saida = os.path.splitext(os.path.basename(arquivo_excel))[0]
-            caminho_diretorio_saida = os.path.dirname(arquivo_excel)
+        if planilha_alvo:
+            df_dados = extrair_dados_da_planilha(arquivo_excel, planilha_alvo)
             
-            caminho_saida_json = os.path.join(caminho_diretorio_saida, f"{nome_base_saida}_layout.json")
-            caminho_saida_txt = os.path.join(caminho_diretorio_saida, f"{nome_base_saida}_layout.txt")
-            caminho_saida_svg = os.path.join(caminho_diretorio_saida, f"{nome_base_saida}_layout.svg")
+            if df_dados is not None:
+                salvar_debug_data(df_dados, arquivo_excel) # Gera o arquivo de depuração
 
-            with open(caminho_saida_json, 'w', encoding='utf-8') as f:
-                json.dump(dados_layout, f, indent=4)
-            print(f"\nSUCESSO! Layout JSON salvo em: '{caminho_saida_json}'")
-
-            gerar_arquivo_txt(dados_layout, caminho_saida_txt)
-            gerar_arquivo_svg(dados_layout, module_cells, caminho_saida_svg)
-        else:
-            print("\nFalha na extração do layout. Nenhum arquivo foi gerado.")
-
+                numeros_encontrados, cores_encontradas = encontrar_elementos(df_dados)
+                print(f"\nAnálise: {len(numeros_encontrados)} módulos (incluindo repetidos) e {len(cores_encontradas)} células de cor encontrados.")
+                
+                if not numeros_encontrados or not cores_encontradas:
+                    messagebox.showerror("Erro de Análise", "Não foi possível encontrar módulos ou cores no intervalo especificado. Verifique o arquivo de depuração e as configurações de intervalo no script.")
+                else:
+                    print("\nAssociando módulos às cores...")
+                    layout = associar_por_proximidade(numeros_encontrados, cores_encontradas)
+                    salvar_arquivos_resultado(layout, arquivo_excel)
+                    
+                    print("\n===========================================")
+                    print(" LAYOUT EXTRAÍDO COM SUCESSO!")
+                    print("===========================================")
+            else:
+                messagebox.showerror("Erro de Extração", "Não foi possível extrair dados da planilha.")
+                
     input("\nPressione Enter para fechar...")
