@@ -450,12 +450,20 @@
                         Simulação: <span id="current-layout-name" style="font-weight: 500;"></span>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                       <button id="open-layout-panel-btn" class="btn" style="background-color: #16a085; font-size:10px; padding: 4px 8px;">
-                            <i class="fa fa-th"></i> Selecionar Modelo
-                        </button>
-                        <button id="edit-layout-btn" class="btn" style="background-color: #3498db; font-size:10px; padding: 4px 8px;">
-                            <i class="fa fa-pencil"></i> Editar Layout
-                        </button>
+                       <div style="display: flex; gap: 10px;">
+                            <button id="open-layout-panel-btn" class="btn" style="background-color: #16a085; font-size:10px; padding: 4px 8px;">
+                                <i class="fa fa-th"></i> Selecionar Modelo
+                            </button>
+                            <button id="edit-layout-btn" class="btn" style="background-color: #3498db; font-size:10px; padding: 4px 8px;">
+                                <i class="fa fa-pencil"></i> Editar Layout
+                            </button>
+                            <button id="save-layout-btn" class="btn" style="background-color: #27ae60; font-size:10px; padding: 4px 8px; display: none;">
+                                <i class="fa fa-save"></i> Salvar Layout
+                            </button>
+                            <button id="export-layout-btn" class="btn" style="background-color: #9b59b6; font-size:10px; padding: 4px 8px; display: none;">
+                                <i class="fa fa-code"></i> Exportar Coordenadas
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="simulation-area" id="simulation-area">
@@ -513,7 +521,7 @@
         // --- CÓDIGO JAVASCRIPT COMPLETO ---
 
         // === REFERÊNCIAS DE ELEMENTOS DO DOM ===
-        let configModal, openModalBtn, closeModalBtn, saveAndCloseModalBtn, executeMacroBtn, blocksContainer, macroTableBody, macroHeader, sheetSelectorContainer, gravarBtn, restaurarBtn, limpaBtn, colorContextMenu, layoutPanelModal, openLayoutPanelBtn, closeLayoutPanelBtn, layoutPanelBody, currentLayoutNameSpan, advancedSettingsModal, openAdvancedSettingsBtn, closeAdvancedSettingsBtn, saveAdvancedSettingsBtn, tabButtons, tabContents, jumpTabelaCheckboxes, specialFunctionCells, jumpTabelaStatusContainer, specialFunctionsStatusContainer;
+        let configModal, openModalBtn, closeModalBtn, saveAndCloseModalBtn, executeMacroBtn, blocksContainer, macroTableBody, macroHeader, sheetSelectorContainer, gravarBtn, restaurarBtn, limpaBtn, colorContextMenu, layoutPanelModal, openLayoutPanelBtn, closeLayoutPanelBtn, layoutPanelBody, currentLayoutNameSpan, advancedSettingsModal, openAdvancedSettingsBtn, closeAdvancedSettingsBtn, saveAdvancedSettingsBtn, tabButtons, tabContents, jumpTabelaCheckboxes, specialFunctionCells, jumpTabelaStatusContainer, specialFunctionsStatusContainer, simulationArea, editLayoutBtn, saveLayoutBtn;
 
         // === GERENCIAMENTO DE ESTADO ===
         let simulationStopper = null;
@@ -562,92 +570,1140 @@
             "00233": "primus47p20mRef", "00234": "primus47p24mCol", "00235": "primus47p13mRef",
         };
         
-        const s_slim_bicolor_example = [
-            { text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
-            { text: ['3', '4'], top: '45%', left: '40%', width: 77, height: 30, rotate: 0 },
-            { text: '20', top: '14.6%', left: '10%', width: 77, height: 30, rotate: 0 },
-            { text: '20', top: '14.6%', left: '80%', width: 77, height: 30, rotate: 0 }
-        ];
+        // ================================================================================= //
+// =================== INÍCIO DOS BLOCOS DE LAYOUT PERSONALIZADOS ================== //
+// ================================================================================= //
 
-        const s_slim_24_default_BlockLayout = [
-            { text: '1', top: '14.6%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '2', top: '14.6%', left: '58.5%', width: 77, height: 30, rotate: 0 },
-            { text: '3', top: '14.6%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '4', top: '14.6%', left: '77%', width: 77, height: 30, rotate: 0 },
-            { text: '5', top: '20%', left: '86%', width: 79, height: 31, rotate: 35 }, { text: '6', top: '44.9%', left: '91%', width: 82, height: 31, rotate: 90 },
-            { text: '7', top: '70%', left: '86%', width: 79, height: 31, rotate:-35 }, { text: '8', top: '76.4%', left: '77%', width: 77, height: 30, rotate: 0 },
-            { text: '9', top: '76.4%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '10', top: '76.4%', left: '58.4%', width: 77, height: 30, rotate: 0 },
-            { text: '11', top: '76.5%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '12', top: '76.5%', left: '33.3%', width: 77, height: 30, rotate: 0 },
-            { text: '13', top: '76.5%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '14', top: '76.5%', left: '14.8%', width: 77, height: 30, rotate: 0 },
-            { text: '15', top: '70%', left: '5.6%', width: 79, height: 30, rotate: 35 }, { text: '16', top: '45%', left: '0.5%', width: 80, height: 30, rotate: 90 },
-            { text: '17', top: '20%', left: '5.5%', width: 79, height: 30, rotate: -35 }, { text: '18', top: '14.6%', left: '14.7%', width: 77, height: 30, rotate: 0 },
-            { text: '19', top: '14.6%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '20', top: '14.6%', left: '33.3%', width: 77, height: 30, rotate: 0 },
-            { text: '21', top: '45%', left: '33.3%', width: 77, height: 30, rotate: 0 }, { text: '22', top: '45%', left: '45.9%', width: 77, height: 30, rotate: 0 },
-            { text: '23', top: '45%', left: '58.5%', width: 77, height: 30, rotate: 0 }, { text: '24', top: '45%', left: '77%', width: 77, height: 30, rotate: 0 }
-        ];
+const s_slim_bicolor_example = [
+    { text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
+    { text: ['3', '4'], top: '45%', left: '40%', width: 77, height: 30, rotate: 0 },
+    { text: '20', top: '14.6%', left: '10%', width: 77, height: 30, rotate: 0 },
+    { text: '20', top: '14.6%', left: '80%', width: 77, height: 30, rotate: 0 }
+];
 
-        const layouts = [
-            { id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
-            { id: 's_slim_bicolor_example', name: 'S-SLIM Bicolor Exemplo', image: 'simulação.png', category: 'Padrão', blocks: s_slim_bicolor_example },
-            
-            // 40 Polegadas
-            { id: 'primus40p12mCol', name: 'Primus 40p 12m Col', image: 'ImagensSirene40p/primus40p12mCol.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p12mRef', name: 'Primus 40p 12m Ref', image: 'ImagensSirene40p/primus40p12mRef.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p14mCol', name: 'Primus 40p 14m Col', image: 'ImagensSirene40p/primus40p14mCol.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p14mRef', name: 'Primus 40p 14m Ref', image: 'ImagensSirene40p/primus40p14mRef.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p16mCol', name: 'Primus 40p 16m Col', image: 'ImagensSirene40p/primus40p16mCol.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p16mRef', name: 'Primus 40p 16m Ref', image: 'ImagensSirene40p/primus40p16mRef.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p18mCol', name: 'Primus 40p 18m Col', image: 'ImagensSirene40p/primus40p18mCol.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p18mRef', name: 'Primus 40p 18m Ref', image: 'ImagensSirene40p/primus40p18mRef.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus40p22mRef', name: 'Primus 40p 22m Ref', image: 'ImagensSirene40p/primus40p22mRef.png', category: '40 Polegadas', blocks: s_slim_24_default_BlockLayout },
+const s_slim_24_default_BlockLayout = [
+    { text: '1', top: '14.6%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '2', top: '14.6%', left: '58.5%', width: 77, height: 30, rotate: 0 },
+    { text: '3', top: '14.6%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '4', top: '14.6%', left: '77%', width: 77, height: 30, rotate: 0 },
+    { text: '5', top: '20%', left: '86%', width: 79, height: 31, rotate: 35 }, { text: '6', top: '44.9%', left: '91%', width: 82, height: 31, rotate: 90 },
+    { text: '7', top: '70%', left: '86%', width: 79, height: 31, rotate:-35 }, { text: '8', top: '76.4%', left: '77%', width: 77, height: 30, rotate: 0 },
+    { text: '9', top: '76.4%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '10', top: '76.4%', left: '58.4%', width: 77, height: 30, rotate: 0 },
+    { text: '11', top: '76.5%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '12', top: '76.5%', left: '33.3%', width: 77, height: 30, rotate: 0 },
+    { text: '13', top: '76.5%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '14', top: '76.5%', left: '14.8%', width: 77, height: 30, rotate: 0 },
+    { text: '15', top: '70%', left: '5.6%', width: 79, height: 30, rotate: 35 }, { text: '16', top: '45%', left: '0.5%', width: 80, height: 30, rotate: 90 },
+    { text: '17', top: '20%', left: '5.5%', width: 79, height: 30, rotate: -35 }, { text: '18', top: '14.6%', left: '14.7%', width: 77, height: 30, rotate: 0 },
+    { text: '19', top: '14.6%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '20', top: '14.6%', left: '33.3%', width: 77, height: 30, rotate: 0 },
+    { text: '21', top: '45%', left: '33.3%', width: 77, height: 30, rotate: 0 }, { text: '22', top: '45%', left: '45.9%', width: 77, height: 30, rotate: 0 },
+    { text: '23', top: '45%', left: '58.5%', width: 77, height: 30, rotate: 0 }, { text: '24', top: '45%', left: '77%', width: 77, height: 30, rotate: 0 }
+];
 
-            // 47 Polegadas
-            { id: 'primus47p11mCol', name: 'Primus 47p 11m Col', image: 'ImagensRefletor47p/colimador/primus47p11mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p11mRef', name: 'Primus 47p 11m Ref', image: 'ImagensRefletor47p/refletor/primus47p11mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p13mRef', name: 'Primus 47p 13m Ref', image: 'ImagensRefletor47p/refletor/primus47p13mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p14mCol', name: 'Primus 47p 14m Col', image: 'ImagensRefletor47p/colimador/primus47p14mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p14mRef', name: 'Primus 47p 14m Ref', image: 'ImagensRefletor47p/refletor/primus47p14mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p16mCol', name: 'Primus 47p 16m Col', image: 'ImagensRefletor47p/colimador/primus47p16mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p16mRef', name: 'Primus 47p 16m Ref', image: 'ImagensRefletor47p/refletor/primus47p16mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p18mRef', name: 'Primus 47p 18m Ref', image: 'ImagensRefletor47p/refletor/primus47p18mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p20mCol', name: 'Primus 47p 20m Col', image: 'ImagensRefletor47p/colimador/primus47p20mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p20mRef', name: 'Primus 47p 20m Ref', image: 'ImagensRefletor47p/refletor/primus47p20mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p22mRef', name: 'Primus 47p 22m Ref', image: 'ImagensRefletor47p/refletor/primus47p22mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus47p24mRef', name: 'Primus 47p 24m Ref', image: 'ImagensRefletor47p/refletor/primus47p24mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            
-            // 54 Polegadas
-            { id: 'primus54p10mCol', name: 'Primus 54p 10m Col', image: 'ImagensSirene54P/colimador/primus54p10mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p12mRef', name: 'Primus 54p 12m Ref', image: 'ImagensSirene54P/refletor/primus54p12mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p14mCol', name: 'Primus 54p 14m Col', image: 'ImagensSirene54P/colimador/primus54p14mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p14mRef', name: 'Primus 54p 14m Ref', image: 'ImagensSirene54P/refletor/primus54p14mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p16mCol', name: 'Primus 54p 16m Col', image: 'ImagensSirene54P/colimador/primus54p16mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p18mRef', name: 'Primus 54p 18m Ref', image: 'ImagensSirene54P/refletor/primus54p18mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p20mRef', name: 'Primus 54p 20m Ref', image: 'ImagensSirene54P/refletor/primus54p20mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p22mCol', name: 'Primus 54p 22m Col', image: 'ImagensSirene54P/colimador/primus54p22mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p22mRef', name: 'Primus 54p 22m Ref', image: 'ImagensSirene54P/refletor/primus54p22mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus54p26mRef', name: 'Primus 54p 26m Ref', image: 'ImagensSirene54P/refletor/primus54p26mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            
-            // 61 Polegadas
-            { id: 'primus61p13mCol', name: 'Primus 61p 13m Col', image: 'ImagensSirene61P/colimador/primus61p13mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p13mRef', name: 'Primus 61p 13m Ref', image: 'ImagensSirene61P/refletor/primus61p13mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p14mCol', name: 'Primus 61p 14m Col', image: 'ImagensSirene61P/colimador/primus61p14mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p15mRef', name: 'Primus 61p 15m Ref', image: 'ImagensSirene61P/refletor/primus61p15mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p18mCol', name: 'Primus 61p 18m Col', image: 'ImagensSirene61P/colimador/primus61p18mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p18mRef', name: 'Primus 61p 18m Ref', image: 'ImagensSirene61P/refletor/primus61p18mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p20mRef', name: 'Primus 61p 20m Ref', image: 'ImagensSirene61P/refletor/primus61p20mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p22mRef', name: 'Primus 61p 22m Ref', image: 'ImagensSirene61P/refletor/primus61p22mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p24mCol', name: 'Primus 61p 24m Col', image: 'ImagensSirene61P/colimador/primus61p24mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p24mRef', name: 'Primus 61p 24m Ref', image: 'ImagensSirene61P/refletor/primus61p24mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            { id: 'primus61p28mRef', name: 'Primus 61p 28m Ref', image: 'ImagensSirene61P/refletor/primus61p28mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-            
-            // Venus
-            { id: 'venus11m', name: 'Venus 11m', image: 'VenusSirene/venus11m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus14m', name: 'Venus 14m', image: 'VenusSirene/venus14m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus15m', name: 'Venus 15m', image: 'VenusSirene/venus15m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus16m', name: 'Venus 16m', image: 'VenusSirene/venus16m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus19m', name: 'Venus 19m', image: 'VenusSirene/venus19m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus20m', name: 'Venus 20m', image: 'VenusSirene/venus20m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus22m', name: 'Venus 22m', image: 'VenusSirene/venus22m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-            { id: 'venus24m', name: 'Venus 24m', image: 'VenusSirene/venus24m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-        ];
+const primus40p22mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "7.92634%",
+        "left": "51.2903%",
+        "width": 90,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "7.92634%",
+        "left": "62.1505%",
+        "width": 93,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "35.1516%",
+        "left": "69.6774%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "14.6%",
+        "left": "77%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "20%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "70%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": -35
+    },
+    {
+        "text": "8",
+        "top": "76.4%",
+        "left": "77%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "76.4%",
+        "left": "67.7%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "76.4%",
+        "left": "58.4%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "76.5%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "76.5%",
+        "left": "33.3%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "76.5%",
+        "left": "24.1%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "76.5%",
+        "left": "14.8%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "15",
+        "top": "70%",
+        "left": "5.6%",
+        "width": 79,
+        "height": 30,
+        "rotate": 35
+    },
+    {
+        "text": "16",
+        "top": "45%",
+        "left": "0.5%",
+        "width": 80,
+        "height": 30,
+        "rotate": 90
+    },
+    {
+        "text": "17",
+        "top": "20%",
+        "left": "5.5%",
+        "width": 79,
+        "height": 30,
+        "rotate": -35
+    },
+    {
+        "text": "18",
+        "top": "14.6%",
+        "left": "14.7%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "14.6%",
+        "left": "24.1%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "20",
+        "top": "14.6%",
+        "left": "33.3%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "21",
+        "top": "45%",
+        "left": "33.3%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "22",
+        "top": "45%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "23",
+        "top": "45%",
+        "left": "58.5%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "24",
+        "top": "45%",
+        "left": "77%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    }
+];
+
+
+const primus40p18mRef_BlockLayout = [
+    { "text": "1", "top": "10.6833%", "left": "50.8602%", "width": 94, "height": 31, "rotate": 0 },
+    { "text": "2", "top": "10.6833%", "left": "62.043%", "width": 91, "height": 32, "rotate": 0 },
+    { "text": "3", "top": "10.3387%", "left": "72.9032%", "width": 92, "height": 32, "rotate": 0 },
+    { "text": "4", "top": "15.8527%", "left": "83.6559%", "width": 93, "height": 38, "rotate": 33.02386755579664 },
+    { "text": "5", "top": "43.7672%", "left": "89.1398%", "width": 100, "height": 35, "rotate": 91.2253777079841 },
+    { "text": "6", "top": "70.9924%", "left": "83.1183%", "width": 96, "height": 33, "rotate": -33.6900675259798 },
+    { "text": "7", "top": "77.1956%", "left": "72.9032%", "width": 91, "height": 36, "rotate": 0.3511264730522754 },
+    { "text": "8", "top": "77.5403%", "left": "61.9355%", "width": 92, "height": 34, "rotate": 0 },
+    { "text": "9", "top": "78.5741%", "left": "51.0753%", "width": 92, "height": 31, "rotate": 0 },
+    { "text": "10", "top": "78.5741%", "left": "39.0323%", "width": 91, "height": 32, "rotate": 0 },
+    { "text": "11", "top": "78.5741%", "left": "28.172%", "width": 89, "height": 32, "rotate": 0 },
+    { "text": "12", "top": "78.2295%", "left": "17.0968%", "width": 94, "height": 33, "rotate": 0 },
+    { "text": "13", "top": "71.337%", "left": "6.45161%", "width": 95, "height": 32, "rotate": 33.05808505261985 },
+    { "text": "14", "top": "44.4564%", "left": "0.107527%", "width": 97, "height": 34, "rotate": 90.76902468257803 },
+    { "text": "15", "top": "17.2312%", "left": "6.23656%", "width": 95, "height": 35, "rotate": -34.63231812412218 },
+    { "text": "16", "top": "10.3387%", "left": "17.2043%", "width": 90, "height": 33, "rotate": -0.4212849041686013 },
+    { "text": "17", "top": "10.3387%", "left": "27.957%", "width": 92, "height": 32, "rotate": 0.08154041868489514 },
+    { "text": "18", "top": "10.3387%", "left": "38.9247%", "width": 92, "height": 33, "rotate": 0 },
+    { "text": "19", "top": "44.801%", "left": "39.2473%", "width": 81, "height": 30, "rotate": 0 },
+    { "text": "20", "top": "44.801%", "left": "51.828%", "width": 81, "height": 30, "rotate": 0 }
+];
+
+const primus40p18mCol_BlockLayout = [
+    { "text": "1", "top": "13.0957%", "left": "50.6452%", "width": 97, "height": 28, "rotate": 0 },
+    { "text": "2", "top": "13.0957%", "left": "61.828%", "width": 95, "height": 29, "rotate": 0 },
+    { "text": "3", "top": "12.7511%", "left": "72.6882%", "width": 94, "height": 29, "rotate": 0 },
+    { "text": "4", "top": "17.2312%", "left": "83.4409%", "width": 94, "height": 37, "rotate": 36.62132749378443 },
+    { "text": "5", "top": "44.4564%", "left": "89.1398%", "width": 90, "height": 32, "rotate": 90.45835645800044 },
+    { "text": "6", "top": "71.6817%", "left": "83.1183%", "width": 95, "height": 28, "rotate": -34.95466963050332 },
+    { "text": "7", "top": "77.1956%", "left": "72.7957%", "width": 92, "height": 25, "rotate": 0.6950985156569516 },
+    { "text": "8", "top": "76.851%", "left": "61.6129%", "width": 96, "height": 25, "rotate": 0 },
+    { "text": "9", "top": "76.5064%", "left": "50.6452%", "width": 95, "height": 26, "rotate": 0 },
+    { "text": "10", "top": "76.851%", "left": "39.1398%", "width": 93, "height": 25, "rotate": 0 },
+    { "text": "11", "top": "76.851%", "left": "28.2796%", "width": 92, "height": 24, "rotate": 0 },
+    { "text": "12", "top": "76.851%", "left": "17.2043%", "width": 95, "height": 25, "rotate": 0 },
+    { "text": "13", "top": "70.6478%", "left": "7.2043%", "width": 92, "height": 27, "rotate": 36.86989764584402 },
+    { "text": "14", "top": "45.8349%", "left": "1.6129%", "width": 92, "height": 25, "rotate": 270 },
+    { "text": "15", "top": "19.6435%", "left": "7.2043%", "width": 87, "height": 28, "rotate": -32.18008106123287 },
+    { "text": "16", "top": "12.4064%", "left": "17.0968%", "width": 96, "height": 26, "rotate": 0 },
+    { "text": "17", "top": "13.0957%", "left": "28.2796%", "width": 90, "height": 25, "rotate": 0.32182275023401985 },
+    { "text": "18", "top": "13.4403%", "left": "39.1398%", "width": 91, "height": 25, "rotate": 0 },
+    { "text": "19", "top": "44.4564%", "left": "39.3548%", "width": 82, "height": 33, "rotate": 0 },
+    { "text": "20", "top": "44.4564%", "left": "51.6129%", "width": 81, "height": 32, "rotate": 0 }
+];
+
+const primus40p16mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "11.0279%",
+        "left": "51.0753%",
+        "width": 95,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "11.0279%",
+        "left": "61.7204%",
+        "width": 95,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "11.0279%",
+        "left": "72.6882%",
+        "width": 94,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "16.5419%",
+        "left": "83.2258%",
+        "width": 94,
+        "height": 37,
+        "rotate": 34.930937301110575
+    },
+    {
+        "text": "5",
+        "top": "44.4564%",
+        "left": "89.3548%",
+        "width": 90,
+        "height": 32,
+        "rotate": 90.45835645800044
+    },
+    {
+        "text": "6",
+        "top": "71.337%",
+        "left": "83.0108%",
+        "width": 92.904541015625,
+        "height": 32.37713623046875,
+        "rotate": -34.95466963050332
+    },
+    {
+        "text": "7",
+        "top": "77.1956%",
+        "left": "69.8925%",
+        "width": 91.639892578125,
+        "height": 32.202392578125,
+        "rotate": 0.6950985156569516
+    },
+    {
+        "text": "8",
+        "top": "77.1956%",
+        "left": "53.7634%",
+        "width": 92,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "77.1956%",
+        "left": "36.129%",
+        "width": 93,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "77.8849%",
+        "left": "20.1075%",
+        "width": 92,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "70.3032%",
+        "left": "7.2043%",
+        "width": 88.26806640625,
+        "height": 35.1656494140625,
+        "rotate": 34.755920910299736
+    },
+    {
+        "text": "12",
+        "top": "44.4564%",
+        "left": "0.537634%",
+        "width": 96.6455078125,
+        "height": 35.1678466796875,
+        "rotate": 89.6103216419136
+    },
+    {
+        "text": "13",
+        "top": "16.1973%",
+        "left": "6.45161%",
+        "width": 97.4873046875,
+        "height": 35.19956970214844,
+        "rotate": -34.658354705521106
+    },
+    {
+        "text": "14",
+        "top": "11.0279%",
+        "left": "17.5269%",
+        "width": 93.797119140625,
+        "height": 30.82763671875,
+        "rotate": 0.8746767711213153
+    },
+    {
+        "text": "15",
+        "top": "11.0279%",
+        "left": "28.0645%",
+        "width": 95.3056640625,
+        "height": 29.964874267578125,
+        "rotate": 0.6365936838840298
+    },
+    {
+        "text": "16",
+        "top": "10.6833%",
+        "left": "39.2473%",
+        "width": 94,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "17",
+        "top": "10.6833%",
+        "left": "39.2473%",
+        "width": 94,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "18",
+        "top": "10.6833%",
+        "left": "39.2473%",
+        "width": 94,
+        "height": 30,
+        "rotate": 0
+    }
+];
+
+const primus40p16mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "13.0957%",
+        "left": "50.8602%",
+        "width": 94,
+        "height": 24,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "12.7511%",
+        "left": "61.7204%",
+        "width": 91,
+        "height": 25,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "12.4064%",
+        "left": "72.5806%",
+        "width": 94,
+        "height": 25,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "18.9543%",
+        "left": "82.6882%",
+        "width": 90.928955078125,
+        "height": 26.358154296875,
+        "rotate": 35.65532809790031
+    },
+    {
+        "text": "5",
+        "top": "44.801%",
+        "left": "88.172%",
+        "width": 97.5673828125,
+        "height": 30.220962524414062,
+        "rotate": 89.58780725859768
+    },
+    {
+        "text": "6",
+        "top": "70.9924%",
+        "left": "82.4731%",
+        "width": 92.791015625,
+        "height": 27.382080078125,
+        "rotate": -36.218837265614525
+    },
+    {
+        "text": "7",
+        "top": "78.5741%",
+        "left": "72.3656%",
+        "width": 91.75927734375,
+        "height": 20.5045166015625,
+        "rotate": 0.2367580719071043
+    },
+    {
+        "text": "8",
+        "top": "78.2295%",
+        "left": "61.828%",
+        "width": 89,
+        "height": 21,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "78.5741%",
+        "left": "50.9677%",
+        "width": 94,
+        "height": 21,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "78.9187%",
+        "left": "39.4624%",
+        "width": 91,
+        "height": 22,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "78.5741%",
+        "left": "28.6022%",
+        "width": 93,
+        "height": 23,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "79.2634%",
+        "left": "17.957%",
+        "width": 91,
+        "height": 21,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "70.3032%",
+        "left": "8.17204%",
+        "width": 90.068603515625,
+        "height": 30.22503662109375,
+        "rotate": 35.61085243866875
+    },
+    {
+        "text": "14",
+        "top": "44.1118%",
+        "left": "1.93548%",
+        "width": 90.37445068359375,
+        "height": 34.75164794921875,
+        "rotate": -89.13194855025446
+    },
+    {
+        "text": "15",
+        "top": "18.9543%",
+        "left": "8.17204%",
+        "width": 88.112548828125,
+        "height": 30.567230224609375,
+        "rotate": -37.08249696517166
+    },
+    {
+        "text": "16",
+        "top": "12.0618%",
+        "left": "17.957%",
+        "width": 91.730224609375,
+        "height": 27.233856201171875,
+        "rotate": -0.3333880704687431
+    },
+    {
+        "text": "17",
+        "top": "12.7511%",
+        "left": "28.7097%",
+        "width": 91.553466796875,
+        "height": 23.57330322265625,
+        "rotate": -0.3240676953107311
+    },
+    {
+        "text": "18",
+        "top": "12.4064%",
+        "left": "39.4624%",
+        "width": 89,
+        "height": 24,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "44.801%",
+        "left": "39.7849%",
+        "width": 80,
+        "height": 31,
+        "rotate": 0
+    },
+    {
+        "text": "20",
+        "top": "45.1457%",
+        "left": "51.9355%",
+        "width": 81,
+        "height": 31,
+        "rotate": 0
+    }
+];
+const primus40p14mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "11.0279%",
+        "left": "53.6559%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "11.3726%",
+        "left": "70%",
+        "width": 92,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "17.5758%",
+        "left": "83.5484%",
+        "width": 89.6626,
+        "height": 32.7779,
+        "rotate": 34.439
+    },
+    {
+        "text": "4",
+        "top": "43.4225%",
+        "left": "90%",
+        "width": 90.293212890625,
+        "height": 35.916748046875,
+        "rotate": 89.78374384693512
+    },
+    {
+        "text": "5",
+        "top": "71.337%",
+        "left": "83.0108%",
+        "width": 97.5674,
+        "height": 30.221,
+        "rotate": -32.8299427861065
+    },
+    {
+        "text": "6",
+        "top": "77.5403%",
+        "left": "70%",
+        "width": 93.4736328125,
+        "height": 33.512939453125,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "77.8849%",
+        "left": "53.6559%",
+        "width": 90.95068359375,
+        "height": 31.25006103515625,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "77.8849%",
+        "left": "36.6667%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "77.1956%",
+        "left": "20.1075%",
+        "width": 93,
+        "height": 35,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "70.3032%",
+        "left": "6.98925%",
+        "width": 89.827880859375,
+        "height": 33.8858642578125,
+        "rotate": 32.016505362561496
+    },
+    {
+        "text": "11",
+        "top": "43.7672%",
+        "left": "0.537634%",
+        "width": 90.67822265625,
+        "height": 34.1654052734375,
+        "rotate": 89.5817900585029
+    },
+    {
+        "text": "12",
+        "top": "16.8865%",
+        "left": "6.77419%",
+        "width": 95.1767578125,
+        "height": 31.917236328125,
+        "rotate": -33.4397773147512
+    },
+    {
+        "text": "13",
+        "top": "11.0279%",
+        "left": "20.2151%",
+        "width": 92.0859375,
+        "height": 30.288909912109375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "11.0279%",
+        "left": "36.5591%",
+        "width": 92.791015625,
+        "height": 30.88873291015625,
+        "rotate": -0.7238287929288703
+    },
+    {
+        "text": "15",
+        "top": "44.4564%",
+        "left": "38.9247%",
+        "width": 88.1125,
+        "height": 30.5672,
+        "rotate": -0.09414790976944687
+    },
+    {
+        "text": "16",
+        "top": "44.4564%",
+        "left": "51.9355%",
+        "width": 82.87548828125,
+        "height": 30.751968383789062,
+        "rotate": -0.333388
+    }
+];
+const primus40p14mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "11.0279%",
+        "left": "53.6559%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "11.3726%",
+        "left": "70%",
+        "width": 92,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "17.5758%",
+        "left": "83.5484%",
+        "width": 89.6626,
+        "height": 32.7779,
+        "rotate": 34.439
+    },
+    {
+        "text": "4",
+        "top": "43.4225%",
+        "left": "90%",
+        "width": 90.293212890625,
+        "height": 35.916748046875,
+        "rotate": 89.78374384693512
+    },
+    {
+        "text": "5",
+        "top": "71.337%",
+        "left": "83.0108%",
+        "width": 97.5674,
+        "height": 30.221,
+        "rotate": -32.8299427861065
+    },
+    {
+        "text": "6",
+        "top": "77.5403%",
+        "left": "70%",
+        "width": 93.4736328125,
+        "height": 33.512939453125,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "77.8849%",
+        "left": "53.6559%",
+        "width": 90.95068359375,
+        "height": 31.25006103515625,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "77.8849%",
+        "left": "36.6667%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "77.1956%",
+        "left": "20.1075%",
+        "width": 93,
+        "height": 35,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "70.3032%",
+        "left": "6.98925%",
+        "width": 89.827880859375,
+        "height": 33.8858642578125,
+        "rotate": 32.016505362561496
+    },
+    {
+        "text": "11",
+        "top": "43.7672%",
+        "left": "0.537634%",
+        "width": 90.67822265625,
+        "height": 34.1654052734375,
+        "rotate": 89.5817900585029
+    },
+    {
+        "text": "12",
+        "top": "16.8865%",
+        "left": "6.77419%",
+        "width": 95.1767578125,
+        "height": 31.917236328125,
+        "rotate": -33.4397773147512
+    },
+    {
+        "text": "13",
+        "top": "11.0279%",
+        "left": "20.2151%",
+        "width": 92.0859375,
+        "height": 30.288909912109375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "11.0279%",
+        "left": "36.5591%",
+        "width": 92.791015625,
+        "height": 30.88873291015625,
+        "rotate": -0.7238287929288703
+    },
+    {
+        "text": "15",
+        "top": "44.4564%",
+        "left": "38.9247%",
+        "width": 88.1125,
+        "height": 30.5672,
+        "rotate": -0.09414790976944687
+    },
+    {
+        "text": "16",
+        "top": "44.4564%",
+        "left": "51.9355%",
+        "width": 82.87548828125,
+        "height": 30.751968383789062,
+        "rotate": -0.333388
+    }
+];
+const primus40p12mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "11.0279%",
+        "left": "53.5484%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "12.0618%",
+        "left": "69.6774%",
+        "width": 92,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "25.1575%",
+        "left": "85.1613%",
+        "width": 98.471923828125,
+        "height": 32.725921630859375,
+        "rotate": 34.439
+    },
+    {
+        "text": "4",
+        "top": "64.0999%",
+        "left": "85.0538%",
+        "width": 96.85595703125,
+        "height": 31.43310546875,
+        "rotate": -34.18968139622734
+    },
+    {
+        "text": "5",
+        "top": "78.2295%",
+        "left": "69.6774%",
+        "width": 99.27197265625,
+        "height": 29.7598876953125,
+        "rotate": 0.3674438462476388
+    },
+    {
+        "text": "6",
+        "top": "77.8849%",
+        "left": "53.4409%",
+        "width": 94.9296875,
+        "height": 29.9625244140625,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "77.5403%",
+        "left": "36.6667%",
+        "width": 90.95068359375,
+        "height": 31.25006103515625,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "77.5403%",
+        "left": "20.5376%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "63.0661%",
+        "left": "4.94624%",
+        "width": 93,
+        "height": 35,
+        "rotate": 38.516969997995645
+    },
+    {
+        "text": "10",
+        "top": "25.8468%",
+        "left": "4.94624%",
+        "width": 94.85693359375,
+        "height": 31.58184814453125,
+        "rotate": -37.53692401335465
+    },
+    {
+        "text": "11",
+        "top": "11.7172%",
+        "left": "20.1075%",
+        "width": 94.958984375,
+        "height": 30.9261474609375,
+        "rotate": 0.4872947602160451
+    },
+    {
+        "text": "12",
+        "top": "12.0618%",
+        "left": "36.4516%",
+        "width": 95.1767578125,
+        "height": 31.917236328125,
+        "rotate": -0.685761081706346
+    },
+    {
+        "text": "13",
+        "top": "45.1457%",
+        "left": "39.4624%",
+        "width": 83.1015625,
+        "height": 30.35296630859375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "44.801%",
+        "left": "51.9355%",
+        "width": 78.1639404296875,
+        "height": 31.04461669921875,
+        "rotate": -0.7238287929288703
+    }
+];
+const primus40p12mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "11.0279%",
+        "left": "53.5484%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "12.0618%",
+        "left": "69.6774%",
+        "width": 92,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "25.1575%",
+        "left": "85.1613%",
+        "width": 98.471923828125,
+        "height": 32.725921630859375,
+        "rotate": 34.439
+    },
+    {
+        "text": "4",
+        "top": "64.0999%",
+        "left": "85.0538%",
+        "width": 96.85595703125,
+        "height": 31.43310546875,
+        "rotate": -34.18968139622734
+    },
+    {
+        "text": "5",
+        "top": "78.2295%",
+        "left": "69.6774%",
+        "width": 99.27197265625,
+        "height": 29.7598876953125,
+        "rotate": 0.3674438462476388
+    },
+    {
+        "text": "6",
+        "top": "77.8849%",
+        "left": "53.4409%",
+        "width": 94.9296875,
+        "height": 29.9625244140625,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "77.5403%",
+        "left": "36.6667%",
+        "width": 90.95068359375,
+        "height": 31.25006103515625,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "77.5403%",
+        "left": "20.5376%",
+        "width": 91,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "63.0661%",
+        "left": "4.94624%",
+        "width": 93,
+        "height": 35,
+        "rotate": 38.516969997995645
+    },
+    {
+        "text": "10",
+        "top": "25.8468%",
+        "left": "4.94624%",
+        "width": 94.85693359375,
+        "height": 31.58184814453125,
+        "rotate": -37.53692401335465
+    },
+    {
+        "text": "11",
+        "top": "11.7172%",
+        "left": "20.1075%",
+        "width": 94.958984375,
+        "height": 30.9261474609375,
+        "rotate": 0.4872947602160451
+    },
+    {
+        "text": "12",
+        "top": "12.0618%",
+        "left": "36.4516%",
+        "width": 95.1767578125,
+        "height": 31.917236328125,
+        "rotate": -0.685761081706346
+    },
+    {
+        "text": "13",
+        "top": "45.1457%",
+        "left": "39.4624%",
+        "width": 83.1015625,
+        "height": 30.35296630859375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "44.801%",
+        "left": "51.9355%",
+        "width": 78.1639404296875,
+        "height": 31.04461669921875,
+        "rotate": -0.7238287929288703
+    }
+];
+
+// ================================================================================= //
+// ===================== LISTA PRINCIPAL DE LAYOUTS (CORRIGIDA) ==================== //
+// ================================================================================= //
+
+const layouts = [
+    { id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
+    { id: 's_slim_bicolor_example', name: 'S-SLIM Bicolor Exemplo', image: 'simulação.png', category: 'Padrão', blocks: s_slim_bicolor_example },
+    
+    // 40 Polegadas
+    { id: 'primus40p12mCol', name: 'Primus 40p 12m Col', image: 'ImagensSirene40p/primus40p12mCol.png', category: '40 Polegadas', blocks: primus40p12mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus40p12mRef', name: 'Primus 40p 12m Ref', image: 'ImagensSirene40p/primus40p12mRef.png', category: '40 Polegadas', blocks: primus40p12mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus40p14mCol', name: 'Primus 40p 14m Col', image: 'ImagensSirene40p/primus40p14mCol.png', category: '40 Polegadas', blocks: primus40p14mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus40p14mRef', name: 'Primus 40p 14m Ref', image: 'ImagensSirene40p/primus40p14mRef.png', category: '40 Polegadas', blocks: primus40p14mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus40p16mCol', name: 'Primus 40p 16m Col', image: 'ImagensSirene40p/primus40p16mCol.png', category: '40 Polegadas', blocks: primus40p16mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus40p16mRef', name: 'Primus 40p 16m Ref', image: 'ImagensSirene40p/primus40p16mRef.png', category: '40 Polegadas', blocks: primus40p16mRef_BlockLayout},
+    { id: 'primus40p18mCol', name: 'Primus 40p 18m Col', image: 'ImagensSirene40p/primus40p18mCol.png', category: '40 Polegadas', blocks: primus40p18mCol_BlockLayout },
+    { id: 'primus40p18mRef', name: 'Primus 40p 18m Ref', image: 'ImagensSirene40p/primus40p18mRef.png', category: '40 Polegadas', blocks: primus40p18mRef_BlockLayout },
+    { id: 'primus40p22mRef', name: 'Primus 40p 22m Ref', image: 'ImagensSirene40p/primus40p22mRef.png', category: '40 Polegadas', blocks: primus40p22mRef_BlockLayout },
+
+    // 47 Polegadas
+    { id: 'primus47p11mCol', name: 'Primus 47p 11m Col', image: 'ImagensRefletor47p/colimador/primus47p11mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p11mRef', name: 'Primus 47p 11m Ref', image: 'ImagensRefletor47p/refletor/primus47p11mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p13mRef', name: 'Primus 47p 13m Ref', image: 'ImagensRefletor47p/refletor/primus47p13mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p14mCol', name: 'Primus 47p 14m Col', image: 'ImagensRefletor47p/colimador/primus47p14mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p14mRef', name: 'Primus 47p 14m Ref', image: 'ImagensRefletor47p/refletor/primus47p14mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p16mCol', name: 'Primus 47p 16m Col', image: 'ImagensRefletor47p/colimador/primus47p16mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p16mRef', name: 'Primus 47p 16m Ref', image: 'ImagensRefletor47p/refletor/primus47p16mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p18mRef', name: 'Primus 47p 18m Ref', image: 'ImagensRefletor47p/refletor/primus47p18mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p20mCol', name: 'Primus 47p 20m Col', image: 'ImagensRefletor47p/colimador/primus47p20mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p20mRef', name: 'Primus 47p 20m Ref', image: 'ImagensRefletor47p/refletor/primus47p20mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p22mRef', name: 'Primus 47p 22m Ref', image: 'ImagensRefletor47p/refletor/primus47p22mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    { id: 'primus47p24mRef', name: 'Primus 47p 24m Ref', image: 'ImagensRefletor47p/refletor/primus47p24mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
+    
+    // 54 Polegadas
+    { id: 'primus54p10mCol', name: 'Primus 54p 10m Col', image: 'ImagensSirene54P/colimador/primus54p10mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p12mRef', name: 'Primus 54p 12m Ref', image: 'ImagensSirene54P/refletor/primus54p12mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p14mCol', name: 'Primus 54p 14m Col', image: 'ImagensSirene54P/colimador/primus54p14mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p14mRef', name: 'Primus 54p 14m Ref', image: 'ImagensSirene54P/refletor/primus54p14mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p16mCol', name: 'Primus 54p 16m Col', image: 'ImagensSirene54P/colimador/primus54p16mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p18mRef', name: 'Primus 54p 18m Ref', image: 'ImagensSirene54P/refletor/primus54p18mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p20mRef', name: 'Primus 54p 20m Ref', image: 'ImagensSirene54P/refletor/primus54p20mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p22mCol', name: 'Primus 54p 22m Col', image: 'ImagensSirene54P/colimador/primus54p22mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p22mRef', name: 'Primus 54p 22m Ref', image: 'ImagensSirene54P/refletor/primus54p22mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus54p26mRef', name: 'Primus 54p 26m Ref', image: 'ImagensSirene54P/refletor/primus54p26mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    
+    // 61 Polegadas
+    { id: 'primus61p13mCol', name: 'Primus 61p 13m Col', image: 'ImagensSirene61P/colimador/primus61p13mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p13mRef', name: 'Primus 61p 13m Ref', image: 'ImagensSirene61P/refletor/primus61p13mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p14mCol', name: 'Primus 61p 14m Col', image: 'ImagensSirene61P/colimador/primus61p14mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p15mRef', name: 'Primus 61p 15m Ref', image: 'ImagensSirene61P/refletor/primus61p15mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p18mCol', name: 'Primus 61p 18m Col', image: 'ImagensSirene61P/colimador/primus61p18mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p18mRef', name: 'Primus 61p 18m Ref', image: 'ImagensSirene61P/refletor/primus61p18mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p20mRef', name: 'Primus 61p 20m Ref', image: 'ImagensSirene61P/refletor/primus61p20mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p22mRef', name: 'Primus 61p 22m Ref', image: 'ImagensSirene61P/refletor/primus61p22mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p24mCol', name: 'Primus 61p 24m Col', image: 'ImagensSirene61P/colimador/primus61p24mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p24mRef', name: 'Primus 61p 24m Ref', image: 'ImagensSirene61P/refletor/primus61p24mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    { id: 'primus61p28mRef', name: 'Primus 61p 28m Ref', image: 'ImagensSirene61P/refletor/primus61p28mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+    
+    // Venus
+    { id: 'venus11m', name: 'Venus 11m', image: 'VenusSirene/venus11m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus14m', name: 'Venus 14m', image: 'VenusSirene/venus14m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus15m', name: 'Venus 15m', image: 'VenusSirene/venus15m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus16m', name: 'Venus 16m', image: 'VenusSirene/venus16m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus19m', name: 'Venus 19m', image: 'VenusSirene/venus19m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus20m', name: 'Venus 20m', image: 'VenusSirene/venus20m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus22m', name: 'Venus 22m', image: 'VenusSirene/venus22m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+    { id: 'venus24m', name: 'Venus 24m', image: 'VenusSirene/venus24m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+];
 
 
         const baseSheetStructure = Array.from({ length: 200 }, (_, i) => ({
@@ -661,13 +1717,22 @@
         // ================================================================================= //
         
         // === FUNÇÕES DE INICIALIZAÇÃO E LAYOUT ===
-        function initializeApp() {
+        async function initializeApp() {
             assignDomElements();
             initializeDataStructure();
             createSheetSelectorTabs();
             createTableHeader();
-            populateLayoutPanel();
-            switchLayout(layouts[0].id); 
+            
+            const allLayouts = await populateLayoutPanel(); 
+            const lastSavedId = localStorage.getItem('lastSavedLayoutId');
+            
+            if (lastSavedId && allLayouts.some(l => l.id === lastSavedId)) {
+                switchLayout(lastSavedId, allLayouts);
+                localStorage.removeItem('lastSavedLayoutId');
+            } else {
+                switchLayout(layouts[0].id, allLayouts); 
+            }
+            
             renderTable(allMacroData[activeSheet]);
             updateActiveSheetUI();
             initializeEventListeners();
@@ -706,35 +1771,39 @@
             jumpTabelaStatusContainer = document.getElementById('jumptabela-active-list');
             specialFunctionsStatusContainer = document.getElementById('special-functions-active-list');
             simulationArea = document.getElementById('simulation-area');
+            editLayoutBtn = document.getElementById('edit-layout-btn');
             saveLayoutBtn = document.getElementById('save-layout-btn');
         }
 
         async function populateLayoutPanel() {
             layoutPanelBody.innerHTML = 'Carregando layouts...';
-            let allLayouts = [...layouts]; // Começa com a lista de layouts padrão
+            
+            let baseLayouts = JSON.parse(JSON.stringify(layouts)); 
 
             try {
-                const response = await fetch('api/carregar_layouts.php');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const customLayouts = await response.json();
+                const response = await fetch('carregar_layouts.php'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const savedLayouts = await response.json();
 
-                // Adiciona os layouts do banco de dados à lista
-                customLayouts.forEach(custom => {
-                    allLayouts.push({
-                        id: `custom-${custom.layout_id}`, // ID único para evitar conflitos
-                        name: custom.nome_layout,
-                        image: custom.imagem_base,
-                        category: 'Layouts Personalizados',
-                        blocks: custom.dados_layout 
-                    });
+                const savedLayoutsMap = new Map();
+                savedLayouts.forEach(saved => {
+                    savedLayoutsMap.set(saved.layout_id, saved);
                 });
+
+                baseLayouts.forEach(layout => {
+                    if (savedLayoutsMap.has(layout.id)) {
+                        const savedData = savedLayoutsMap.get(layout.id);
+                        layout.blocks = savedData.dados_layout;
+                    }
+                });
+                
             } catch (error) {
-                console.error("Erro ao carregar layouts personalizados:", error);
+                console.error("Não foi possível carregar personalizações:", error);
             }
             
-            renderLayoutGrid(allLayouts);
+            renderLayoutGrid(baseLayouts);
+            return baseLayouts;
         }
 
         function renderLayoutGrid(layoutsToRender) {
@@ -745,7 +1814,7 @@
                 return groups;
             }, {});
             
-            const categoryOrder = ['Padrão', 'Layouts Personalizados', '40 Polegadas', '47 Polegadas', '54 Polegadas', '61 Polegadas', 'Venus', 'Outros Modelos'];
+            const categoryOrder = ['Padrão', '40 Polegadas', '47 Polegadas', '54 Polegadas', '61 Polegadas', 'Venus', 'Outros Modelos'];
             const gridContainer = document.createElement('div');
             gridContainer.className = 'layout-panel-grid';
             
@@ -773,7 +1842,14 @@
             layoutPanelBody.appendChild(gridContainer);
         }
 
-        function switchLayout(layoutId, allLayoutsList = layouts) {
+        function switchLayout(layoutId, allLayoutsList) {
+            if (!allLayoutsList) {
+                console.error("A lista de layouts não foi fornecida para switchLayout.");
+                // Fallback para recarregar a lista, embora isso não deva acontecer com a nova lógica
+                populateLayoutPanel().then(layouts => switchLayout(layoutId, layouts));
+                return;
+            }
+
             const selectedLayout = allLayoutsList.find(l => l.id === layoutId);
             if (!selectedLayout) {
                 console.error("Layout não encontrado:", layoutId);
@@ -1033,7 +2109,7 @@
                         const polSheets = sheetNames.filter(name => name.toUpperCase().includes("POL"));
 
                         if (polSheets.length > 0) {
-                            targetSheetName = polSheets[0]; // Usa a primeira por padrão
+                            targetSheetName = polSheets[0];
                             const filenameMatch = file.name.match(/(\d{2})/);
                             if (filenameMatch) {
                                 const identifier = filenameMatch[1];
@@ -1045,8 +2121,8 @@
                             if (!targetSheetName) return reject(new Error("Nenhuma planilha encontrada."));
                         }
                         
-                        console.log(`Usando a planilha: '${targetSheetName}'`);
                         const worksheet = workbook.Sheets[targetSheetName];
+                        if (!worksheet) return reject(new Error(`A planilha '${targetSheetName}' não foi encontrada no arquivo.`));
 
                         const sheetData = [];
                         for (let r = START_ROW; r <= END_ROW; r++) {
@@ -1174,42 +2250,62 @@
             });
         }
         
-        async function saveLayoutToDatabase() {
-            if (!currentLayout) {
-                alert("Nenhum layout base selecionado para salvar.");
-                return;
-            }
-
-            const layoutName = prompt("Digite um nome para este layout personalizado:", currentLayout.name || "Novo Layout");
-            if (!layoutName) {
-                alert("Salvamento cancelado.");
+        async function saveOrUpdateLayout() {
+            if (!currentLayout || !activeBlockLayout) {
+                alert("Nenhum layout ativo para salvar.");
                 return;
             }
 
             const payload = {
-                nome: layoutName,
+                layout_id: currentLayout.id,
+                nome: currentLayout.name,
                 imagem: currentLayout.image,
-                layout: activeBlockLayout // A variável global com as posições editadas
+                layout_data: activeBlockLayout
             };
 
             try {
-                const response = await fetch('api/salvar_layout.php', {
+                const response = await fetch('salvar_layout.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro do servidor: ${response.status}. Detalhes: ${errorText}`);
+                }
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    alert('Sucesso! O layout foi salvo no banco de dados.');
-                    populateLayoutPanel(); // Atualiza a lista de layouts para incluir o novo
+                    alert(`Sucesso! O layout foi salvo. A página será recarregada para aplicar as mudanças.`);
+                    localStorage.setItem('lastSavedLayoutId', payload.layout_id);
+                    location.reload();
                 } else {
-                    throw new Error(result.error || 'Erro desconhecido no servidor.');
+                    throw new Error(result.error || 'Erro desconhecido retornado pelo servidor.');
                 }
             } catch (error) {
                 console.error('ERRO AO SALVAR LAYOUT:', error);
-                alert(`FALHA! Ocorreu um erro ao salvar o layout: ${error.message}`);
+                alert(`FALHA! Ocorreu um erro: ${error.message}`);
             }
+        }
+
+        function exportLayoutCoordinates() {
+            if (!currentLayout || !activeBlockLayout || activeBlockLayout.length === 0) {
+                alert("Não há layout ativo para exportar!");
+                return;
+            }
+
+            const layoutName = `${currentLayout.id}_BlockLayout`;
+            const layoutDataString = JSON.stringify(activeBlockLayout, null, 4);
+            const codeToCopy = `const ${layoutName} = ${layoutDataString};`;
+
+            navigator.clipboard.writeText(codeToCopy).then(() => {
+                alert(`Coordenadas do layout "${currentLayout.name}" copiadas para a área de transferência!`);
+            }).catch(err => {
+                console.error('Falha ao copiar: ', err);
+                alert('Não foi possível copiar o código. Verifique o console para mais detalhes.');
+            });
         }
         
         function initializeEventListeners() {
@@ -1232,8 +2328,12 @@
             if (gravarBtn) gravarBtn.addEventListener('click', saveSimulationToDatabase);
             if (restaurarBtn) restaurarBtn.addEventListener('click', () => { alert("Lembrar de ativar essa função"); });
             if (executeMacroBtn) executeMacroBtn.addEventListener('click', executeMacro);
-            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', saveLayoutToDatabase);
             
+            // Listeners dos botões de layout
+            if (saveLayoutBtn) saveLayoutBtn.addEventListener('click', saveOrUpdateLayout);
+            const exportLayoutBtn = document.getElementById('export-layout-btn');
+            if(exportLayoutBtn) exportLayoutBtn.addEventListener('click', exportLayoutCoordinates);
+
             const importBtn = document.getElementById('import-txt-btn');
             if (importBtn) {
                 const fileInput = document.createElement('input');
@@ -1247,35 +2347,27 @@
             
             const extractExcelBtn = document.getElementById('extract-excel-layout-btn');
             const excelLayoutInput = document.getElementById('excel-layout-input');
-
             if (extractExcelBtn && excelLayoutInput) {
                 extractExcelBtn.addEventListener('click', () => {
                     excelLayoutInput.click(); 
                 });
-
                 excelLayoutInput.addEventListener('change', async (event) => {
                     const file = event.target.files[0];
                     if (!file) return;
-
                     extractExcelBtn.disabled = true;
                     extractExcelBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processando...';
-                    
                     try {
                         const { layout, newBlockLayout } = await processExcelLayout(file);
-                        
                         if (layout.length > 0) {
                             activeBlockLayout = newBlockLayout;
                             initializeBlocks(activeBlockLayout);
-
                             columnColors = {}; 
                             const uniqueColorMapping = {};
-                            
                             layout.forEach(item => {
                                 if (!uniqueColorMapping[item.module]) {
                                     uniqueColorMapping[item.module] = item.color;
                                 }
                             });
-
                             for (const moduleNumber in uniqueColorMapping) {
                                 const color = uniqueColorMapping[moduleNumber];
                                 const colIndex = parseInt(moduleNumber, 10) - 1;
@@ -1285,7 +2377,6 @@
                             }
                             alert('Layout de cores e visual extraídos e aplicados com sucesso!');
                         }
-
                     } catch (error) {
                         console.error("Erro ao extrair layout do Excel:", error);
                         alert(`Falha ao processar o arquivo Excel. Detalhes: ${error.message}`);
@@ -1295,29 +2386,41 @@
                         excelLayoutInput.value = '';
                     }
                 });
-            } else {
-                console.error("ERRO: Botão de extração de Excel ou input de arquivo não encontrado!");
             }
 
             const exportGifBtn = document.getElementById('export-gif-btn');
             if(exportGifBtn) { exportGifBtn.addEventListener('click', exportAllSimulationsAsGifs); }
             
-            const editLayoutBtn = document.getElementById('edit-layout-btn');
-            if (editLayoutBtn && simulationArea) {
+            if (editLayoutBtn && simulationArea && saveLayoutBtn) {
                 editLayoutBtn.addEventListener('click', () => {
                     isEditMode = !isEditMode;
                     simulationArea.classList.toggle('edit-mode', isEditMode);
+                    
+                    const exportLayoutBtn = document.getElementById('export-layout-btn'); // Pega o botão de exportar
+
                     if (isEditMode) {
                         editLayoutBtn.innerHTML = '<i class="fa fa-check"></i> Concluir Edição';
                         editLayoutBtn.style.backgroundColor = '#2ecc71';
-                        if (saveLayoutBtn) saveLayoutBtn.style.display = 'inline-block';
+                        saveLayoutBtn.style.display = 'inline-block';
+                        exportLayoutBtn.style.display = 'inline-block'; // <-- ADICIONADO PARA MOSTRAR
                         stopSimulation(); 
                     } else {
                         editLayoutBtn.innerHTML = '<i class="fa fa-pencil"></i> Editar Layout';
                         editLayoutBtn.style.backgroundColor = '#3498db';
-                        if (saveLayoutBtn) saveLayoutBtn.style.display = 'none';
+                        saveLayoutBtn.style.display = 'none';
+                        exportLayoutBtn.style.display = 'none'; // <-- ADICIONADO PARA ESCONDER
                         if (currentLayout) {
-                            currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
+                             const blockElements = blocksContainer.querySelectorAll('.block-container');
+                             blockElements.forEach((blockEl, index) => {
+                                 if (activeBlockLayout[index]) {
+                                     activeBlockLayout[index].top = blockEl.style.top;
+                                     activeBlockLayout[index].left = blockEl.style.left;
+                                     activeBlockLayout[index].width = parseFloat(blockEl.style.width);
+                                     activeBlockLayout[index].height = parseFloat(blockEl.style.height);
+                                     const rotation = blockEl.style.transform.match(/rotate\((.+)deg\)/);
+                                     activeBlockLayout[index].rotate = rotation ? parseFloat(rotation[1]) : 0;
+                                 }
+                             });
                         }
                         if(activeBlock) { activeBlock.classList.remove('selected'); activeBlock = null; }
                     }
@@ -1325,7 +2428,7 @@
             }
 
             const hideContextMenu = () => {
-                colorContextMenu.style.display = 'none';
+                if (colorContextMenu) colorContextMenu.style.display = 'none';
                 window.removeEventListener('click', hideContextMenu);
             };
 
@@ -1333,15 +2436,15 @@
                 const headerCell = e.target.closest('th.column-header[data-col-index]');
                 if (headerCell) {
                     e.preventDefault();
-                    
-                    colorContextMenu.style.display = 'block';
-                    colorContextMenu.style.top = `${e.clientY}px`;
-                    colorContextMenu.style.left = `${e.clientX}px`;
-                    colorContextMenu.dataset.editingCol = headerCell.dataset.colIndex;
-
-                    setTimeout(() => {
-                        window.addEventListener('click', hideContextMenu, { once: true });
-                    }, 0);
+                    if (colorContextMenu) {
+                        colorContextMenu.style.display = 'block';
+                        colorContextMenu.style.top = `${e.clientY}px`;
+                        colorContextMenu.style.left = `${e.clientX}px`;
+                        colorContextMenu.dataset.editingCol = headerCell.dataset.colIndex;
+                        setTimeout(() => {
+                            window.addEventListener('click', hideContextMenu, { once: true });
+                        }, 0);
+                    }
                 }
             };
             
@@ -1361,7 +2464,6 @@
             if (blocksContainer) blocksContainer.addEventListener('mousedown', (e) => {
                 if (!isEditMode) return;
                 const target = e.target;
-                
                 if (target.isContentEditable) {
                     return;
                 }
@@ -1394,38 +2496,40 @@
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
             });
-            function onMouseMove(e) {
-                if (!action || !activeBlock) return;
-                const blockData = activeBlockLayout[activeBlock.dataset.index];
-                const containerRect = simulationArea.getBoundingClientRect();
-                if (action.type === 'move') {
-                    const dx = e.clientX - action.initialMouseX;
-                    const dy = e.clientY - action.initialMouseY;
-                    activeBlock.style.left = `${((action.initialLeft + dx) / containerRect.width) * 100}%`;
-                    activeBlock.style.top = `${((action.initialTop + dy) / containerRect.height) * 100}%`;
-                    blockData.left = activeBlock.style.left;
-                    blockData.top = activeBlock.style.top;
-                } 
-                else if (action.type === 'resize') {
-                    const dx = e.clientX - action.initialMouseX;
-                    const dy = e.clientY - action.initialMouseY;
-                    let newWidth = action.initialWidth + dx;
-                    let newHeight = action.initialHeight + dy;
-                    if (newWidth > 20) { activeBlock.style.width = `${newWidth}px`; blockData.width = newWidth; }
-                    if (newHeight > 10) { activeBlock.style.height = `${newHeight}px`; blockData.height = newHeight; }
-                }
-                else if (action.type === 'rotate') {
-                    const angleRad = Math.atan2(e.clientY - action.centerY, e.clientX - action.centerX);
-                    let angleDeg = angleRad * (180 / Math.PI) + 90;
-                    activeBlock.style.transform = `rotate(${angleDeg}deg)`;
-                    blockData.rotate = angleDeg;
-                }
+        }
+        
+        function onMouseMove(e) {
+            if (!action || !activeBlock) return;
+            const blockData = activeBlockLayout[activeBlock.dataset.index];
+            const containerRect = simulationArea.getBoundingClientRect();
+            if (action.type === 'move') {
+                const dx = e.clientX - action.initialMouseX;
+                const dy = e.clientY - action.initialMouseY;
+                activeBlock.style.left = `${((action.initialLeft + dx) / containerRect.width) * 100}%`;
+                activeBlock.style.top = `${((action.initialTop + dy) / containerRect.height) * 100}%`;
+                blockData.left = activeBlock.style.left;
+                blockData.top = activeBlock.style.top;
+            } 
+            else if (action.type === 'resize') {
+                const dx = e.clientX - action.initialMouseX;
+                const dy = e.clientY - action.initialMouseY;
+                let newWidth = action.initialWidth + dx;
+                let newHeight = action.initialHeight + dy;
+                if (newWidth > 20) { activeBlock.style.width = `${newWidth}px`; blockData.width = newWidth; }
+                if (newHeight > 10) { activeBlock.style.height = `${newHeight}px`; blockData.height = newHeight; }
             }
-            function onMouseUp() {
-                action = null;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
+            else if (action.type === 'rotate') {
+                const angleRad = Math.atan2(e.clientY - action.centerY, e.clientX - action.centerX);
+                let angleDeg = angleRad * (180 / Math.PI) + 90;
+                activeBlock.style.transform = `rotate(${angleDeg}deg)`;
+                blockData.rotate = angleDeg;
             }
+        }
+        
+        function onMouseUp() {
+            action = null;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
         }
         
         function clearSelection() {
