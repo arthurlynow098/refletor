@@ -12,6 +12,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        .column-header { background-color: #d9e1f2; font-weight: bold; font-size: 9px; color: #333; cursor: pointer; user-select: none; }
+/* ---> ADICIONE ESTA CLASSE ABAIXO <--- */
+.column-header.selected-col { background-color: #b4c6e7; outline: 1px solid #4a89dc; }
         /* Estilos Globais e Layout Principal */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background-color: #f8f9fa; height: 100vh; overflow: hidden; color: #333; }
@@ -546,6 +549,9 @@
         let backgroundImageDataURL = null;
         let currentLayout;
         let activeBlockLayout; 
+        let allAvailableLayouts = []; // Variável global para a lista de layouts
+        let selectedColumns = new Set();
+        let lastSelectedColumn = -1;
         
         // ================================================================================= //
         // ======================= MAPA DE CÓDIGOS DE ARQUIVO PARA LAYOUT ====================== //
@@ -571,36 +577,36 @@
         };
         
         // ================================================================================= //
-// =================== INÍCIO DOS BLOCOS DE LAYOUT PERSONALIZADOS ================== //
-// ================================================================================= //
+		// =================== INÍCIO DOS BLOCOS DE LAYOUT PERSONALIZADOS ================== //
+		// ================================================================================= //
 
-const s_slim_bicolor_example = [
-    { text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
-    { text: ['3', '4'], top: '45%', left: '40%', width: 77, height: 30, rotate: 0 },
-    { text: '20', top: '14.6%', left: '10%', width: 77, height: 30, rotate: 0 },
-    { text: '20', top: '14.6%', left: '80%', width: 77, height: 30, rotate: 0 }
-];
+		const s_slim_bicolor_example = [
+			{ text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
+			{ text: ['3', '4'], top: '45%', left: '40%', width: 77, height: 30, rotate: 0 },
+			{ text: '20', top: '14.6%', left: '10%', width: 77, height: 30, rotate: 0 },
+			{ text: '20', top: '14.6%', left: '80%', width: 77, height: 30, rotate: 0 }
+		];
 
-const s_slim_24_default_BlockLayout = [
-    { text: '1', top: '14.6%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '2', top: '14.6%', left: '58.5%', width: 77, height: 30, rotate: 0 },
-    { text: '3', top: '14.6%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '4', top: '14.6%', left: '77%', width: 77, height: 30, rotate: 0 },
-    { text: '5', top: '20%', left: '86%', width: 79, height: 31, rotate: 35 }, { text: '6', top: '44.9%', left: '91%', width: 82, height: 31, rotate: 90 },
-    { text: '7', top: '70%', left: '86%', width: 79, height: 31, rotate:-35 }, { text: '8', top: '76.4%', left: '77%', width: 77, height: 30, rotate: 0 },
-    { text: '9', top: '76.4%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '10', top: '76.4%', left: '58.4%', width: 77, height: 30, rotate: 0 },
-    { text: '11', top: '76.5%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '12', top: '76.5%', left: '33.3%', width: 77, height: 30, rotate: 0 },
-    { text: '13', top: '76.5%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '14', top: '76.5%', left: '14.8%', width: 77, height: 30, rotate: 0 },
-    { text: '15', top: '70%', left: '5.6%', width: 79, height: 30, rotate: 35 }, { text: '16', top: '45%', left: '0.5%', width: 80, height: 30, rotate: 90 },
-    { text: '17', top: '20%', left: '5.5%', width: 79, height: 30, rotate: -35 }, { text: '18', top: '14.6%', left: '14.7%', width: 77, height: 30, rotate: 0 },
-    { text: '19', top: '14.6%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '20', top: '14.6%', left: '33.3%', width: 77, height: 30, rotate: 0 },
-    { text: '21', top: '45%', left: '33.3%', width: 77, height: 30, rotate: 0 }, { text: '22', top: '45%', left: '45.9%', width: 77, height: 30, rotate: 0 },
-    { text: '23', top: '45%', left: '58.5%', width: 77, height: 30, rotate: 0 }, { text: '24', top: '45%', left: '77%', width: 77, height: 30, rotate: 0 }
-];
+		const s_slim_24_default_BlockLayout = [
+			{ text: '1', top: '14.6%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '2', top: '14.6%', left: '58.5%', width: 77, height: 30, rotate: 0 },
+			{ text: '3', top: '14.6%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '4', top: '14.6%', left: '77%', width: 77, height: 30, rotate: 0 },
+			{ text: '5', top: '20%', left: '86%', width: 79, height: 31, rotate: 35 }, { text: '6', top: '44.9%', left: '91%', width: 82, height: 31, rotate: 90 },
+			{ text: '7', top: '70%', left: '86%', width: 79, height: 31, rotate:-35 }, { text: '8', top: '76.4%', left: '77%', width: 77, height: 30, rotate: 0 },
+			{ text: '9', top: '76.4%', left: '67.7%', width: 77, height: 30, rotate: 0 }, { text: '10', top: '76.4%', left: '58.4%', width: 77, height: 30, rotate: 0 },
+			{ text: '11', top: '76.5%', left: '45.9%', width: 77, height: 30, rotate: 0 }, { text: '12', top: '76.5%', left: '33.3%', width: 77, height: 30, rotate: 0 },
+			{ text: '13', top: '76.5%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '14', top: '76.5%', left: '14.8%', width: 77, height: 30, rotate: 0 },
+			{ text: '15', top: '70%', left: '5.6%', width: 79, height: 30, rotate: 35 }, { text: '16', top: '45%', left: '0.5%', width: 80, height: 30, rotate: 90 },
+			{ text: '17', top: '20%', left: '5.5%', width: 79, height: 30, rotate: -35 }, { text: '18', top: '14.6%', left: '14.7%', width: 77, height: 30, rotate: 0 },
+			{ text: '19', top: '14.6%', left: '24.1%', width: 77, height: 30, rotate: 0 }, { text: '20', top: '14.6%', left: '33.3%', width: 77, height: 30, rotate: 0 },
+			{ text: '21', top: '45%', left: '33.3%', width: 77, height: 30, rotate: 0 }, { text: '22', top: '45%', left: '45.9%', width: 77, height: 30, rotate: 0 },
+			{ text: '23', top: '45%', left: '58.5%', width: 77, height: 30, rotate: 0 }, { text: '24', top: '45%', left: '77%', width: 77, height: 30, rotate: 0 }
+		];
 
-const primus40p22mRef_BlockLayout = [
+	const primus40p22mRef_BlockLayout = [
     {
         "text": "1",
         "top": "7.92634%",
-        "left": "51.2903%",
+        "left": "51.1828%",
         "width": 90,
         "height": 32,
         "rotate": 0
@@ -615,8 +621,2354 @@ const primus40p22mRef_BlockLayout = [
     },
     {
         "text": "3",
-        "top": "35.1516%",
-        "left": "69.6774%",
+        "top": "7.58171%",
+        "left": "72.9032%",
+        "width": 91,
+        "height": 34,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "9.99408%",
+        "left": "83.4409%",
+        "width": 59.7031,
+        "height": 39.8113,
+        "rotate": 28.2374
+    },
+    {
+        "text": "5",
+        "top": "19.9882%",
+        "left": "89.4624%",
+        "width": 60.8374,
+        "height": 43.133,
+        "rotate": 41.6274
+    },
+    {
+        "text": "6",
+        "top": "44.801%",
+        "left": "91.0753%",
+        "width": 68,
+        "height": 35,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "66.5123%",
+        "left": "89.4624%",
+        "width": 58.9092,
+        "height": 31.6057,
+        "rotate": -46.4321
+    },
+    {
+        "text": "8",
+        "top": "76.1618%",
+        "left": "82.7957%",
+        "width": 66.2874,
+        "height": 38.2682,
+        "rotate": -28.1757
+    },
+    {
+        "text": "9",
+        "top": "80.2972%",
+        "left": "73.0108%",
+        "width": 91,
+        "height": 35,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "80.2972%",
+        "left": "62.043%",
+        "width": 92,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "79.9526%",
+        "left": "51.0753%",
+        "width": 91,
+        "height": 35,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "80.2972%",
+        "left": "39.0323%",
+        "width": 91,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "80.2972%",
+        "left": "28.0645%",
+        "width": 91,
+        "height": 34,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "117.172%",
+        "left": "34.6237%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "15",
+        "top": "74.7833%",
+        "left": "10.2151%",
+        "width": 64.283935546875,
+        "height": 36.171356201171875,
+        "rotate": 29.459089578467378
+    },
+    {
+        "text": "16",
+        "top": "66.5123%",
+        "left": "4.08602%",
+        "width": 58.06463623046875,
+        "height": 32.705322265625,
+        "rotate": 44.406600643928435
+    },
+    {
+        "text": "17",
+        "top": "43.7672%",
+        "left": "1.50538%",
+        "width": 64,
+        "height": 36,
+        "rotate": 270
+    },
+    {
+        "text": "18",
+        "top": "22.4005%",
+        "left": "3.97849%",
+        "width": 61.688720703125,
+        "height": 31.571441650390625,
+        "rotate": -46.62315696131799
+    },
+    {
+        "text": "19",
+        "top": "12.7511%",
+        "left": "9.78495%",
+        "width": 68.40283203125,
+        "height": 30.658447265625,
+        "rotate": -30.11373315098244
+    },
+    {
+        "text": "20",
+        "top": "7.92634%",
+        "left": "17.0968%",
+        "width": 92,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "21",
+        "top": "7.23709%",
+        "left": "27.957%",
+        "width": 93,
+        "height": 35,
+        "rotate": 0
+    },
+    {
+        "text": "22",
+        "top": "7.23709%",
+        "left": "38.9247%",
+        "width": 92,
+        "height": 34,
+        "rotate": 0
+    },
+    {
+        "text": "23",
+        "top": "43.7672%",
+        "left": "39.1398%",
+        "width": 82,
+        "height": 36,
+        "rotate": 0
+    },
+    {
+        "text": "24",
+        "top": "44.4564%",
+        "left": "51.828%",
+        "width": 82,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "80.2972%",
+        "left": "16.9892%",
+        "width": 93.532,
+        "height": 33.5069,
+        "rotate": -0.311387
+    }
+];
+
+
+		const primus40p18mRef_BlockLayout = [
+			{ "text": "1", "top": "10.6833%", "left": "50.8602%", "width": 94, "height": 31, "rotate": 0 },
+			{ "text": "2", "top": "10.6833%", "left": "62.043%", "width": 91, "height": 32, "rotate": 0 },
+			{ "text": "3", "top": "10.3387%", "left": "72.9032%", "width": 92, "height": 32, "rotate": 0 },
+			{ "text": "4", "top": "15.8527%", "left": "83.6559%", "width": 93, "height": 38, "rotate": 33.02386755579664 },
+			{ "text": "5", "top": "43.7672%", "left": "89.1398%", "width": 100, "height": 35, "rotate": 91.2253777079841 },
+			{ "text": "6", "top": "70.9924%", "left": "83.1183%", "width": 96, "height": 33, "rotate": -33.6900675259798 },
+			{ "text": "7", "top": "77.1956%", "left": "72.9032%", "width": 91, "height": 36, "rotate": 0.3511264730522754 },
+			{ "text": "8", "top": "77.5403%", "left": "61.9355%", "width": 92, "height": 34, "rotate": 0 },
+			{ "text": "9", "top": "78.5741%", "left": "51.0753%", "width": 92, "height": 31, "rotate": 0 },
+			{ "text": "10", "top": "78.5741%", "left": "39.0323%", "width": 91, "height": 32, "rotate": 0 },
+			{ "text": "11", "top": "78.5741%", "left": "28.172%", "width": 89, "height": 32, "rotate": 0 },
+			{ "text": "12", "top": "78.2295%", "left": "17.0968%", "width": 94, "height": 33, "rotate": 0 },
+			{ "text": "13", "top": "71.337%", "left": "6.45161%", "width": 95, "height": 32, "rotate": 33.05808505261985 },
+			{ "text": "14", "top": "44.4564%", "left": "0.107527%", "width": 97, "height": 34, "rotate": 90.76902468257803 },
+			{ "text": "15", "top": "17.2312%", "left": "6.23656%", "width": 95, "height": 35, "rotate": -34.63231812412218 },
+			{ "text": "16", "top": "10.3387%", "left": "17.2043%", "width": 90, "height": 33, "rotate": -0.4212849041686013 },
+			{ "text": "17", "top": "10.3387%", "left": "27.957%", "width": 92, "height": 32, "rotate": 0.08154041868489514 },
+			{ "text": "18", "top": "10.3387%", "left": "38.9247%", "width": 92, "height": 33, "rotate": 0 },
+			{ "text": "19", "top": "44.801%", "left": "39.2473%", "width": 81, "height": 30, "rotate": 0 },
+			{ "text": "20", "top": "44.801%", "left": "51.828%", "width": 81, "height": 30, "rotate": 0 }
+		];
+
+		const primus40p18mCol_BlockLayout = [
+			{ "text": "1", "top": "13.0957%", "left": "50.6452%", "width": 97, "height": 28, "rotate": 0 },
+			{ "text": "2", "top": "13.0957%", "left": "61.828%", "width": 95, "height": 29, "rotate": 0 },
+			{ "text": "3", "top": "12.7511%", "left": "72.6882%", "width": 94, "height": 29, "rotate": 0 },
+			{ "text": "4", "top": "17.2312%", "left": "83.4409%", "width": 94, "height": 37, "rotate": 36.62132749378443 },
+			{ "text": "5", "top": "44.4564%", "left": "89.1398%", "width": 90, "height": 32, "rotate": 90.45835645800044 },
+			{ "text": "6", "top": "71.6817%", "left": "83.1183%", "width": 95, "height": 28, "rotate": -34.95466963050332 },
+			{ "text": "7", "top": "77.1956%", "left": "72.7957%", "width": 92, "height": 25, "rotate": 0.6950985156569516 },
+			{ "text": "8", "top": "76.851%", "left": "61.6129%", "width": 96, "height": 25, "rotate": 0 },
+			{ "text": "9", "top": "76.5064%", "left": "50.6452%", "width": 95, "height": 26, "rotate": 0 },
+			{ "text": "10", "top": "76.851%", "left": "39.1398%", "width": 93, "height": 25, "rotate": 0 },
+			{ "text": "11", "top": "76.851%", "left": "28.2796%", "width": 92, "height": 24, "rotate": 0 },
+			{ "text": "12", "top": "76.851%", "left": "17.2043%", "width": 95, "height": 25, "rotate": 0 },
+			{ "text": "13", "top": "70.6478%", "left": "7.2043%", "width": 92, "height": 27, "rotate": 36.86989764584402 },
+			{ "text": "14", "top": "45.8349%", "left": "1.6129%", "width": 92, "height": 25, "rotate": 270 },
+			{ "text": "15", "top": "19.6435%", "left": "7.2043%", "width": 87, "height": 28, "rotate": -32.18008106123287 },
+			{ "text": "16", "top": "12.4064%", "left": "17.0968%", "width": 96, "height": 26, "rotate": 0 },
+			{ "text": "17", "top": "13.0957%", "left": "28.2796%", "width": 90, "height": 25, "rotate": 0.32182275023401985 },
+			{ "text": "18", "top": "13.4403%", "left": "39.1398%", "width": 91, "height": 25, "rotate": 0 },
+			{ "text": "19", "top": "44.4564%", "left": "39.3548%", "width": 82, "height": 33, "rotate": 0 },
+			{ "text": "20", "top": "44.4564%", "left": "51.6129%", "width": 81, "height": 32, "rotate": 0 }
+		];
+
+		const primus40p16mRef_BlockLayout = [
+			{
+				"text": "1",
+				"top": "11.0279%",
+				"left": "51.0753%",
+				"width": 95,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "11.0279%",
+				"left": "61.7204%",
+				"width": 95,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "11.0279%",
+				"left": "72.6882%",
+				"width": 94,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "4",
+				"top": "16.5419%",
+				"left": "83.2258%",
+				"width": 94,
+				"height": 37,
+				"rotate": 34.930937301110575
+			},
+			{
+				"text": "5",
+				"top": "44.4564%",
+				"left": "89.3548%",
+				"width": 90,
+				"height": 32,
+				"rotate": 90.45835645800044
+			},
+			{
+				"text": "6",
+				"top": "71.337%",
+				"left": "83.0108%",
+				"width": 92.904541015625,
+				"height": 32.37713623046875,
+				"rotate": -34.95466963050332
+			},
+			{
+				"text": "7",
+				"top": "77.1956%",
+				"left": "69.8925%",
+				"width": 91.639892578125,
+				"height": 32.202392578125,
+				"rotate": 0.6950985156569516
+			},
+			{
+				"text": "8",
+				"top": "77.1956%",
+				"left": "53.7634%",
+				"width": 92,
+				"height": 33,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "77.1956%",
+				"left": "36.129%",
+				"width": 93,
+				"height": 33,
+				"rotate": 0
+			},
+			{
+				"text": "10",
+				"top": "77.8849%",
+				"left": "20.1075%",
+				"width": 92,
+				"height": 30,
+				"rotate": 0
+			},
+			{
+				"text": "11",
+				"top": "70.3032%",
+				"left": "7.2043%",
+				"width": 88.26806640625,
+				"height": 35.1656494140625,
+				"rotate": 34.755920910299736
+			},
+			{
+				"text": "12",
+				"top": "44.4564%",
+				"left": "0.537634%",
+				"width": 96.6455078125,
+				"height": 35.1678466796875,
+				"rotate": 89.6103216419136
+			},
+			{
+				"text": "13",
+				"top": "16.1973%",
+				"left": "6.45161%",
+				"width": 97.4873046875,
+				"height": 35.19956970214844,
+				"rotate": -34.658354705521106
+			},
+			{
+				"text": "14",
+				"top": "11.0279%",
+				"left": "17.5269%",
+				"width": 93.797119140625,
+				"height": 30.82763671875,
+				"rotate": 0.8746767711213153
+			},
+			{
+				"text": "15",
+				"top": "11.0279%",
+				"left": "28.0645%",
+				"width": 95.3056640625,
+				"height": 29.964874267578125,
+				"rotate": 0.6365936838840298
+			},
+			{
+				"text": "16",
+				"top": "10.6833%",
+				"left": "39.2473%",
+				"width": 94,
+				"height": 30,
+				"rotate": 0
+			},
+			{
+				"text": "17",
+				"top": "10.6833%",
+				"left": "39.2473%",
+				"width": 94,
+				"height": 30,
+				"rotate": 0
+			},
+			{
+				"text": "18",
+				"top": "10.6833%",
+				"left": "39.2473%",
+				"width": 94,
+				"height": 30,
+				"rotate": 0
+			}
+		];
+
+		const primus40p16mCol_BlockLayout = [
+			{
+				"text": "1",
+				"top": "13.0957%",
+				"left": "50.8602%",
+				"width": 94,
+				"height": 24,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "12.7511%",
+				"left": "61.7204%",
+				"width": 91,
+				"height": 25,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "12.4064%",
+				"left": "72.5806%",
+				"width": 94,
+				"height": 25,
+				"rotate": 0
+			},
+			{
+				"text": "4",
+				"top": "18.9543%",
+				"left": "82.6882%",
+				"width": 90.928955078125,
+				"height": 26.358154296875,
+				"rotate": 35.65532809790031
+			},
+			{
+				"text": "5",
+				"top": "44.801%",
+				"left": "88.172%",
+				"width": 97.5673828125,
+				"height": 30.220962524414062,
+				"rotate": 89.58780725859768
+			},
+			{
+				"text": "6",
+				"top": "70.9924%",
+				"left": "82.4731%",
+				"width": 92.791015625,
+				"height": 27.382080078125,
+				"rotate": -36.218837265614525
+			},
+			{
+				"text": "7",
+				"top": "78.5741%",
+				"left": "72.3656%",
+				"width": 91.75927734375,
+				"height": 20.5045166015625,
+				"rotate": 0.2367580719071043
+			},
+			{
+				"text": "8",
+				"top": "78.2295%",
+				"left": "61.828%",
+				"width": 89,
+				"height": 21,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "78.5741%",
+				"left": "50.9677%",
+				"width": 94,
+				"height": 21,
+				"rotate": 0
+			},
+			{
+				"text": "10",
+				"top": "78.9187%",
+				"left": "39.4624%",
+				"width": 91,
+				"height": 22,
+				"rotate": 0
+			},
+			{
+				"text": "11",
+				"top": "78.5741%",
+				"left": "28.6022%",
+				"width": 93,
+				"height": 23,
+				"rotate": 0
+			},
+			{
+				"text": "12",
+				"top": "79.2634%",
+				"left": "17.957%",
+				"width": 91,
+				"height": 21,
+				"rotate": 0
+			},
+			{
+				"text": "13",
+				"top": "70.3032%",
+				"left": "8.17204%",
+				"width": 90.068603515625,
+				"height": 30.22503662109375,
+				"rotate": 35.61085243866875
+			},
+			{
+				"text": "14",
+				"top": "44.1118%",
+				"left": "1.93548%",
+				"width": 90.37445068359375,
+				"height": 34.75164794921875,
+				"rotate": -89.13194855025446
+			},
+			{
+				"text": "15",
+				"top": "18.9543%",
+				"left": "8.17204%",
+				"width": 88.112548828125,
+				"height": 30.567230224609375,
+				"rotate": -37.08249696517166
+			},
+			{
+				"text": "16",
+				"top": "12.0618%",
+				"left": "17.957%",
+				"width": 91.730224609375,
+				"height": 27.233856201171875,
+				"rotate": -0.3333880704687431
+			},
+			{
+				"text": "17",
+				"top": "12.7511%",
+				"left": "28.7097%",
+				"width": 91.553466796875,
+				"height": 23.57330322265625,
+				"rotate": -0.3240676953107311
+			},
+			{
+				"text": "18",
+				"top": "12.4064%",
+				"left": "39.4624%",
+				"width": 89,
+				"height": 24,
+				"rotate": 0
+			},
+			{
+				"text": "19",
+				"top": "44.801%",
+				"left": "39.7849%",
+				"width": 80,
+				"height": 31,
+				"rotate": 0
+			},
+			{
+				"text": "20",
+				"top": "45.1457%",
+				"left": "51.9355%",
+				"width": 81,
+				"height": 31,
+				"rotate": 0
+			}
+		];
+		const primus40p14mCol_BlockLayout = [
+			{
+				"text": "1",
+				"top": "11.0279%",
+				"left": "53.6559%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "11.3726%",
+				"left": "70%",
+				"width": 92,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "17.5758%",
+				"left": "83.5484%",
+				"width": 89.6626,
+				"height": 32.7779,
+				"rotate": 34.439
+			},
+			{
+				"text": "4",
+				"top": "43.4225%",
+				"left": "90%",
+				"width": 90.293212890625,
+				"height": 35.916748046875,
+				"rotate": 89.78374384693512
+			},
+			{
+				"text": "5",
+				"top": "71.337%",
+				"left": "83.0108%",
+				"width": 97.5674,
+				"height": 30.221,
+				"rotate": -32.8299427861065
+			},
+			{
+				"text": "6",
+				"top": "77.5403%",
+				"left": "70%",
+				"width": 93.4736328125,
+				"height": 33.512939453125,
+				"rotate": -0.45042923869822005
+			},
+			{
+				"text": "7",
+				"top": "77.8849%",
+				"left": "53.6559%",
+				"width": 90.95068359375,
+				"height": 31.25006103515625,
+				"rotate": 0.236758
+			},
+			{
+				"text": "8",
+				"top": "77.8849%",
+				"left": "36.6667%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "77.1956%",
+				"left": "20.1075%",
+				"width": 93,
+				"height": 35,
+				"rotate": 0
+			},
+			{
+				"text": "10",
+				"top": "70.3032%",
+				"left": "6.98925%",
+				"width": 89.827880859375,
+				"height": 33.8858642578125,
+				"rotate": 32.016505362561496
+			},
+			{
+				"text": "11",
+				"top": "43.7672%",
+				"left": "0.537634%",
+				"width": 90.67822265625,
+				"height": 34.1654052734375,
+				"rotate": 89.5817900585029
+			},
+			{
+				"text": "12",
+				"top": "16.8865%",
+				"left": "6.77419%",
+				"width": 95.1767578125,
+				"height": 31.917236328125,
+				"rotate": -33.4397773147512
+			},
+			{
+				"text": "13",
+				"top": "11.0279%",
+				"left": "20.2151%",
+				"width": 92.0859375,
+				"height": 30.288909912109375,
+				"rotate": -0.044640246997460054
+			},
+			{
+				"text": "14",
+				"top": "11.0279%",
+				"left": "36.5591%",
+				"width": 92.791015625,
+				"height": 30.88873291015625,
+				"rotate": -0.7238287929288703
+			},
+			{
+				"text": "15",
+				"top": "44.4564%",
+				"left": "38.9247%",
+				"width": 88.1125,
+				"height": 30.5672,
+				"rotate": -0.09414790976944687
+			},
+			{
+				"text": "16",
+				"top": "44.4564%",
+				"left": "51.9355%",
+				"width": 82.87548828125,
+				"height": 30.751968383789062,
+				"rotate": -0.333388
+			}
+		];
+		const primus40p14mRef_BlockLayout = [
+			{
+				"text": "1",
+				"top": "11.0279%",
+				"left": "53.6559%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "11.3726%",
+				"left": "70%",
+				"width": 92,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "17.5758%",
+				"left": "83.5484%",
+				"width": 89.6626,
+				"height": 32.7779,
+				"rotate": 34.439
+			},
+			{
+				"text": "4",
+				"top": "43.4225%",
+				"left": "90%",
+				"width": 90.293212890625,
+				"height": 35.916748046875,
+				"rotate": 89.78374384693512
+			},
+			{
+				"text": "5",
+				"top": "71.337%",
+				"left": "83.0108%",
+				"width": 97.5674,
+				"height": 30.221,
+				"rotate": -32.8299427861065
+			},
+			{
+				"text": "6",
+				"top": "77.5403%",
+				"left": "70%",
+				"width": 93.4736328125,
+				"height": 33.512939453125,
+				"rotate": -0.45042923869822005
+			},
+			{
+				"text": "7",
+				"top": "77.8849%",
+				"left": "53.6559%",
+				"width": 90.95068359375,
+				"height": 31.25006103515625,
+				"rotate": 0.236758
+			},
+			{
+				"text": "8",
+				"top": "77.8849%",
+				"left": "36.6667%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "77.1956%",
+				"left": "20.1075%",
+				"width": 93,
+				"height": 35,
+				"rotate": 0
+			},
+			{
+				"text": "10",
+				"top": "70.3032%",
+				"left": "6.98925%",
+				"width": 89.827880859375,
+				"height": 33.8858642578125,
+				"rotate": 32.016505362561496
+			},
+			{
+				"text": "11",
+				"top": "43.7672%",
+				"left": "0.537634%",
+				"width": 90.67822265625,
+				"height": 34.1654052734375,
+				"rotate": 89.5817900585029
+			},
+			{
+				"text": "12",
+				"top": "16.8865%",
+				"left": "6.77419%",
+				"width": 95.1767578125,
+				"height": 31.917236328125,
+				"rotate": -33.4397773147512
+			},
+			{
+				"text": "13",
+				"top": "11.0279%",
+				"left": "20.2151%",
+				"width": 92.0859375,
+				"height": 30.288909912109375,
+				"rotate": -0.044640246997460054
+			},
+			{
+				"text": "14",
+				"top": "11.0279%",
+				"left": "36.5591%",
+				"width": 92.791015625,
+				"height": 30.88873291015625,
+				"rotate": -0.7238287929288703
+			},
+			{
+				"text": "15",
+				"top": "44.4564%",
+				"left": "38.9247%",
+				"width": 88.1125,
+				"height": 30.5672,
+				"rotate": -0.09414790976944687
+			},
+			{
+				"text": "16",
+				"top": "44.4564%",
+				"left": "51.9355%",
+				"width": 82.87548828125,
+				"height": 30.751968383789062,
+				"rotate": -0.333388
+			}
+		];
+		const primus40p12mRef_BlockLayout = [
+			{
+				"text": "1",
+				"top": "11.0279%",
+				"left": "53.5484%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "12.0618%",
+				"left": "69.6774%",
+				"width": 92,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "25.1575%",
+				"left": "85.1613%",
+				"width": 98.471923828125,
+				"height": 32.725921630859375,
+				"rotate": 34.439
+			},
+			{
+				"text": "4",
+				"top": "64.0999%",
+				"left": "85.0538%",
+				"width": 96.85595703125,
+				"height": 31.43310546875,
+				"rotate": -34.18968139622734
+			},
+			{
+				"text": "5",
+				"top": "78.2295%",
+				"left": "69.6774%",
+				"width": 99.27197265625,
+				"height": 29.7598876953125,
+				"rotate": 0.3674438462476388
+			},
+			{
+				"text": "6",
+				"top": "77.8849%",
+				"left": "53.4409%",
+				"width": 94.9296875,
+				"height": 29.9625244140625,
+				"rotate": -0.45042923869822005
+			},
+			{
+				"text": "7",
+				"top": "77.5403%",
+				"left": "36.6667%",
+				"width": 90.95068359375,
+				"height": 31.25006103515625,
+				"rotate": 0.236758
+			},
+			{
+				"text": "8",
+				"top": "77.5403%",
+				"left": "20.5376%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "63.0661%",
+				"left": "4.94624%",
+				"width": 93,
+				"height": 35,
+				"rotate": 38.516969997995645
+			},
+			{
+				"text": "10",
+				"top": "25.8468%",
+				"left": "4.94624%",
+				"width": 94.85693359375,
+				"height": 31.58184814453125,
+				"rotate": -37.53692401335465
+			},
+			{
+				"text": "11",
+				"top": "11.7172%",
+				"left": "20.1075%",
+				"width": 94.958984375,
+				"height": 30.9261474609375,
+				"rotate": 0.4872947602160451
+			},
+			{
+				"text": "12",
+				"top": "12.0618%",
+				"left": "36.4516%",
+				"width": 95.1767578125,
+				"height": 31.917236328125,
+				"rotate": -0.685761081706346
+			},
+			{
+				"text": "13",
+				"top": "45.1457%",
+				"left": "39.4624%",
+				"width": 83.1015625,
+				"height": 30.35296630859375,
+				"rotate": -0.044640246997460054
+			},
+			{
+				"text": "14",
+				"top": "44.801%",
+				"left": "51.9355%",
+				"width": 78.1639404296875,
+				"height": 31.04461669921875,
+				"rotate": -0.7238287929288703
+			}
+		];
+		const primus40p12mCol_BlockLayout = [
+			{
+				"text": "1",
+				"top": "11.0279%",
+				"left": "53.5484%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "2",
+				"top": "12.0618%",
+				"left": "69.6774%",
+				"width": 92,
+				"height": 29,
+				"rotate": 0
+			},
+			{
+				"text": "3",
+				"top": "25.1575%",
+				"left": "85.1613%",
+				"width": 98.471923828125,
+				"height": 32.725921630859375,
+				"rotate": 34.439
+			},
+			{
+				"text": "4",
+				"top": "64.0999%",
+				"left": "85.0538%",
+				"width": 96.85595703125,
+				"height": 31.43310546875,
+				"rotate": -34.18968139622734
+			},
+			{
+				"text": "5",
+				"top": "78.2295%",
+				"left": "69.6774%",
+				"width": 99.27197265625,
+				"height": 29.7598876953125,
+				"rotate": 0.3674438462476388
+			},
+			{
+				"text": "6",
+				"top": "77.8849%",
+				"left": "53.4409%",
+				"width": 94.9296875,
+				"height": 29.9625244140625,
+				"rotate": -0.45042923869822005
+			},
+			{
+				"text": "7",
+				"top": "77.5403%",
+				"left": "36.6667%",
+				"width": 90.95068359375,
+				"height": 31.25006103515625,
+				"rotate": 0.236758
+			},
+			{
+				"text": "8",
+				"top": "77.5403%",
+				"left": "20.5376%",
+				"width": 91,
+				"height": 32,
+				"rotate": 0
+			},
+			{
+				"text": "9",
+				"top": "63.0661%",
+				"left": "4.94624%",
+				"width": 93,
+				"height": 35,
+				"rotate": 38.516969997995645
+			},
+			{
+				"text": "10",
+				"top": "25.8468%",
+				"left": "4.94624%",
+				"width": 94.85693359375,
+				"height": 31.58184814453125,
+				"rotate": -37.53692401335465
+			},
+			{
+				"text": "11",
+				"top": "11.7172%",
+				"left": "20.1075%",
+				"width": 94.958984375,
+				"height": 30.9261474609375,
+				"rotate": 0.4872947602160451
+			},
+			{
+				"text": "12",
+				"top": "12.0618%",
+				"left": "36.4516%",
+				"width": 95.1767578125,
+				"height": 31.917236328125,
+				"rotate": -0.685761081706346
+			},
+			{
+				"text": "13",
+				"top": "45.1457%",
+				"left": "39.4624%",
+				"width": 83.1015625,
+				"height": 30.35296630859375,
+				"rotate": -0.044640246997460054
+			},
+			{
+				"text": "14",
+				"top": "44.801%",
+				"left": "51.9355%",
+				"width": 78.1639404296875,
+				"height": 31.04461669921875,
+				"rotate": -0.7238287929288703
+			}
+		];
+        const primus47p11mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.6%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.6%",
+        "left": "58.5%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.6%",
+        "left": "67.7%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "14.6%",
+        "left": "77%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "20%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "44.4564%",
+        "left": "0.430108%",
+        "width": 79,
+        "height": 31,
+        "rotate": 269.66097567554857
+    },
+    {
+        "text": "8",
+        "top": "21.022%",
+        "left": "6.02151%",
+        "width": 77,
+        "height": 30,
+        "rotate": -30.510237406115564
+    },
+    {
+        "text": "9",
+        "top": "14.8188%",
+        "left": "14.6237%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "14.8188%",
+        "left": "23.9785%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "14.8188%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "44.4564%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "44.801%",
+        "left": "44.1935%",
+        "width": 108,
+        "height": 28,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "44.801%",
+        "left": "59.0323%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    }
+];
+     const primus47p11mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.6%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.6%",
+        "left": "58.5%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.6%",
+        "left": "67.7%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "14.6%",
+        "left": "77%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "20%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "44.4564%",
+        "left": "0.430108%",
+        "width": 79,
+        "height": 31,
+        "rotate": 269.66097567554857
+    },
+    {
+        "text": "8",
+        "top": "21.022%",
+        "left": "6.02151%",
+        "width": 77,
+        "height": 30,
+        "rotate": -30.510237406115564
+    },
+    {
+        "text": "9",
+        "top": "14.8188%",
+        "left": "14.6237%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "14.8188%",
+        "left": "23.9785%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "14.8188%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "44.4564%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "44.801%",
+        "left": "44.1935%",
+        "width": 108,
+        "height": 28,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "44.801%",
+        "left": "59.0323%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    }
+];
+const primus47p13mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.6%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.4742%",
+        "left": "58.2796%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.4742%",
+        "left": "67.6344%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "14.1296%",
+        "left": "76.8817%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "20%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "69.6139%",
+        "left": "85.8065%",
+        "width": 79,
+        "height": 31,
+        "rotate": -35
+    },
+    {
+        "text": "8",
+        "top": "69.6139%",
+        "left": "5.91398%",
+        "width": 77,
+        "height": 30,
+        "rotate": 33.4248111826038
+    },
+    {
+        "text": "9",
+        "top": "45.8349%",
+        "left": "0.322581%",
+        "width": 82,
+        "height": 27,
+        "rotate": 270
+    },
+    {
+        "text": "10",
+        "top": "21.022%",
+        "left": "5.80645%",
+        "width": 81.89111328125,
+        "height": 25.577972412109375,
+        "rotate": -37.266401900977144
+    },
+    {
+        "text": "11",
+        "top": "13.7849%",
+        "left": "14.8387%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "14.1296%",
+        "left": "24.086%",
+        "width": 79,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "14.1296%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "45.8349%",
+        "left": "33.5484%",
+        "width": 70,
+        "height": 27,
+        "rotate": 0
+    },
+    {
+        "text": "15",
+        "top": "45.4903%",
+        "left": "46.2366%",
+        "width": 73.37109375,
+        "height": 25.991073608398438,
+        "rotate": 0.7205263154219494
+    },
+    {
+        "text": "16",
+        "top": "45.4903%",
+        "left": "59.0323%",
+        "width": 67.68017578125,
+        "height": 26.90484619140625,
+        "rotate": 0.7205263154219494
+    }
+];
+const primus47p14mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.8188%",
+        "left": "45.5914%",
+        "width": 82,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "15.1634%",
+        "left": "60.4301%",
+        "width": 77,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "15.1634%",
+        "left": "74.3011%",
+        "width": 79.897216796875,
+        "height": 27.501800537109375,
+        "rotate": 0.23796486719052723
+    },
+    {
+        "text": "4",
+        "top": "27.5699%",
+        "left": "87.5269%",
+        "width": 80.58447265625,
+        "height": 30.415084838867188,
+        "rotate": 37.2836162066179
+    },
+    {
+        "text": "5",
+        "top": "62.3768%",
+        "left": "87.3118%",
+        "width": 79.65478515625,
+        "height": 30.4453125,
+        "rotate": -37.850664017799005
+    },
+    {
+        "text": "6",
+        "top": "75.4725%",
+        "left": "74.1935%",
+        "width": 78.154296875,
+        "height": 30.6201171875,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "75.1279%",
+        "left": "60.3226%",
+        "width": 79.409912109375,
+        "height": 31.615966796875,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "74.7833%",
+        "left": "45.5914%",
+        "width": 81,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "74.7833%",
+        "left": "30.8602%",
+        "width": 83,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "74.094%",
+        "left": "16.7742%",
+        "width": 85.799560546875,
+        "height": 33.72021484375,
+        "rotate": 0.4093948154951619
+    },
+    {
+        "text": "11",
+        "top": "63.0661%",
+        "left": "3.65591%",
+        "width": 82.97991943359375,
+        "height": 26.574951171875,
+        "rotate": 37.34509950465803
+    },
+    {
+        "text": "12",
+        "top": "27.2252%",
+        "left": "3.54839%",
+        "width": 89.99993896484375,
+        "height": 28.070098876953125,
+        "rotate": -37.5195003912433
+    },
+    {
+        "text": "13",
+        "top": "14.8188%",
+        "left": "17.3118%",
+        "width": 82.1015625,
+        "height": 32.35296630859375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "14.4742%",
+        "left": "30.8602%",
+        "width": 83.163818359375,
+        "height": 31.04461669921875,
+        "rotate": -0.7238287929288703
+    },
+    {
+        "text": "15",
+        "top": "45.4903%",
+        "left": "33.6559%",
+        "width": 70.203369140625,
+        "height": 26.815078735351562,
+        "rotate": -0.09414790976944687
+    },
+    {
+        "text": "16",
+        "top": "45.4903%",
+        "left": "46.3441%",
+        "width": 68.34765625,
+        "height": 26.45135498046875,
+        "rotate": -0.333388
+    },
+    {
+        "text": "17",
+        "top": "44.801%",
+        "left": "59.1398%",
+        "width": 67.34765625,
+        "height": 29.45135498046875,
+        "rotate": -0.333388
+    }
+];
+ const primus47p14mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "15.5081%",
+        "left": "45.0538%",
+        "width": 91,
+        "height": 28,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "15.5081%",
+        "left": "59.7849%",
+        "width": 92,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "15.8527%",
+        "left": "73.7634%",
+        "width": 90.79150390625,
+        "height": 28.1376953125,
+        "rotate": 0.23796486719052723
+    },
+    {
+        "text": "4",
+        "top": "27.5699%",
+        "left": "87.5269%",
+        "width": 80.58447265625,
+        "height": 30.415084838867188,
+        "rotate": 43.097152521836236
+    },
+    {
+        "text": "5",
+        "top": "60.6537%",
+        "left": "86.9892%",
+        "width": 79.65478515625,
+        "height": 30.4453125,
+        "rotate": -32.8299427861065
+    },
+    {
+        "text": "6",
+        "top": "73.7494%",
+        "left": "73.6559%",
+        "width": 90.929931640625,
+        "height": 29.9154052734375,
+        "rotate": -0.45042923869822005
+    },
+    {
+        "text": "7",
+        "top": "74.7833%",
+        "left": "60.3226%",
+        "width": 85.171875,
+        "height": 27.959716796875,
+        "rotate": 0.236758
+    },
+    {
+        "text": "8",
+        "top": "74.7833%",
+        "left": "45.5914%",
+        "width": 84,
+        "height": 27,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "74.7833%",
+        "left": "30.8602%",
+        "width": 83,
+        "height": 27,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "74.094%",
+        "left": "16.7742%",
+        "width": 85.6005859375,
+        "height": 29.10955810546875,
+        "rotate": 0.4093948154951619
+    },
+    {
+        "text": "11",
+        "top": "62.3768%",
+        "left": "3.54839%",
+        "width": 82.97991943359375,
+        "height": 26.574951171875,
+        "rotate": 38.96364309232781
+    },
+    {
+        "text": "12",
+        "top": "26.8806%",
+        "left": "3.33333%",
+        "width": 89.99993896484375,
+        "height": 28.070098876953125,
+        "rotate": -39.23731950180692
+    },
+    {
+        "text": "13",
+        "top": "15.5081%",
+        "left": "16.6667%",
+        "width": 92.0859375,
+        "height": 30.288909912109375,
+        "rotate": -0.044640246997460054
+    },
+    {
+        "text": "14",
+        "top": "15.1634%",
+        "left": "30.4301%",
+        "width": 92.791015625,
+        "height": 30.88873291015625,
+        "rotate": -0.7238287929288703
+    },
+    {
+        "text": "15",
+        "top": "45.4903%",
+        "left": "33.6559%",
+        "width": 70.203369140625,
+        "height": 26.815078735351562,
+        "rotate": -0.09414790976944687
+    },
+    {
+        "text": "16",
+        "top": "45.4903%",
+        "left": "44.1935%",
+        "width": 107.19775390625,
+        "height": 27.82952880859375,
+        "rotate": -0.333388
+    },
+    {
+        "text": "17",
+        "top": "44.801%",
+        "left": "59.1398%",
+        "width": 67.34765625,
+        "height": 29.45135498046875,
+        "rotate": -0.333388
+    }
+];
+const primus47p16mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "17.5758%",
+        "left": "45.0538%",
+        "width": 94,
+        "height": 24,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "17.2312%",
+        "left": "60.2151%",
+        "width": 91,
+        "height": 25,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "16.1973%",
+        "left": "73.4409%",
+        "width": 94,
+        "height": 25,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "21.7113%",
+        "left": "84.8387%",
+        "width": 90.928955078125,
+        "height": 26.358154296875,
+        "rotate": 35.65532809790031
+    },
+    {
+        "text": "5",
+        "top": "45.8349%",
+        "left": "90.4301%",
+        "width": 82.919921875,
+        "height": 21.777359008789062,
+        "rotate": 89.58780725859768
+    },
+    {
+        "text": "6",
+        "top": "68.9247%",
+        "left": "84.6237%",
+        "width": 89.02783203125,
+        "height": 24.906982421875,
+        "rotate": -36.218837265614525
+    },
+    {
+        "text": "7",
+        "top": "74.4386%",
+        "left": "73.5484%",
+        "width": 91.75927734375,
+        "height": 20.5045166015625,
+        "rotate": 0.2367580719071043
+    },
+    {
+        "text": "8",
+        "top": "74.7833%",
+        "left": "59.8925%",
+        "width": 89,
+        "height": 21,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "75.1279%",
+        "left": "45.1613%",
+        "width": 94,
+        "height": 21,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "74.094%",
+        "left": "30.8602%",
+        "width": 91,
+        "height": 22,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "74.7833%",
+        "left": "16.5591%",
+        "width": 93,
+        "height": 23,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "68.2354%",
+        "left": "5.91398%",
+        "width": 76.859375,
+        "height": 24.80621337890625,
+        "rotate": 37.05652818940958
+    },
+    {
+        "text": "13",
+        "top": "46.1795%",
+        "left": "0.645161%",
+        "width": 86.357177734375,
+        "height": 21.125946044921875,
+        "rotate": 268.5008401993847
+    },
+    {
+        "text": "14",
+        "top": "22.4005%",
+        "left": "5.91398%",
+        "width": 82.35693359375,
+        "height": 27.34295654296875,
+        "rotate": -35.458655343155414
+    },
+    {
+        "text": "15",
+        "top": "16.8865%",
+        "left": "16.6667%",
+        "width": 88.431640625,
+        "height": 25.539108276367188,
+        "rotate": 0.6249980105248341
+    },
+    {
+        "text": "16",
+        "top": "17.2312%",
+        "left": "30.4301%",
+        "width": 91.87548828125,
+        "height": 22.751953125,
+        "rotate": -0.3333880704687431
+    },
+    {
+        "text": "17",
+        "top": "45.4903%",
+        "left": "33.6559%",
+        "width": 69.6787109375,
+        "height": 26.079940795898438,
+        "rotate": -0.3240676953107311
+    },
+    {
+        "text": "18",
+        "top": "45.8349%",
+        "left": "44.4086%",
+        "width": 107,
+        "height": 26,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "45.4903%",
+        "left": "59.0323%",
+        "width": 72,
+        "height": 27,
+        "rotate": 0
+    }
+];
+const primus47p16mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.4742%",
+        "left": "45.8065%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.4742%",
+        "left": "60.2151%",
+        "width": 81,
+        "height": 28,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.4742%",
+        "left": "74.086%",
+        "width": 83,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "21.022%",
+        "left": "85.6989%",
+        "width": 82.2333984375,
+        "height": 28.404388427734375,
+        "rotate": 35.65532809790031
+    },
+    {
+        "text": "5",
+        "top": "44.801%",
+        "left": "90.7527%",
+        "width": 82.361328125,
+        "height": 29.0606689453125,
+        "rotate": 89.58780725859768
+    },
+    {
+        "text": "6",
+        "top": "70.3032%",
+        "left": "85.1613%",
+        "width": 84.53125,
+        "height": 25.6903076171875,
+        "rotate": -36.72563665103537
+    },
+    {
+        "text": "7",
+        "top": "75.8171%",
+        "left": "74.1935%",
+        "width": 78.833984375,
+        "height": 27.87896728515625,
+        "rotate": 0.2367580719071043
+    },
+    {
+        "text": "8",
+        "top": "75.8171%",
+        "left": "60.4301%",
+        "width": 78,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "75.1279%",
+        "left": "45.6989%",
+        "width": 80,
+        "height": 31,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "75.4725%",
+        "left": "30.9677%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "75.8171%",
+        "left": "17.2043%",
+        "width": 78,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "69.2693%",
+        "left": "5.80645%",
+        "width": 77.279541015625,
+        "height": 31.1046142578125,
+        "rotate": 33.208503023312
+    },
+    {
+        "text": "13",
+        "top": "46.5242%",
+        "left": "-0.215054%",
+        "width": 89.559814453125,
+        "height": 29.8575439453125,
+        "rotate": -88.89436402285301
+    },
+    {
+        "text": "14",
+        "top": "21.022%",
+        "left": "5.48387%",
+        "width": 82.35693359375,
+        "height": 27.34295654296875,
+        "rotate": -35.458655343155414
+    },
+    {
+        "text": "15",
+        "top": "14.8188%",
+        "left": "17.3118%",
+        "width": 77.695068359375,
+        "height": 30.494247436523438,
+        "rotate": 0.6249980105248341
+    },
+    {
+        "text": "16",
+        "top": "15.1634%",
+        "left": "30.9677%",
+        "width": 79.005859375,
+        "height": 28.284210205078125,
+        "rotate": -0.3333880704687431
+    },
+    {
+        "text": "17",
+        "top": "45.4903%",
+        "left": "33.5484%",
+        "width": 71.818359375,
+        "height": 30.471786499023438,
+        "rotate": -0.3240676953107311
+    },
+    {
+        "text": "18",
+        "top": "45.8349%",
+        "left": "44.1935%",
+        "width": 108,
+        "height": 25,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "44.801%",
+        "left": "58.8172%",
+        "width": 74,
+        "height": 30,
+        "rotate": 0
+    }
+];
+const primus47p18mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.6%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.4742%",
+        "left": "58.172%",
+        "width": 80,
+        "height": 31,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.4742%",
+        "left": "67.6344%",
+        "width": 79,
+        "height": 32,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "14.4742%",
+        "left": "76.7742%",
+        "width": 79,
+        "height": 33,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "19.9882%",
+        "left": "85.4839%",
+        "width": 87.493896484375,
+        "height": 32.70623779296875,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "69.9585%",
+        "left": "85.6989%",
+        "width": 79,
+        "height": 31,
+        "rotate": -35
+    },
+    {
+        "text": "8",
+        "top": "75.8171%",
+        "left": "73.9785%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "76.1618%",
+        "left": "61.2903%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "75.8171%",
+        "left": "45.914%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "75.8171%",
+        "left": "30.2151%",
+        "width": 81,
+        "height": 31,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "76.1618%",
+        "left": "17.5269%",
+        "width": 81,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "69.6139%",
+        "left": "6.02151%",
+        "width": 77,
+        "height": 30,
+        "rotate": 35.25635871296284
+    },
+    {
+        "text": "14",
+        "top": "44.4564%",
+        "left": "0.322581%",
+        "width": 85,
+        "height": 33,
+        "rotate": 269.9999869451914
+    },
+    {
+        "text": "15",
+        "top": "21.022%",
+        "left": "5.80645%",
+        "width": 79,
+        "height": 30,
+        "rotate": -35.31121343963319
+    },
+    {
+        "text": "16",
+        "top": "14.4742%",
+        "left": "14.7312%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "17",
+        "top": "14.8188%",
+        "left": "24.1935%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0.5509039792185604
+    },
+    {
+        "text": "18",
+        "top": "14.4742%",
+        "left": "33.3333%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "44.801%",
+        "left": "33.4409%",
+        "width": 78,
+        "height": 31,
+        "rotate": 0
+    },
+    {
+        "text": "20",
+        "top": "45.1457%",
+        "left": "46.129%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "21",
+        "top": "45.1457%",
+        "left": "59.0323%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    }
+];
+
+const primus47p20mCol_BlockLayout = [
+    {
+        "text": "1",
+        "top": "16.1973%",
+        "left": "46.0215%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "15.1634%",
+        "left": "58.4946%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "15.5081%",
+        "left": "67.7419%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "4",
+        "top": "15.5081%",
+        "left": "77.0968%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "5",
+        "top": "20.6774%",
+        "left": "85.914%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
+    },
+    {
+        "text": "6",
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
+    },
+    {
+        "text": "7",
+        "top": "69.2693%",
+        "left": "85.8065%",
+        "width": 79,
+        "height": 31,
+        "rotate": -35
+    },
+    {
+        "text": "8",
+        "top": "75.1279%",
+        "left": "76.9892%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "9",
+        "top": "75.1279%",
+        "left": "67.7419%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "10",
+        "top": "74.7833%",
+        "left": "58.3871%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "11",
+        "top": "74.7833%",
+        "left": "46.0215%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "75.4725%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "75.1279%",
+        "left": "24.086%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "14",
+        "top": "74.7833%",
+        "left": "14.9462%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "15",
+        "top": "68.58%",
+        "left": "5.91398%",
+        "width": 79,
+        "height": 30,
+        "rotate": 35
+    },
+    {
+        "text": "16",
+        "top": "45%",
+        "left": "0.5%",
+        "width": 80,
+        "height": 30,
+        "rotate": 90
+    },
+    {
+        "text": "17",
+        "top": "20.6774%",
+        "left": "5.80645%",
+        "width": 79,
+        "height": 30,
+        "rotate": -35
+    },
+    {
+        "text": "18",
+        "top": "15.8527%",
+        "left": "14.9462%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "19",
+        "top": "15.5081%",
+        "left": "24.1935%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "20",
+        "top": "15.8527%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "21",
+        "top": "44.4564%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "22",
+        "top": "45.1457%",
+        "left": "44.1935%",
+        "width": 108,
+        "height": 29,
+        "rotate": 0
+    },
+    {
+        "text": "23",
+        "top": "44.801%",
+        "left": "58.9247%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    }
+];
+const primus47p20mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.6%",
+        "left": "45.9%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "2",
+        "top": "14.6%",
+        "left": "58.5%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "3",
+        "top": "14.6%",
+        "left": "67.7%",
         "width": 77,
         "height": 30,
         "rotate": 0
@@ -780,930 +3132,449 @@ const primus40p22mRef_BlockLayout = [
         "width": 77,
         "height": 30,
         "rotate": 0
+    }
+];
+const primus47p22mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "13.7849%",
+        "left": "50.4301%",
+        "width": 52,
+        "height": 32,
+        "rotate": 0
     },
     {
-        "text": "24",
-        "top": "45%",
-        "left": "77%",
+        "text": "2",
+        "top": "14.1296%",
+        "left": "58.4946%",
         "width": 77,
         "height": 30,
         "rotate": 0
-    }
-];
-
-
-const primus40p18mRef_BlockLayout = [
-    { "text": "1", "top": "10.6833%", "left": "50.8602%", "width": 94, "height": 31, "rotate": 0 },
-    { "text": "2", "top": "10.6833%", "left": "62.043%", "width": 91, "height": 32, "rotate": 0 },
-    { "text": "3", "top": "10.3387%", "left": "72.9032%", "width": 92, "height": 32, "rotate": 0 },
-    { "text": "4", "top": "15.8527%", "left": "83.6559%", "width": 93, "height": 38, "rotate": 33.02386755579664 },
-    { "text": "5", "top": "43.7672%", "left": "89.1398%", "width": 100, "height": 35, "rotate": 91.2253777079841 },
-    { "text": "6", "top": "70.9924%", "left": "83.1183%", "width": 96, "height": 33, "rotate": -33.6900675259798 },
-    { "text": "7", "top": "77.1956%", "left": "72.9032%", "width": 91, "height": 36, "rotate": 0.3511264730522754 },
-    { "text": "8", "top": "77.5403%", "left": "61.9355%", "width": 92, "height": 34, "rotate": 0 },
-    { "text": "9", "top": "78.5741%", "left": "51.0753%", "width": 92, "height": 31, "rotate": 0 },
-    { "text": "10", "top": "78.5741%", "left": "39.0323%", "width": 91, "height": 32, "rotate": 0 },
-    { "text": "11", "top": "78.5741%", "left": "28.172%", "width": 89, "height": 32, "rotate": 0 },
-    { "text": "12", "top": "78.2295%", "left": "17.0968%", "width": 94, "height": 33, "rotate": 0 },
-    { "text": "13", "top": "71.337%", "left": "6.45161%", "width": 95, "height": 32, "rotate": 33.05808505261985 },
-    { "text": "14", "top": "44.4564%", "left": "0.107527%", "width": 97, "height": 34, "rotate": 90.76902468257803 },
-    { "text": "15", "top": "17.2312%", "left": "6.23656%", "width": 95, "height": 35, "rotate": -34.63231812412218 },
-    { "text": "16", "top": "10.3387%", "left": "17.2043%", "width": 90, "height": 33, "rotate": -0.4212849041686013 },
-    { "text": "17", "top": "10.3387%", "left": "27.957%", "width": 92, "height": 32, "rotate": 0.08154041868489514 },
-    { "text": "18", "top": "10.3387%", "left": "38.9247%", "width": 92, "height": 33, "rotate": 0 },
-    { "text": "19", "top": "44.801%", "left": "39.2473%", "width": 81, "height": 30, "rotate": 0 },
-    { "text": "20", "top": "44.801%", "left": "51.828%", "width": 81, "height": 30, "rotate": 0 }
-];
-
-const primus40p18mCol_BlockLayout = [
-    { "text": "1", "top": "13.0957%", "left": "50.6452%", "width": 97, "height": 28, "rotate": 0 },
-    { "text": "2", "top": "13.0957%", "left": "61.828%", "width": 95, "height": 29, "rotate": 0 },
-    { "text": "3", "top": "12.7511%", "left": "72.6882%", "width": 94, "height": 29, "rotate": 0 },
-    { "text": "4", "top": "17.2312%", "left": "83.4409%", "width": 94, "height": 37, "rotate": 36.62132749378443 },
-    { "text": "5", "top": "44.4564%", "left": "89.1398%", "width": 90, "height": 32, "rotate": 90.45835645800044 },
-    { "text": "6", "top": "71.6817%", "left": "83.1183%", "width": 95, "height": 28, "rotate": -34.95466963050332 },
-    { "text": "7", "top": "77.1956%", "left": "72.7957%", "width": 92, "height": 25, "rotate": 0.6950985156569516 },
-    { "text": "8", "top": "76.851%", "left": "61.6129%", "width": 96, "height": 25, "rotate": 0 },
-    { "text": "9", "top": "76.5064%", "left": "50.6452%", "width": 95, "height": 26, "rotate": 0 },
-    { "text": "10", "top": "76.851%", "left": "39.1398%", "width": 93, "height": 25, "rotate": 0 },
-    { "text": "11", "top": "76.851%", "left": "28.2796%", "width": 92, "height": 24, "rotate": 0 },
-    { "text": "12", "top": "76.851%", "left": "17.2043%", "width": 95, "height": 25, "rotate": 0 },
-    { "text": "13", "top": "70.6478%", "left": "7.2043%", "width": 92, "height": 27, "rotate": 36.86989764584402 },
-    { "text": "14", "top": "45.8349%", "left": "1.6129%", "width": 92, "height": 25, "rotate": 270 },
-    { "text": "15", "top": "19.6435%", "left": "7.2043%", "width": 87, "height": 28, "rotate": -32.18008106123287 },
-    { "text": "16", "top": "12.4064%", "left": "17.0968%", "width": 96, "height": 26, "rotate": 0 },
-    { "text": "17", "top": "13.0957%", "left": "28.2796%", "width": 90, "height": 25, "rotate": 0.32182275023401985 },
-    { "text": "18", "top": "13.4403%", "left": "39.1398%", "width": 91, "height": 25, "rotate": 0 },
-    { "text": "19", "top": "44.4564%", "left": "39.3548%", "width": 82, "height": 33, "rotate": 0 },
-    { "text": "20", "top": "44.4564%", "left": "51.6129%", "width": 81, "height": 32, "rotate": 0 }
-];
-
-const primus40p16mRef_BlockLayout = [
-    {
-        "text": "1",
-        "top": "11.0279%",
-        "left": "51.0753%",
-        "width": 95,
-        "height": 29,
-        "rotate": 0
-    },
-    {
-        "text": "2",
-        "top": "11.0279%",
-        "left": "61.7204%",
-        "width": 95,
-        "height": 29,
-        "rotate": 0
     },
     {
         "text": "3",
-        "top": "11.0279%",
-        "left": "72.6882%",
-        "width": 94,
-        "height": 29,
+        "top": "14.1296%",
+        "left": "67.5269%",
+        "width": 79,
+        "height": 30,
         "rotate": 0
     },
     {
         "text": "4",
-        "top": "16.5419%",
-        "left": "83.2258%",
-        "width": 94,
-        "height": 37,
-        "rotate": 34.930937301110575
+        "top": "14.4742%",
+        "left": "76.7742%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "5",
-        "top": "44.4564%",
-        "left": "89.3548%",
-        "width": 90,
-        "height": 32,
-        "rotate": 90.45835645800044
+        "top": "20%",
+        "left": "86%",
+        "width": 79,
+        "height": 31,
+        "rotate": 35
     },
     {
         "text": "6",
-        "top": "71.337%",
-        "left": "83.0108%",
-        "width": 92.904541015625,
-        "height": 32.37713623046875,
-        "rotate": -34.95466963050332
+        "top": "44.9%",
+        "left": "91%",
+        "width": 82,
+        "height": 31,
+        "rotate": 90
     },
     {
         "text": "7",
-        "top": "77.1956%",
-        "left": "69.8925%",
-        "width": 91.639892578125,
-        "height": 32.202392578125,
-        "rotate": 0.6950985156569516
+        "top": "69.6139%",
+        "left": "86.129%",
+        "width": 79,
+        "height": 31,
+        "rotate": -35
     },
     {
         "text": "8",
-        "top": "77.1956%",
-        "left": "53.7634%",
-        "width": 92,
-        "height": 33,
+        "top": "75.8171%",
+        "left": "76.7742%",
+        "width": 79,
+        "height": 31,
         "rotate": 0
     },
     {
         "text": "9",
-        "top": "77.1956%",
-        "left": "36.129%",
-        "width": 93,
-        "height": 33,
+        "top": "75.4725%",
+        "left": "67.6344%",
+        "width": 78,
+        "height": 30,
         "rotate": 0
     },
     {
         "text": "10",
-        "top": "77.8849%",
-        "left": "20.1075%",
-        "width": 92,
-        "height": 30,
-        "rotate": 0
-    },
-    {
-        "text": "11",
-        "top": "70.3032%",
-        "left": "7.2043%",
-        "width": 88.26806640625,
-        "height": 35.1656494140625,
-        "rotate": 34.755920910299736
-    },
-    {
-        "text": "12",
-        "top": "44.4564%",
-        "left": "0.537634%",
-        "width": 96.6455078125,
-        "height": 35.1678466796875,
-        "rotate": 89.6103216419136
-    },
-    {
-        "text": "13",
-        "top": "16.1973%",
-        "left": "6.45161%",
-        "width": 97.4873046875,
-        "height": 35.19956970214844,
-        "rotate": -34.658354705521106
-    },
-    {
-        "text": "14",
-        "top": "11.0279%",
-        "left": "17.5269%",
-        "width": 93.797119140625,
-        "height": 30.82763671875,
-        "rotate": 0.8746767711213153
-    },
-    {
-        "text": "15",
-        "top": "11.0279%",
-        "left": "28.0645%",
-        "width": 95.3056640625,
-        "height": 29.964874267578125,
-        "rotate": 0.6365936838840298
-    },
-    {
-        "text": "16",
-        "top": "10.6833%",
-        "left": "39.2473%",
-        "width": 94,
-        "height": 30,
-        "rotate": 0
-    },
-    {
-        "text": "17",
-        "top": "10.6833%",
-        "left": "39.2473%",
-        "width": 94,
-        "height": 30,
-        "rotate": 0
-    },
-    {
-        "text": "18",
-        "top": "10.6833%",
-        "left": "39.2473%",
-        "width": 94,
-        "height": 30,
-        "rotate": 0
-    }
-];
-
-const primus40p16mCol_BlockLayout = [
-    {
-        "text": "1",
-        "top": "13.0957%",
-        "left": "50.8602%",
-        "width": 94,
-        "height": 24,
-        "rotate": 0
-    },
-    {
-        "text": "2",
-        "top": "12.7511%",
-        "left": "61.7204%",
-        "width": 91,
-        "height": 25,
-        "rotate": 0
-    },
-    {
-        "text": "3",
-        "top": "12.4064%",
-        "left": "72.5806%",
-        "width": 94,
-        "height": 25,
-        "rotate": 0
-    },
-    {
-        "text": "4",
-        "top": "18.9543%",
-        "left": "82.6882%",
-        "width": 90.928955078125,
-        "height": 26.358154296875,
-        "rotate": 35.65532809790031
-    },
-    {
-        "text": "5",
-        "top": "44.801%",
-        "left": "88.172%",
-        "width": 97.5673828125,
-        "height": 30.220962524414062,
-        "rotate": 89.58780725859768
-    },
-    {
-        "text": "6",
-        "top": "70.9924%",
-        "left": "82.4731%",
-        "width": 92.791015625,
-        "height": 27.382080078125,
-        "rotate": -36.218837265614525
-    },
-    {
-        "text": "7",
-        "top": "78.5741%",
-        "left": "72.3656%",
-        "width": 91.75927734375,
-        "height": 20.5045166015625,
-        "rotate": 0.2367580719071043
-    },
-    {
-        "text": "8",
-        "top": "78.2295%",
-        "left": "61.828%",
-        "width": 89,
-        "height": 21,
-        "rotate": 0
-    },
-    {
-        "text": "9",
-        "top": "78.5741%",
-        "left": "50.9677%",
-        "width": 94,
-        "height": 21,
-        "rotate": 0
-    },
-    {
-        "text": "10",
-        "top": "78.9187%",
-        "left": "39.4624%",
-        "width": 91,
-        "height": 22,
-        "rotate": 0
-    },
-    {
-        "text": "11",
-        "top": "78.5741%",
-        "left": "28.6022%",
-        "width": 93,
-        "height": 23,
-        "rotate": 0
-    },
-    {
-        "text": "12",
-        "top": "79.2634%",
-        "left": "17.957%",
-        "width": 91,
-        "height": 21,
-        "rotate": 0
-    },
-    {
-        "text": "13",
-        "top": "70.3032%",
-        "left": "8.17204%",
-        "width": 90.068603515625,
-        "height": 30.22503662109375,
-        "rotate": 35.61085243866875
-    },
-    {
-        "text": "14",
-        "top": "44.1118%",
-        "left": "1.93548%",
-        "width": 90.37445068359375,
-        "height": 34.75164794921875,
-        "rotate": -89.13194855025446
-    },
-    {
-        "text": "15",
-        "top": "18.9543%",
-        "left": "8.17204%",
-        "width": 88.112548828125,
-        "height": 30.567230224609375,
-        "rotate": -37.08249696517166
-    },
-    {
-        "text": "16",
-        "top": "12.0618%",
-        "left": "17.957%",
-        "width": 91.730224609375,
-        "height": 27.233856201171875,
-        "rotate": -0.3333880704687431
-    },
-    {
-        "text": "17",
-        "top": "12.7511%",
-        "left": "28.7097%",
-        "width": 91.553466796875,
-        "height": 23.57330322265625,
-        "rotate": -0.3240676953107311
-    },
-    {
-        "text": "18",
-        "top": "12.4064%",
-        "left": "39.4624%",
-        "width": 89,
-        "height": 24,
-        "rotate": 0
-    },
-    {
-        "text": "19",
-        "top": "44.801%",
-        "left": "39.7849%",
+        "top": "75.4725%",
+        "left": "58.172%",
         "width": 80,
         "height": 31,
         "rotate": 0
     },
     {
-        "text": "20",
-        "top": "45.1457%",
-        "left": "51.9355%",
-        "width": 81,
+        "text": "11",
+        "top": "75.1279%",
+        "left": "50.5376%",
+        "width": 49,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "12",
+        "top": "75.1279%",
+        "left": "43.9785%",
+        "width": 51,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "13",
+        "top": "75.4725%",
+        "left": "33.3333%",
+        "width": 78,
         "height": 31,
         "rotate": 0
-    }
-];
-const primus40p14mCol_BlockLayout = [
-    {
-        "text": "1",
-        "top": "11.0279%",
-        "left": "53.6559%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
-    },
-    {
-        "text": "2",
-        "top": "11.3726%",
-        "left": "70%",
-        "width": 92,
-        "height": 29,
-        "rotate": 0
-    },
-    {
-        "text": "3",
-        "top": "17.5758%",
-        "left": "83.5484%",
-        "width": 89.6626,
-        "height": 32.7779,
-        "rotate": 34.439
-    },
-    {
-        "text": "4",
-        "top": "43.4225%",
-        "left": "90%",
-        "width": 90.293212890625,
-        "height": 35.916748046875,
-        "rotate": 89.78374384693512
-    },
-    {
-        "text": "5",
-        "top": "71.337%",
-        "left": "83.0108%",
-        "width": 97.5674,
-        "height": 30.221,
-        "rotate": -32.8299427861065
-    },
-    {
-        "text": "6",
-        "top": "77.5403%",
-        "left": "70%",
-        "width": 93.4736328125,
-        "height": 33.512939453125,
-        "rotate": -0.45042923869822005
-    },
-    {
-        "text": "7",
-        "top": "77.8849%",
-        "left": "53.6559%",
-        "width": 90.95068359375,
-        "height": 31.25006103515625,
-        "rotate": 0.236758
-    },
-    {
-        "text": "8",
-        "top": "77.8849%",
-        "left": "36.6667%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
-    },
-    {
-        "text": "9",
-        "top": "77.1956%",
-        "left": "20.1075%",
-        "width": 93,
-        "height": 35,
-        "rotate": 0
-    },
-    {
-        "text": "10",
-        "top": "70.3032%",
-        "left": "6.98925%",
-        "width": 89.827880859375,
-        "height": 33.8858642578125,
-        "rotate": 32.016505362561496
-    },
-    {
-        "text": "11",
-        "top": "43.7672%",
-        "left": "0.537634%",
-        "width": 90.67822265625,
-        "height": 34.1654052734375,
-        "rotate": 89.5817900585029
-    },
-    {
-        "text": "12",
-        "top": "16.8865%",
-        "left": "6.77419%",
-        "width": 95.1767578125,
-        "height": 31.917236328125,
-        "rotate": -33.4397773147512
-    },
-    {
-        "text": "13",
-        "top": "11.0279%",
-        "left": "20.2151%",
-        "width": 92.0859375,
-        "height": 30.288909912109375,
-        "rotate": -0.044640246997460054
     },
     {
         "text": "14",
-        "top": "11.0279%",
-        "left": "36.5591%",
-        "width": 92.791015625,
-        "height": 30.88873291015625,
-        "rotate": -0.7238287929288703
+        "top": "75.8171%",
+        "left": "24.086%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "15",
-        "top": "44.4564%",
-        "left": "38.9247%",
-        "width": 88.1125,
-        "height": 30.5672,
-        "rotate": -0.09414790976944687
+        "top": "75.4725%",
+        "left": "14.5161%",
+        "width": 79,
+        "height": 30,
+        "rotate": -0.4775781408588671
     },
     {
         "text": "16",
-        "top": "44.4564%",
-        "left": "51.9355%",
-        "width": 82.87548828125,
-        "height": 30.751968383789062,
-        "rotate": -0.333388
-    }
-];
-const primus40p14mRef_BlockLayout = [
+        "top": "69.2693%",
+        "left": "5.5914%",
+        "width": 80,
+        "height": 30,
+        "rotate": 38.19868517601842
+    },
     {
-        "text": "1",
-        "top": "11.0279%",
-        "left": "53.6559%",
-        "width": 91,
-        "height": 32,
+        "text": "17",
+        "top": "45.1457%",
+        "left": "0%",
+        "width": 86.4990234375,
+        "height": 29.5570068359375,
+        "rotate": 268.9087837747374
+    },
+    {
+        "text": "18",
+        "top": "20.3328%",
+        "left": "5.69892%",
+        "width": 79.767822265625,
+        "height": 29.86376953125,
+        "rotate": -36.43075032082888
+    },
+    {
+        "text": "19",
+        "top": "13.4403%",
+        "left": "14.7312%",
+        "width": 79,
+        "height": 30,
         "rotate": 0
     },
     {
-        "text": "2",
-        "top": "11.3726%",
-        "left": "70%",
-        "width": 92,
+        "text": "20",
+        "top": "14.1296%",
+        "left": "24.086%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "21",
+        "top": "14.1296%",
+        "left": "33.4409%",
+        "width": 77,
+        "height": 30,
+        "rotate": 0
+    },
+    {
+        "text": "22",
+        "top": "14.4742%",
+        "left": "43.9785%",
+        "width": 51,
+        "height": 29,
+        "rotate": 0
+    }
+];
+
+const primus47p24mRef_BlockLayout = [
+    {
+        "text": "1",
+        "top": "14.4742%",
+        "left": "45.6989%",
+        "width": 79,
         "height": 29,
         "rotate": 0
     },
     {
+        "text": "2",
+        "top": "14.4742%",
+        "left": "58.2796%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
+    },
+    {
         "text": "3",
-        "top": "17.5758%",
-        "left": "83.5484%",
-        "width": 89.6626,
-        "height": 32.7779,
-        "rotate": 34.439
+        "top": "14.4742%",
+        "left": "67.5269%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "4",
-        "top": "43.4225%",
-        "left": "90%",
-        "width": 90.293212890625,
-        "height": 35.916748046875,
-        "rotate": 89.78374384693512
+        "top": "14.1296%",
+        "left": "76.7742%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "5",
-        "top": "71.337%",
-        "left": "83.0108%",
-        "width": 97.5674,
-        "height": 30.221,
-        "rotate": -32.8299427861065
+        "top": "16.1973%",
+        "left": "85.6989%",
+        "width": 48.86328125,
+        "height": 40.29241943359375,
+        "rotate": 29.311900745626012
     },
     {
         "text": "6",
-        "top": "77.5403%",
-        "left": "70%",
-        "width": 93.4736328125,
-        "height": 33.512939453125,
-        "rotate": -0.45042923869822005
+        "top": "23.779%",
+        "left": "90.8602%",
+        "width": 52.58349609375,
+        "height": 42.37493896484375,
+        "rotate": 43.87630393575183
     },
     {
         "text": "7",
-        "top": "77.8849%",
-        "left": "53.6559%",
-        "width": 90.95068359375,
-        "height": 31.25006103515625,
-        "rotate": 0.236758
+        "top": "44.801%",
+        "left": "92.3656%",
+        "width": 53.816162109375,
+        "height": 30.91754150390625,
+        "rotate": 90.51210452082812
     },
     {
         "text": "8",
-        "top": "77.8849%",
-        "left": "36.6667%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
+        "top": "62.3768%",
+        "left": "90.8602%",
+        "width": 47.5546875,
+        "height": 34.22119140625,
+        "rotate": -42.20707016808356
     },
     {
         "text": "9",
-        "top": "77.1956%",
-        "left": "20.1075%",
-        "width": 93,
-        "height": 35,
-        "rotate": 0
+        "top": "70.9924%",
+        "left": "85.5914%",
+        "width": 52.8193359375,
+        "height": 31.8973388671875,
+        "rotate": -29.357753542791272
     },
     {
         "text": "10",
-        "top": "70.3032%",
-        "left": "6.98925%",
-        "width": 89.827880859375,
-        "height": 33.8858642578125,
-        "rotate": 32.016505362561496
+        "top": "75.4725%",
+        "left": "76.8817%",
+        "width": 78,
+        "height": 29,
+        "rotate": 0
     },
     {
         "text": "11",
-        "top": "43.7672%",
-        "left": "0.537634%",
-        "width": 90.67822265625,
-        "height": 34.1654052734375,
-        "rotate": 89.5817900585029
+        "top": "75.4725%",
+        "left": "67.4194%",
+        "width": 80,
+        "height": 31,
+        "rotate": 0
     },
     {
         "text": "12",
-        "top": "16.8865%",
-        "left": "6.77419%",
-        "width": 95.1767578125,
-        "height": 31.917236328125,
-        "rotate": -33.4397773147512
+        "top": "75.8171%",
+        "left": "58.2796%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "13",
-        "top": "11.0279%",
-        "left": "20.2151%",
-        "width": 92.0859375,
-        "height": 30.288909912109375,
-        "rotate": -0.044640246997460054
+        "top": "75.8171%",
+        "left": "45.6989%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "14",
-        "top": "11.0279%",
-        "left": "36.5591%",
-        "width": 92.791015625,
-        "height": 30.88873291015625,
-        "rotate": -0.7238287929288703
+        "top": "75.4725%",
+        "left": "33.2258%",
+        "width": 79,
+        "height": 30,
+        "rotate": 0
     },
     {
         "text": "15",
-        "top": "44.4564%",
-        "left": "38.9247%",
-        "width": 88.1125,
-        "height": 30.5672,
-        "rotate": -0.09414790976944687
+        "top": "75.4725%",
+        "left": "23.871%",
+        "width": 79,
+        "height": 30,
+        "rotate": -0.7538483330707777
     },
     {
         "text": "16",
-        "top": "44.4564%",
-        "left": "51.9355%",
-        "width": 82.87548828125,
-        "height": 30.751968383789062,
-        "rotate": -0.333388
-    }
-];
-const primus40p12mRef_BlockLayout = [
-    {
-        "text": "1",
-        "top": "11.0279%",
-        "left": "53.5484%",
-        "width": 91,
-        "height": 32,
+        "top": "75.8171%",
+        "left": "14.6237%",
+        "width": 80,
+        "height": 30,
         "rotate": 0
     },
     {
-        "text": "2",
-        "top": "12.0618%",
-        "left": "69.6774%",
-        "width": 92,
-        "height": 29,
-        "rotate": 0
+        "text": "17",
+        "top": "70.9924%",
+        "left": "8.8172%",
+        "width": 50.5244140625,
+        "height": 32.8582763671875,
+        "rotate": 26.56505117707799
     },
     {
-        "text": "3",
-        "top": "25.1575%",
-        "left": "85.1613%",
-        "width": 98.471923828125,
-        "height": 32.725921630859375,
-        "rotate": 34.439
+        "text": "18",
+        "top": "63.7553%",
+        "left": "3.54839%",
+        "width": 53.62799072265625,
+        "height": 29.25958251953125,
+        "rotate": 48.06781910863707
     },
     {
-        "text": "4",
-        "top": "64.0999%",
-        "left": "85.0538%",
-        "width": 96.85595703125,
-        "height": 31.43310546875,
-        "rotate": -34.18968139622734
+        "text": "19",
+        "top": "44.1118%",
+        "left": "1.50538%",
+        "width": 56,
+        "height": 31,
+        "rotate": 270
     },
     {
-        "text": "5",
-        "top": "78.2295%",
-        "left": "69.6774%",
-        "width": 99.27197265625,
-        "height": 29.7598876953125,
-        "rotate": 0.3674438462476388
-    },
-    {
-        "text": "6",
-        "top": "77.8849%",
-        "left": "53.4409%",
-        "width": 94.9296875,
-        "height": 29.9625244140625,
-        "rotate": -0.45042923869822005
-    },
-    {
-        "text": "7",
-        "top": "77.5403%",
-        "left": "36.6667%",
-        "width": 90.95068359375,
-        "height": 31.25006103515625,
-        "rotate": 0.236758
-    },
-    {
-        "text": "8",
-        "top": "77.5403%",
-        "left": "20.5376%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
-    },
-    {
-        "text": "9",
-        "top": "63.0661%",
-        "left": "4.94624%",
-        "width": 93,
-        "height": 35,
-        "rotate": 38.516969997995645
-    },
-    {
-        "text": "10",
+        "text": "20",
         "top": "25.8468%",
-        "left": "4.94624%",
-        "width": 94.85693359375,
-        "height": 31.58184814453125,
-        "rotate": -37.53692401335465
+        "left": "3.33333%",
+        "width": 52.541015625,
+        "height": 31.528076171875,
+        "rotate": -46.3118877825041
     },
     {
-        "text": "11",
-        "top": "11.7172%",
-        "left": "20.1075%",
-        "width": 94.958984375,
-        "height": 30.9261474609375,
-        "rotate": 0.4872947602160451
+        "text": "21",
+        "top": "17.5758%",
+        "left": "8.8172%",
+        "width": 54.10595703125,
+        "height": 32.440185546875,
+        "rotate": -27.790442479452096
     },
     {
-        "text": "12",
-        "top": "12.0618%",
-        "left": "36.4516%",
-        "width": 95.1767578125,
-        "height": 31.917236328125,
-        "rotate": -0.685761081706346
+        "text": "22",
+        "top": "14.1296%",
+        "left": "14.5161%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
     },
     {
-        "text": "13",
-        "top": "45.1457%",
-        "left": "39.4624%",
-        "width": 83.1015625,
-        "height": 30.35296630859375,
-        "rotate": -0.044640246997460054
+        "text": "23",
+        "top": "13.7849%",
+        "left": "23.9785%",
+        "width": 80,
+        "height": 30,
+        "rotate": 0
     },
     {
-        "text": "14",
-        "top": "44.801%",
-        "left": "51.9355%",
-        "width": 78.1639404296875,
-        "height": 31.04461669921875,
-        "rotate": -0.7238287929288703
+        "text": "24",
+        "top": "13.4403%",
+        "left": "33.0108%",
+        "width": 83,
+        "height": 30,
+        "rotate": 0
     }
 ];
-const primus40p12mCol_BlockLayout = [
-    {
-        "text": "1",
-        "top": "11.0279%",
-        "left": "53.5484%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
-    },
-    {
-        "text": "2",
-        "top": "12.0618%",
-        "left": "69.6774%",
-        "width": 92,
-        "height": 29,
-        "rotate": 0
-    },
-    {
-        "text": "3",
-        "top": "25.1575%",
-        "left": "85.1613%",
-        "width": 98.471923828125,
-        "height": 32.725921630859375,
-        "rotate": 34.439
-    },
-    {
-        "text": "4",
-        "top": "64.0999%",
-        "left": "85.0538%",
-        "width": 96.85595703125,
-        "height": 31.43310546875,
-        "rotate": -34.18968139622734
-    },
-    {
-        "text": "5",
-        "top": "78.2295%",
-        "left": "69.6774%",
-        "width": 99.27197265625,
-        "height": 29.7598876953125,
-        "rotate": 0.3674438462476388
-    },
-    {
-        "text": "6",
-        "top": "77.8849%",
-        "left": "53.4409%",
-        "width": 94.9296875,
-        "height": 29.9625244140625,
-        "rotate": -0.45042923869822005
-    },
-    {
-        "text": "7",
-        "top": "77.5403%",
-        "left": "36.6667%",
-        "width": 90.95068359375,
-        "height": 31.25006103515625,
-        "rotate": 0.236758
-    },
-    {
-        "text": "8",
-        "top": "77.5403%",
-        "left": "20.5376%",
-        "width": 91,
-        "height": 32,
-        "rotate": 0
-    },
-    {
-        "text": "9",
-        "top": "63.0661%",
-        "left": "4.94624%",
-        "width": 93,
-        "height": 35,
-        "rotate": 38.516969997995645
-    },
-    {
-        "text": "10",
-        "top": "25.8468%",
-        "left": "4.94624%",
-        "width": 94.85693359375,
-        "height": 31.58184814453125,
-        "rotate": -37.53692401335465
-    },
-    {
-        "text": "11",
-        "top": "11.7172%",
-        "left": "20.1075%",
-        "width": 94.958984375,
-        "height": 30.9261474609375,
-        "rotate": 0.4872947602160451
-    },
-    {
-        "text": "12",
-        "top": "12.0618%",
-        "left": "36.4516%",
-        "width": 95.1767578125,
-        "height": 31.917236328125,
-        "rotate": -0.685761081706346
-    },
-    {
-        "text": "13",
-        "top": "45.1457%",
-        "left": "39.4624%",
-        "width": 83.1015625,
-        "height": 30.35296630859375,
-        "rotate": -0.044640246997460054
-    },
-    {
-        "text": "14",
-        "top": "44.801%",
-        "left": "51.9355%",
-        "width": 78.1639404296875,
-        "height": 31.04461669921875,
-        "rotate": -0.7238287929288703
-    }
-];
+		// ================================================================================= //
+		// ===================== LISTA PRINCIPAL DE LAYOUTS (CORRIGIDA) ==================== //
+		// ================================================================================= //
 
-// ================================================================================= //
-// ===================== LISTA PRINCIPAL DE LAYOUTS (CORRIGIDA) ==================== //
-// ================================================================================= //
+		const layouts = [
+			{ id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
+			{ id: 's_slim_bicolor_example', name: 'S-SLIM Bicolor Exemplo', image: 'simulação.png', category: 'Padrão', blocks: s_slim_bicolor_example },
+			
+			// 40 Polegadas
+			{ id: 'primus40p12mCol', name: 'Primus 40p 12m Col', image: 'ImagensSirene40p/primus40p12mCol.png', category: '40 Polegadas', blocks: primus40p12mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus40p12mRef', name: 'Primus 40p 12m Ref', image: 'ImagensSirene40p/primus40p12mRef.png', category: '40 Polegadas', blocks: primus40p12mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus40p14mCol', name: 'Primus 40p 14m Col', image: 'ImagensSirene40p/primus40p14mCol.png', category: '40 Polegadas', blocks: primus40p14mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus40p14mRef', name: 'Primus 40p 14m Ref', image: 'ImagensSirene40p/primus40p14mRef.png', category: '40 Polegadas', blocks: primus40p14mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus40p16mCol', name: 'Primus 40p 16m Col', image: 'ImagensSirene40p/primus40p16mCol.png', category: '40 Polegadas', blocks: primus40p16mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus40p16mRef', name: 'Primus 40p 16m Ref', image: 'ImagensSirene40p/primus40p16mRef.png', category: '40 Polegadas', blocks: primus40p16mRef_BlockLayout},
+			{ id: 'primus40p18mCol', name: 'Primus 40p 18m Col', image: 'ImagensSirene40p/primus40p18mCol.png', category: '40 Polegadas', blocks: primus40p18mCol_BlockLayout },
+			{ id: 'primus40p18mRef', name: 'Primus 40p 18m Ref', image: 'ImagensSirene40p/primus40p18mRef.png', category: '40 Polegadas', blocks: primus40p18mRef_BlockLayout },
+			{ id: 'primus40p22mRef', name: 'Primus 40p 22m Ref', image: 'ImagensSirene40p/primus40p22mRef.png', category: '40 Polegadas', blocks: primus40p22mRef_BlockLayout },
 
-const layouts = [
-    { id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
-    { id: 's_slim_bicolor_example', name: 'S-SLIM Bicolor Exemplo', image: 'simulação.png', category: 'Padrão', blocks: s_slim_bicolor_example },
-    
-    // 40 Polegadas
-    { id: 'primus40p12mCol', name: 'Primus 40p 12m Col', image: 'ImagensSirene40p/primus40p12mCol.png', category: '40 Polegadas', blocks: primus40p12mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus40p12mRef', name: 'Primus 40p 12m Ref', image: 'ImagensSirene40p/primus40p12mRef.png', category: '40 Polegadas', blocks: primus40p12mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus40p14mCol', name: 'Primus 40p 14m Col', image: 'ImagensSirene40p/primus40p14mCol.png', category: '40 Polegadas', blocks: primus40p14mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus40p14mRef', name: 'Primus 40p 14m Ref', image: 'ImagensSirene40p/primus40p14mRef.png', category: '40 Polegadas', blocks: primus40p14mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus40p16mCol', name: 'Primus 40p 16m Col', image: 'ImagensSirene40p/primus40p16mCol.png', category: '40 Polegadas', blocks: primus40p16mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus40p16mRef', name: 'Primus 40p 16m Ref', image: 'ImagensSirene40p/primus40p16mRef.png', category: '40 Polegadas', blocks: primus40p16mRef_BlockLayout},
-    { id: 'primus40p18mCol', name: 'Primus 40p 18m Col', image: 'ImagensSirene40p/primus40p18mCol.png', category: '40 Polegadas', blocks: primus40p18mCol_BlockLayout },
-    { id: 'primus40p18mRef', name: 'Primus 40p 18m Ref', image: 'ImagensSirene40p/primus40p18mRef.png', category: '40 Polegadas', blocks: primus40p18mRef_BlockLayout },
-    { id: 'primus40p22mRef', name: 'Primus 40p 22m Ref', image: 'ImagensSirene40p/primus40p22mRef.png', category: '40 Polegadas', blocks: primus40p22mRef_BlockLayout },
-
-    // 47 Polegadas
-    { id: 'primus47p11mCol', name: 'Primus 47p 11m Col', image: 'ImagensRefletor47p/colimador/primus47p11mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p11mRef', name: 'Primus 47p 11m Ref', image: 'ImagensRefletor47p/refletor/primus47p11mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p13mRef', name: 'Primus 47p 13m Ref', image: 'ImagensRefletor47p/refletor/primus47p13mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p14mCol', name: 'Primus 47p 14m Col', image: 'ImagensRefletor47p/colimador/primus47p14mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p14mRef', name: 'Primus 47p 14m Ref', image: 'ImagensRefletor47p/refletor/primus47p14mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p16mCol', name: 'Primus 47p 16m Col', image: 'ImagensRefletor47p/colimador/primus47p16mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p16mRef', name: 'Primus 47p 16m Ref', image: 'ImagensRefletor47p/refletor/primus47p16mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p18mRef', name: 'Primus 47p 18m Ref', image: 'ImagensRefletor47p/refletor/primus47p18mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p20mCol', name: 'Primus 47p 20m Col', image: 'ImagensRefletor47p/colimador/primus47p20mCol.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p20mRef', name: 'Primus 47p 20m Ref', image: 'ImagensRefletor47p/refletor/primus47p20mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p22mRef', name: 'Primus 47p 22m Ref', image: 'ImagensRefletor47p/refletor/primus47p22mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    { id: 'primus47p24mRef', name: 'Primus 47p 24m Ref', image: 'ImagensRefletor47p/refletor/primus47p24mRef.png', category: '47 Polegadas', blocks: s_slim_24_default_BlockLayout }, // <-- Manter padrão ou criar um específico
-    
-    // 54 Polegadas
-    { id: 'primus54p10mCol', name: 'Primus 54p 10m Col', image: 'ImagensSirene54P/colimador/primus54p10mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p12mRef', name: 'Primus 54p 12m Ref', image: 'ImagensSirene54P/refletor/primus54p12mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p14mCol', name: 'Primus 54p 14m Col', image: 'ImagensSirene54P/colimador/primus54p14mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p14mRef', name: 'Primus 54p 14m Ref', image: 'ImagensSirene54P/refletor/primus54p14mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p16mCol', name: 'Primus 54p 16m Col', image: 'ImagensSirene54P/colimador/primus54p16mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p18mRef', name: 'Primus 54p 18m Ref', image: 'ImagensSirene54P/refletor/primus54p18mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p20mRef', name: 'Primus 54p 20m Ref', image: 'ImagensSirene54P/refletor/primus54p20mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p22mCol', name: 'Primus 54p 22m Col', image: 'ImagensSirene54P/colimador/primus54p22mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p22mRef', name: 'Primus 54p 22m Ref', image: 'ImagensSirene54P/refletor/primus54p22mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus54p26mRef', name: 'Primus 54p 26m Ref', image: 'ImagensSirene54P/refletor/primus54p26mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    
-    // 61 Polegadas
-    { id: 'primus61p13mCol', name: 'Primus 61p 13m Col', image: 'ImagensSirene61P/colimador/primus61p13mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p13mRef', name: 'Primus 61p 13m Ref', image: 'ImagensSirene61P/refletor/primus61p13mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p14mCol', name: 'Primus 61p 14m Col', image: 'ImagensSirene61P/colimador/primus61p14mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p15mRef', name: 'Primus 61p 15m Ref', image: 'ImagensSirene61P/refletor/primus61p15mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p18mCol', name: 'Primus 61p 18m Col', image: 'ImagensSirene61P/colimador/primus61p18mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p18mRef', name: 'Primus 61p 18m Ref', image: 'ImagensSirene61P/refletor/primus61p18mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p20mRef', name: 'Primus 61p 20m Ref', image: 'ImagensSirene61P/refletor/primus61p20mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p22mRef', name: 'Primus 61p 22m Ref', image: 'ImagensSirene61P/refletor/primus61p22mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p24mCol', name: 'Primus 61p 24m Col', image: 'ImagensSirene61P/colimador/primus61p24mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p24mRef', name: 'Primus 61p 24m Ref', image: 'ImagensSirene61P/refletor/primus61p24mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    { id: 'primus61p28mRef', name: 'Primus 61p 28m Ref', image: 'ImagensSirene61P/refletor/primus61p28mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
-    
-    // Venus
-    { id: 'venus11m', name: 'Venus 11m', image: 'VenusSirene/venus11m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus14m', name: 'Venus 14m', image: 'VenusSirene/venus14m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus15m', name: 'Venus 15m', image: 'VenusSirene/venus15m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus16m', name: 'Venus 16m', image: 'VenusSirene/venus16m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus19m', name: 'Venus 19m', image: 'VenusSirene/venus19m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus20m', name: 'Venus 20m', image: 'VenusSirene/venus20m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus22m', name: 'Venus 22m', image: 'VenusSirene/venus22m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-    { id: 'venus24m', name: 'Venus 24m', image: 'VenusSirene/venus24m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
-];
+			// 47 Polegadas
+			{ id: 'primus47p11mCol', name: 'Primus 47p 11m Col', image: 'ImagensRefletor47p/colimador/primus47p11mCol.png', category: '47 Polegadas', blocks: primus47p11mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p11mRef', name: 'Primus 47p 11m Ref', image: 'ImagensRefletor47p/refletor/primus47p11mRef.png', category: '47 Polegadas', blocks: primus47p11mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p13mRef', name: 'Primus 47p 13m Ref', image: 'ImagensRefletor47p/refletor/primus47p13mRef.png', category: '47 Polegadas', blocks: primus47p13mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p14mCol', name: 'Primus 47p 14m Col', image: 'ImagensRefletor47p/colimador/primus47p14mCol.png', category: '47 Polegadas', blocks: primus47p14mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p14mRef', name: 'Primus 47p 14m Ref', image: 'ImagensRefletor47p/refletor/primus47p14mRef.png', category: '47 Polegadas', blocks: primus47p14mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p16mCol', name: 'Primus 47p 16m Col', image: 'ImagensRefletor47p/colimador/primus47p16mCol.png', category: '47 Polegadas', blocks: primus47p16mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p16mRef', name: 'Primus 47p 16m Ref', image: 'ImagensRefletor47p/refletor/primus47p16mRef.png', category: '47 Polegadas', blocks: primus47p16mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p18mRef', name: 'Primus 47p 18m Ref', image: 'ImagensRefletor47p/refletor/primus47p18mRef.png', category: '47 Polegadas', blocks: primus47p18mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p20mCol', name: 'Primus 47p 20m Col', image: 'ImagensRefletor47p/colimador/primus47p20mCol.png', category: '47 Polegadas', blocks: primus47p20mCol_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p20mRef', name: 'Primus 47p 20m Ref', image: 'ImagensRefletor47p/refletor/primus47p20mRef.png', category: '47 Polegadas', blocks: primus47p20mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p22mRef', name: 'Primus 47p 22m Ref', image: 'ImagensRefletor47p/refletor/primus47p22mRef.png', category: '47 Polegadas', blocks: primus47p22mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			{ id: 'primus47p24mRef', name: 'Primus 47p 24m Ref', image: 'ImagensRefletor47p/refletor/primus47p24mRef.png', category: '47 Polegadas', blocks: primus47p24mRef_BlockLayout }, // <-- Manter padrão ou criar um específico
+			
+			// 54 Polegadas
+			{ id: 'primus54p10mCol', name: 'Primus 54p 10m Col', image: 'ImagensSirene54P/colimador/primus54p10mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p12mRef', name: 'Primus 54p 12m Ref', image: 'ImagensSirene54P/refletor/primus54p12mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p14mCol', name: 'Primus 54p 14m Col', image: 'ImagensSirene54P/colimador/primus54p14mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p14mRef', name: 'Primus 54p 14m Ref', image: 'ImagensSirene54P/refletor/primus54p14mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p16mCol', name: 'Primus 54p 16m Col', image: 'ImagensSirene54P/colimador/primus54p16mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p18mRef', name: 'Primus 54p 18m Ref', image: 'ImagensSirene54P/refletor/primus54p18mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p20mRef', name: 'Primus 54p 20m Ref', image: 'ImagensSirene54P/refletor/primus54p20mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p22mCol', name: 'Primus 54p 22m Col', image: 'ImagensSirene54P/colimador/primus54p22mCol.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p22mRef', name: 'Primus 54p 22m Ref', image: 'ImagensSirene54P/refletor/primus54p22mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus54p26mRef', name: 'Primus 54p 26m Ref', image: 'ImagensSirene54P/refletor/primus54p26mRef.png', category: '54 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			
+			// 61 Polegadas
+			{ id: 'primus61p13mCol', name: 'Primus 61p 13m Col', image: 'ImagensSirene61P/colimador/primus61p13mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p13mRef', name: 'Primus 61p 13m Ref', image: 'ImagensSirene61P/refletor/primus61p13mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p14mCol', name: 'Primus 61p 14m Col', image: 'ImagensSirene61P/colimador/primus61p14mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p15mRef', name: 'Primus 61p 15m Ref', image: 'ImagensSirene61P/refletor/primus61p15mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p18mCol', name: 'Primus 61p 18m Col', image: 'ImagensSirene61P/colimador/primus61p18mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p18mRef', name: 'Primus 61p 18m Ref', image: 'ImagensSirene61P/refletor/primus61p18mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p20mRef', name: 'Primus 61p 20m Ref', image: 'ImagensSirene61P/refletor/primus61p20mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p22mRef', name: 'Primus 61p 22m Ref', image: 'ImagensSirene61P/refletor/primus61p22mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p24mCol', name: 'Primus 61p 24m Col', image: 'ImagensSirene61P/colimador/primus61p24mCol.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p24mRef', name: 'Primus 61p 24m Ref', image: 'ImagensSirene61P/refletor/primus61p24mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'primus61p28mRef', name: 'Primus 61p 28m Ref', image: 'ImagensSirene61P/refletor/primus61p28mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
+			
+			// Venus
+			{ id: 'venus11m', name: 'Venus 11m', image: 'VenusSirene/venus11m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus14m', name: 'Venus 14m', image: 'VenusSirene/venus14m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus15m', name: 'Venus 15m', image: 'VenusSirene/venus15m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus16m', name: 'Venus 16m', image: 'VenusSirene/venus16m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus19m', name: 'Venus 19m', image: 'VenusSirene/venus19m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus20m', name: 'Venus 20m', image: 'VenusSirene/venus20m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus22m', name: 'Venus 22m', image: 'VenusSirene/venus22m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+			{ id: 'venus24m', name: 'Venus 24m', image: 'VenusSirene/venus24m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
+		];
 
 
         const baseSheetStructure = Array.from({ length: 200 }, (_, i) => ({
@@ -1718,28 +3589,49 @@ const layouts = [
         
         // === FUNÇÕES DE INICIALIZAÇÃO E LAYOUT ===
         async function initializeApp() {
-            assignDomElements();
-            initializeDataStructure();
-            createSheetSelectorTabs();
-            createTableHeader();
-            
-            const allLayouts = await populateLayoutPanel(); 
-            const lastSavedId = localStorage.getItem('lastSavedLayoutId');
-            
-            if (lastSavedId && allLayouts.some(l => l.id === lastSavedId)) {
-                switchLayout(lastSavedId, allLayouts);
-                localStorage.removeItem('lastSavedLayoutId');
-            } else {
-                switchLayout(layouts[0].id, allLayouts); 
-            }
-            
-            renderTable(allMacroData[activeSheet]);
-            updateActiveSheetUI();
-            initializeEventListeners();
-            initializeInteractionHandlers();
-            renderAllActiveSettings(); 
-            updateConsumptionDisplay();
-        }
+            assignDomElements();
+            initializeDataStructure();
+            createSheetSelectorTabs();
+            createTableHeader();
+            
+            // 1. PRIMEIRO: Espera a lista de todos os layouts ser carregada e preparada.
+            allAvailableLayouts = await populateLayoutPanel(); 
+            
+            // 2. SEGUNDO: Agora que a lista existe, verifica se há um template para carregar.
+            const templateDataJSON = localStorage.getItem('simulation_template');
+            let layoutFoiCarregadoPeloTemplate = false;
+
+            if (templateDataJSON) {
+                try {
+                    const loadedData = JSON.parse(templateDataJSON);
+                    // A função loadDataIntoUI é chamada aqui, com a certeza de que allAvailableLayouts está preenchida.
+                    layoutFoiCarregadoPeloTemplate = loadDataIntoUI(loadedData);
+                    localStorage.removeItem('simulation_template');
+                } catch (error) {
+                    console.error("Falha ao processar template do localStorage:", error);
+                    alert("Ocorreu um erro ao tentar carregar o template.");
+                }
+            }
+            
+            // 3. TERCEIRO: Se nenhum template foi carregado, carrega o layout padrão.
+            if (!layoutFoiCarregadoPeloTemplate) {
+                const lastSavedId = localStorage.getItem('lastSavedLayoutId');
+                if (lastSavedId && allAvailableLayouts.some(l => l.id === lastSavedId)) {
+                    switchLayout(lastSavedId, allAvailableLayouts);
+                    localStorage.removeItem('lastSavedLayoutId');
+                } else {
+                    switchLayout(layouts[0].id, allAvailableLayouts); 
+                }
+            }
+            
+            // 4. QUARTO: Continua com o resto da inicialização.
+            renderTable(allMacroData[activeSheet]);
+            updateActiveSheetUI();
+            initializeEventListeners();
+            initializeInteractionHandlers();
+            renderAllActiveSettings(); 
+            updateConsumptionDisplay();
+        }
 
         function assignDomElements() {
             configModal = document.getElementById('config-modal');
@@ -1845,7 +3737,6 @@ const layouts = [
         function switchLayout(layoutId, allLayoutsList) {
             if (!allLayoutsList) {
                 console.error("A lista de layouts não foi fornecida para switchLayout.");
-                // Fallback para recarregar a lista, embora isso não deva acontecer com a nova lógica
                 populateLayoutPanel().then(layouts => switchLayout(layoutId, layouts));
                 return;
             }
@@ -1904,31 +3795,70 @@ const layouts = [
                     container.appendChild(bottomPart);
                     blockElement.appendChild(container);
                 } else { // Bloco único
-                    const singlePart = document.createElement('div');
-                    singlePart.className = 'block-part-single layout-color-off';
-                    singlePart.textContent = blockData.text;
-                    singlePart.dataset.blockNum = blockData.text;
-                    
-                    singlePart.addEventListener('dblclick', (e) => {
-                        if (isEditMode) {
-                            e.stopPropagation();
-                            singlePart.contentEditable = true;
-                            singlePart.focus();
-                        }
-                    });
-                    singlePart.addEventListener('blur', () => {
-                        singlePart.contentEditable = false;
-                        activeBlockLayout[index].text = singlePart.textContent;
-                    });
-                     singlePart.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            singlePart.blur();
-                        }
-                    });
+    const singlePart = document.createElement('div');
+    singlePart.className = 'block-part-single layout-color-off';
+    singlePart.textContent = blockData.text;
+    singlePart.dataset.blockNum = blockData.text;
 
-                    blockElement.appendChild(singlePart);
-                }
+    // --- LÓGICA DE EDIÇÃO CORRIGIDA ---
+
+    // Evento de duplo clique para INICIAR a edição
+    singlePart.addEventListener('dblclick', (e) => {
+        // 1. Só funciona se o modo de edição estiver ativo
+        if (!isEditMode) return;
+
+        e.stopPropagation(); // <-- ADICIONADO PARA SEGURANÇA
+        
+        // 2. Guarda o valor original e torna o campo editável
+        const originalValue = singlePart.textContent;
+        singlePart.contentEditable = true;
+        singlePart.focus();
+        document.execCommand('selectAll', false, null);
+
+        // 3. Define a função que será chamada ao sair do campo (blur)
+        const handleBlur = () => {
+            const blockContainer = singlePart.closest('.block-container');
+            if (!blockContainer) return;
+            
+            const index = parseInt(blockContainer.dataset.index, 10);
+            const newText = singlePart.textContent.trim();
+            const newNumber = parseInt(newText, 10);
+
+            // 4. VALIDAÇÃO: Verifica se é um número válido entre 1 e 24
+            if (!isNaN(newNumber) && newNumber >= 1 && newNumber <= 24) {
+                activeBlockLayout[index].text = String(newNumber);
+                singlePart.dataset.blockNum = String(newNumber);
+                singlePart.textContent = String(newNumber);
+            } else {
+                // Se for inválido, mostra um alerta e restaura o valor original
+                alert("Entrada inválida. Por favor, insira um número entre 1 e 24.");
+                singlePart.textContent = originalValue;
+            }
+
+            // 5. Finaliza a edição e remove os listeners para não acumularem
+            singlePart.contentEditable = false;
+            singlePart.removeEventListener('blur', handleBlur);
+            singlePart.removeEventListener('keydown', handleKeyDown);
+        };
+
+        // 6. Define a função para lidar com as teclas Enter e Escape
+        const handleKeyDown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                singlePart.blur(); // Aciona o handleBlur para salvar
+            } else if (e.key === 'Escape') {
+                singlePart.textContent = originalValue; // Restaura o valor
+                singlePart.blur(); // Aciona o handleBlur para cancelar e limpar
+            }
+        };
+
+        // 7. Ativa os listeners de blur e keydown
+        singlePart.addEventListener('blur', handleBlur);
+        singlePart.addEventListener('keydown', handleKeyDown);
+    });
+    
+    blockElement.appendChild(singlePart);
+}
 
                 blockElement.innerHTML += `<div class="interaction-handle resize-handle"></div><div class="interaction-handle rotate-handle"></div>`;
                 blocksContainer.appendChild(blockElement);
@@ -1936,51 +3866,54 @@ const layouts = [
         }
         
         function loadDataIntoUI(loadedData) {
-            if (loadedData.layout_id) {
-                const foundLayout = layouts.find(l => l.id === loadedData.layout_id);
-                if (foundLayout) {
-                    switchLayout(loadedData.layout_id);
-                } else {
-                    console.warn(`Layout com ID "${loadedData.layout_id}" não encontrado. Usando o padrão.`);
-                    switchLayout(layouts[0].id);
-                }
-            }
+            console.log("--- INICIANDO O CARREGAMENTO DO TEMPLATE ---");
+            console.log("1. Objeto completo recebido do localStorage:", loadedData);
 
-            if (loadedData.block_layout) {
-                activeBlockLayout = loadedData.block_layout;
-                if (currentLayout) {
-                    currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
-                }
-                initializeBlocks(activeBlockLayout);
-            }
+            let layoutSwitched = false;
+            if (loadedData && loadedData.layout_id) {
+                const idDoLayoutSalvo = loadedData.layout_id;
+                console.log("2. ID do layout encontrado no template:", `'${idDoLayoutSalvo}'`);
+                console.log("3. Procurando este ID na lista de layouts disponíveis:", allAvailableLayouts);
 
-            allMacroData = loadedData.data || {};
-            sheetNames.forEach(name => {
-                if (!allMacroData[name]) {
-                    allMacroData[name] = JSON.parse(JSON.stringify(baseSheetStructure));
-                }
-            });
-            savedSpecialFunctionConfigs = loadedData.special_functions || {};
-            savedJumpTabelaSettings = loadedData.jumptabela_settings || {};
-            columnColors = loadedData.column_colors || {};
-            
-            specialFunctionCells.forEach(cell => {
-                const func = cell.dataset.function;
-                const block = parseInt(cell.dataset.block, 10);
-                cell.textContent = savedSpecialFunctionConfigs[func]?.includes(block) ? '1' : '';
-            });
-            jumpTabelaCheckboxes.forEach(checkbox => {
-                const key = `jt${checkbox.dataset.jumptabela}_bit${checkbox.dataset.bit}`;
-                checkbox.checked = !!savedJumpTabelaSettings[key];
-            });
-            activeSheet = 'FP1';
-            renderTable(allMacroData[activeSheet]);
-            updateActiveSheetUI();
-            updateAllVisuals();
-            renderAllActiveSettings();
-            updateConsumptionDisplay();
-            alert('Template carregado com sucesso!');
-        }
+                const foundLayout = allAvailableLayouts.find(l => l.id === idDoLayoutSalvo);
+                console.log("4. Resultado da busca (Layout Encontrado):", foundLayout);
+
+                if (foundLayout) {
+                    console.log("5. SUCESSO! Trocando para o layout:", foundLayout.name);
+                    switchLayout(idDoLayoutSalvo, allAvailableLayouts);
+                    layoutSwitched = true;
+                } else {
+                    console.error("5. FALHA! O ID do layout salvo não corresponde a nenhum layout conhecido.");
+                }
+            } else {
+                console.error("O objeto carregado não possui a chave 'layout_id'.");
+            }
+
+            // O resto da função continua para carregar os dados da macro, cores, etc.
+            if (loadedData.block_layout && !layoutSwitched) {
+                activeBlockLayout = loadedData.block_layout;
+                if (currentLayout) {
+                    currentLayout.blocks = JSON.parse(JSON.stringify(activeBlockLayout));
+                }
+                initializeBlocks(activeBlockLayout);
+            }
+
+            allMacroData = loadedData.data || {};
+            sheetNames.forEach(name => { if (!allMacroData[name]) { allMacroData[name] = JSON.parse(JSON.stringify(baseSheetStructure)); } });
+            savedSpecialFunctionConfigs = loadedData.special_functions || {};
+            savedJumpTabelaSettings = loadedData.jumptabela_settings || {};
+            columnColors = loadedData.column_colors || {};
+            specialFunctionCells.forEach(cell => { const func = cell.dataset.function; const block = parseInt(cell.dataset.block, 10); cell.textContent = savedSpecialFunctionConfigs[func]?.includes(block) ? '1' : ''; });
+            jumpTabelaCheckboxes.forEach(checkbox => { const key = `jt${checkbox.dataset.jumptabela}_bit${checkbox.dataset.bit}`; checkbox.checked = !!savedJumpTabelaSettings[key]; });
+            activeSheet = 'FP1';
+            renderTable(allMacroData[activeSheet]);
+            updateActiveSheetUI();
+            updateAllVisuals();
+            renderAllActiveSettings();
+            updateConsumptionDisplay();
+            alert('Template carregado com sucesso!');
+            return layoutSwitched;
+        }
                                 
         function pushStateToUndoHistory() {
             const currentData = getCurrentTableData();
@@ -2092,76 +4025,78 @@ const layouts = [
         // =================== FUNÇÃO PRINCIPAL DE EXTRAÇÃO DO EXCEL (VERSÃO FINAL) ================== //
         // ========================================================================================//
         async function processExcelLayout(file) {
-            const START_ROW = 1, END_ROW = 13, START_COL = 0, END_COL = 31;
-            const COLOR_MAP = { 'VM': 'red', 'AZ': 'blue', 'BR': 'white', 'AB': 'yellow' };
+            // Configurações idênticas ao script Python
+            const START_ROW = 2;
+            const END_ROW = 14;
+            const START_COL = 'A';
+            const END_COL = 'AF';
+            const COLOR_MAP = { 'VM': 'red', 'AZ': 'blue', 'BR': 'white', 'AB': 'yellow' };
+            const VALID_MODULE_NUMBERS = Array.from({length: 24}, (_, i) => i + 1);
 
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onerror = () => reject(new Error("Erro ao ler o arquivo."));
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error("Erro ao ler o arquivo."));
 
-                reader.onload = (event) => {
-                    try {
-                        const data = new Uint8Array(event.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const sheetNames = workbook.SheetNames;
+                reader.onload = (event) => {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetNames = workbook.SheetNames;
 
-                        let targetSheetName = '';
-                        const polSheets = sheetNames.filter(name => name.toUpperCase().includes("POL"));
+                        let targetSheetName = sheetNames.find(name => name.toUpperCase().includes("POL")) || sheetNames[0];
+                        if (!targetSheetName) return reject(new Error("Nenhuma planilha encontrada."));
+                        
+                        const worksheet = workbook.Sheets[targetSheetName];
+                        if (!worksheet) return reject(new Error(`A planilha '${targetSheetName}' não foi encontrada.`));
 
-                        if (polSheets.length > 0) {
-                            targetSheetName = polSheets[0];
-                            const filenameMatch = file.name.match(/(\d{2})/);
-                            if (filenameMatch) {
-                                const identifier = filenameMatch[1];
-                                const matchedSheet = polSheets.find(sheet => sheet.includes(identifier));
-                                if (matchedSheet) targetSheetName = matchedSheet;
-                            }
-                        } else {
-                            targetSheetName = sheetNames[0];
-                            if (!targetSheetName) return reject(new Error("Nenhuma planilha encontrada."));
-                        }
-                        
-                        const worksheet = workbook.Sheets[targetSheetName];
-                        if (!worksheet) return reject(new Error(`A planilha '${targetSheetName}' não foi encontrada no arquivo.`));
+                        // --- TRADUÇÃO DIRETA DE extrair_dados_da_planilha() ---
+                        const col_start_idx = 0; // 'A'
+                        const col_end_idx = 31; // 'AF'
 
-                        const sheetData = [];
+                        // PASSO 1: Montar a grade de dados manualmente (igual ao Python)
+                        const grid_data = [];
                         for (let r = START_ROW; r <= END_ROW; r++) {
-                            const rowData = [];
-                            for (let c = START_COL; c <= END_COL; c++) {
-                                const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                            const row_data = [];
+                            for (let c = col_start_idx; c <= col_end_idx; c++) {
+                                const cellAddress = XLSX.utils.encode_cell({ r: r - 1, c: c });
                                 const cell = worksheet[cellAddress];
-                                rowData.push(cell ? cell.v : null);
+                                row_data.push(cell ? cell.v : null);
                             }
-                            sheetData.push(rowData);
+                            grid_data.push(row_data);
                         }
-                        
-                        (worksheet['!merges'] || []).forEach(merge => {
-                            const { s, e } = merge;
-                            if (s.r >= START_ROW && s.r <= END_ROW && s.c >= START_COL && s.c <= END_COL) {
-                                const value = sheetData[s.r - START_ROW][s.c - START_COL];
-                                for (let r = s.r; r <= e.r; r++) {
-                                    for (let c = s.c; c <= e.c; c++) {
-                                        if (r >= START_ROW && r <= END_ROW && c >= START_COL && c <= END_COL) {
-                                            if (sheetData[r - START_ROW]) {
-                                                sheetData[r - START_ROW][c - START_COL] = value;
-                                            }
+
+                        // PASSO 2: Preencher células mescladas (igual ao Python)
+                        const merged_cells = worksheet['!merges'] || [];
+                        for (const merged_range of merged_cells) {
+                            const { s, e } = merged_range; // s: start, e: end
+                            const startCellAddress = XLSX.utils.encode_cell({ r: s.r, c: s.c });
+                            const value = worksheet[startCellAddress] ? worksheet[startCellAddress].v : null;
+
+                            for (let r = s.r; r <= e.r; r++) {
+                                for (let c = s.c; c <= e.c; c++) {
+                                    if (r >= (START_ROW - 1) && r <= (END_ROW - 1) && c >= col_start_idx && c <= col_end_idx) {
+                                        const grid_r_idx = r - (START_ROW - 1);
+                                        const grid_c_idx = c - col_start_idx;
+                                        if (grid_data[grid_r_idx]) {
+                                            grid_data[grid_r_idx][grid_c_idx] = value;
                                         }
                                     }
                                 }
                             }
-                        });
+                        }
                         
+                        // --- FIM DA TRADUÇÃO ---
+
+                        // O restante do código agora opera sobre a grade de dados correta.
                         const numeros = [];
                         const cores = [];
-                        
-                        sheetData.forEach((row, r_idx) => {
+                        grid_data.forEach((row, r_idx) => {
                             (row || []).forEach((cellValue, c_idx) => {
                                 if (cellValue === null || cellValue === undefined) return;
                                 const cellText = String(cellValue).trim();
-                                
                                 try {
                                     const num = parseInt(parseFloat(cellText));
-                                    if (!isNaN(num) && num >= 1 && num <= 24) {
+                                    if (VALID_MODULE_NUMBERS.includes(num)) {
                                         numeros.push({ value: num, r: r_idx, c: c_idx });
                                         return;
                                     }
@@ -2171,84 +4106,51 @@ const layouts = [
                                 for (const [codigo, nomeCor] of Object.entries(COLOR_MAP)) {
                                     if (cellUpper.includes(codigo)) {
                                         cores.push({ color: nomeCor, r: r_idx, c: c_idx });
-                                        break; 
+                                        break;
                                     }
                                 }
                             });
                         });
                         
-                        if (numeros.length === 0) {
-                           return reject(new Error("Nenhum módulo numérico (1-24) foi encontrado na planilha."));
+                        if (!numeros.length || !cores.length) {
+                           return reject(new Error("Módulos ou cores não encontrados. Verifique o arquivo de debug gerado pelo script Python para ver o que está sendo lido."));
                         }
-                         if (cores.length === 0) {
-                           return reject(new Error("Nenhuma célula com código de cor (VM, AZ, BR, etc.) foi encontrada."));
-                        }
-                        
-                        const layoutAssociado = [];
-                        let coresDisponiveis = [...cores];
 
-                        numeros.forEach(num_data => {
-                            let melhorCorInfo = null;
-                            let distanciaMinima = Infinity;
-                            let melhorCorIndex = -1;
-
-                            coresDisponiveis.forEach((cor_data, index) => {
+                        const layoutFinal = [];
+                        for (const num_data of numeros) {
+                            let melhor_cor = null;
+                            let distancia_minima = Infinity;
+                            for (const cor_data of cores) {
                                 const distancia = Math.abs(num_data.r - cor_data.r) + Math.abs(num_data.c - cor_data.c);
-                                if (distancia < distanciaMinima) {
-                                    distanciaMinima = distancia;
-                                    melhorCorInfo = cor_data;
-                                    melhorCorIndex = index;
+                                if (distancia < distancia_minima) {
+                                    distancia_minima = distancia;
+                                    melhor_cor = cor_data.color;
                                 }
-                            });
-
-                            if (melhorCorInfo) {
-                                layoutAssociado.push({
-                                    module: num_data.value,
-                                    color: melhorCorInfo.color,
-                                    r: num_data.r,
-                                    c: num_data.c
-                                });
-                                coresDisponiveis.splice(melhorCorIndex, 1);
                             }
-                        });
+                            if (melhor_cor) {
+                                layoutFinal.push({ module: num_data.value, color: melhor_cor });
+                            }
+                        }
                         
-                        layoutAssociado.sort((a, b) => a.r - b.r || a.c - b.c);
-
-                        const minR = Math.min(...layoutAssociado.map(item => item.r));
-                        const maxR = Math.max(...layoutAssociado.map(item => item.r));
-                        const minC = Math.min(...layoutAssociado.map(item => item.c));
-                        const maxC = Math.max(...layoutAssociado.map(item => item.c));
-
-                        const layoutHeight = (maxR - minR) > 0 ? (maxR - minR) : 1;
-                        const layoutWidth = (maxC - minC) > 0 ? (maxC - minC) : 1;
-
-                        const newBlockLayout = layoutAssociado.map(item => {
-                            const relativeY = item.r - minR;
-                            const relativeX = item.c - minC;
-                            
-                            const topPercent = (relativeY / layoutHeight) * 80 + 10;
-                            const leftPercent = (relativeX / layoutWidth) * 90 + 5;
-
-                            return {
-                                text: String(item.module),
-                                top: `${topPercent}%`,
-                                left: `${leftPercent}%`,
-                                width: 60,
-                                height: 30,
-                                rotate: 0
-                            };
+                        const modulosVistos = new Set();
+                        const layoutUnico = layoutFinal.filter(item => {
+                            if (modulosVistos.has(item.module)) return false;
+                            modulosVistos.add(item.module);
+                            return true;
                         });
 
-                        resolve({ layout: layoutAssociado, newBlockLayout: newBlockLayout });
+                        layoutUnico.sort((a, b) => a.module - b.module);
+                        
+                        resolve({ layout: layoutUnico });
 
-                    } catch (error) {
-                        console.error("Erro detalhado ao processar Excel:", error);
-                        reject(error);
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        }
+                    } catch (error) {
+                        console.error("Erro detalhado ao processar Excel:", error);
+                        reject(error);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
         
         async function saveOrUpdateLayout() {
             if (!currentLayout || !activeBlockLayout) {
@@ -2356,26 +4258,61 @@ const layouts = [
                     if (!file) return;
                     extractExcelBtn.disabled = true;
                     extractExcelBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processando...';
+                    
                     try {
-                        const { layout, newBlockLayout } = await processExcelLayout(file);
-                        if (layout.length > 0) {
-                            activeBlockLayout = newBlockLayout;
-                            initializeBlocks(activeBlockLayout);
-                            columnColors = {}; 
-                            const uniqueColorMapping = {};
-                            layout.forEach(item => {
-                                if (!uniqueColorMapping[item.module]) {
-                                    uniqueColorMapping[item.module] = item.color;
+                        // =========================================================================
+                        // PARTE 1: Detecta o código no nome do arquivo e TROCA O LAYOUT (MANTIDO)
+                        // =========================================================================
+                        const fileName = file.name;
+                        const match = fileName.match(/(\d{5})/); // Procura por um código de 5 dígitos
+                        
+                        if (match && match[1]) {
+                            const fileCode = match[1];
+                            const targetLayoutId = fileCodeToLayoutMap[fileCode];
+                            
+                            if (targetLayoutId) {
+                                const layoutExists = allAvailableLayouts.some(l => l.id === targetLayoutId);
+                                if (layoutExists) {
+                                    console.log(`Arquivo ${fileCode} detectado. Trocando para o layout: ${targetLayoutId}`);
+                                    switchLayout(targetLayoutId, allAvailableLayouts);
+                                } else {
+                                    alert(`Layout '${targetLayoutId}' (código: ${fileCode}) não foi encontrado. Mantendo o layout atual.`);
                                 }
-                            });
-                            for (const moduleNumber in uniqueColorMapping) {
-                                const color = uniqueColorMapping[moduleNumber];
-                                const colIndex = parseInt(moduleNumber, 10) - 1;
+                            } else {
+                                console.log(`Nenhum layout correspondente encontrado para o código ${fileCode}. Mantendo layout atual.`);
+                            }
+                        }
+                        // =========================================================================
+
+                        // Processa o Excel para obter a lista de módulos e cores
+                        const { layout } = await processExcelLayout(file);
+                        
+                        if (layout.length > 0) {
+
+                            // =========================================================================
+                            // PARTE 2: Renumeração dos blocos visuais (REMOVIDO)
+                            // O loop 'for' que alterava activeBlockLayout[i].text foi removido.
+                            // A chamada initializeBlocks(activeBlockLayout) foi removida.
+                            // =========================================================================
+                            
+                            // =========================================================================
+                            // PARTE 3: Aplicação das cores nas colunas da planilha (MANTIDO)
+                            // =========================================================================
+                            columnColors = {}; // Reseta as cores
+                            layout.forEach(item => {
+                                const moduleNumber = item.module;
+                                const color = item.color;
+                                const colIndex = moduleNumber - 1; // Converte número do módulo para índice da coluna
                                 if (colIndex >= 0 && colIndex < 24) {
                                     applyColumnColor(colIndex.toString(), color);
                                 }
-                            }
-                            alert('Layout de cores e visual extraídos e aplicados com sucesso!');
+                            });
+                            
+                            // Mensagem de sucesso ajustada
+                            alert('Layout visual e cores dos módulos atualizados com sucesso!');
+
+                        } else {
+                            alert('Não foi possível aplicar as cores. Verifique se há um layout visual carregado.');
                         }
                     } catch (error) {
                         console.error("Erro ao extrair layout do Excel:", error);
@@ -2396,19 +4333,19 @@ const layouts = [
                     isEditMode = !isEditMode;
                     simulationArea.classList.toggle('edit-mode', isEditMode);
                     
-                    const exportLayoutBtn = document.getElementById('export-layout-btn'); // Pega o botão de exportar
+                    const exportLayoutBtn = document.getElementById('export-layout-btn'); 
 
                     if (isEditMode) {
                         editLayoutBtn.innerHTML = '<i class="fa fa-check"></i> Concluir Edição';
                         editLayoutBtn.style.backgroundColor = '#2ecc71';
                         saveLayoutBtn.style.display = 'inline-block';
-                        exportLayoutBtn.style.display = 'inline-block'; // <-- ADICIONADO PARA MOSTRAR
+                        exportLayoutBtn.style.display = 'inline-block';
                         stopSimulation(); 
                     } else {
                         editLayoutBtn.innerHTML = '<i class="fa fa-pencil"></i> Editar Layout';
                         editLayoutBtn.style.backgroundColor = '#3498db';
                         saveLayoutBtn.style.display = 'none';
-                        exportLayoutBtn.style.display = 'none'; // <-- ADICIONADO PARA ESCONDER
+                        exportLayoutBtn.style.display = 'none';
                         if (currentLayout) {
                              const blockElements = blocksContainer.querySelectorAll('.block-container');
                              blockElements.forEach((blockEl, index) => {
@@ -3425,23 +5362,11 @@ const layouts = [
                 applyColumnColor(colIndex, columnColors[colIndex]);
             }
         }
+        
 
         // === INICIALIZAÇÃO ===
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeApp();
-            const templateDataJSON = localStorage.getItem('simulation_template');
-            if (templateDataJSON) {
-                try {
-                    const loadedData = JSON.parse(templateDataJSON);
-                    loadDataIntoUI(loadedData);
-                    localStorage.removeItem('simulation_template');
-                } catch (error) {
-                    console.error("Falha ao processar template do localStorage:", error);
-                    alert("Ocorreu um erro ao tentar carregar o template. Os dados podem estar corrompidos.");
-                    localStorage.removeItem('simulation_template');
-                }
-            }
-        });
+        // === INICIALIZAÇÃO ===
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>

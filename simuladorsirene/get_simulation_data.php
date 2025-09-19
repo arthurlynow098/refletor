@@ -1,58 +1,64 @@
 <?php
-// get_simulation_data.php (VERSÃO FINAL CORRIGIDA)
+header('Content-Type: application/json');
 
-// Define o cabeçalho da resposta como JSON e evita cache
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-cache, must-revalidate');
-
-// --- Detalhes da conexão ---
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sirene_db";
-// -------------------------
-
-// Valida o ID recebido
-if (!isset($_GET['id']) || !filter_var($_GET['id'], FILTER_VALIDATE_INT)) {
-    http_response_code(400); // Bad Request
-    echo json_encode(['success' => false, 'error' => 'ID da simulação inválido ou não fornecido.']);
-    exit;
+// --- Função para enviar erros em JSON ---
+function send_json_error($message) {
+    echo json_encode(['success' => false, 'error' => $message]);
+    exit();
 }
-$id = (int)$_GET['id'];
 
-try {
-    // Conexão com o banco de dados usando PDO
-    $dsn = "mysql:host=$servername;dbname=$dbname;charset=utf8mb4";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
+// --- Conexão ---
+$servidor = "localhost";
+$usuario = "root";
+$senha = "";
+$banco = "sirene_db";
+
+$conn = new mysqli($servidor, $usuario, $senha, $banco);
+
+if ($conn->connect_error) {
+    send_json_error('Falha na conexão com o banco de dados: ' . $conn->connect_error);
+}
+$conn->set_charset("utf8mb4");
+
+// --- Lógica Principal ---
+$simulation_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($simulation_id <= 0) {
+    send_json_error('ID da simulação inválido.');
+}
+
+// 1. A consulta SQL foi corrigida para selecionar as colunas que realmente existem na sua tabela.
+$sql = "SELECT layout_id, block_layout, data, special_functions, jumptabela_settings FROM simulations WHERE id = ?";
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    send_json_error('Erro na preparação da consulta SQL: ' . $conn->error);
+}
+
+$stmt->bind_param("i", $simulation_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+
+    // 2. Monta o objeto de resposta com os dados de cada coluna.
+    // O json_decode() é usado para transformar as strings do banco de volta em objetos/arrays.
+    $response_data = [
+        'success' => true,
+        'layout_id' => $row['layout_id'], // Pega o ID do layout
+        'block_layout' => json_decode($row['block_layout']),
+        'data' => json_decode($row['data']),
+        'special_functions' => json_decode($row['special_functions']),
+        'jumptabela_settings' => json_decode($row['jumptabela_settings'])
     ];
-    $pdo = new PDO($dsn, $username, $password, $options);
+    
+    // 3. Envia o objeto JSON corretamente montado.
+    echo json_encode($response_data);
 
-    // Seleciona TODAS as colunas necessárias para restaurar o estado completo da simulação.
-    $stmt = $pdo->prepare("SELECT `layout_id`, `block_layout`, `data`, `special_functions`, `jumptabela_settings` FROM simulations WHERE id = ?");
-    $stmt->execute([$id]);
-    $simulation = $stmt->fetch();
-
-    if ($simulation) {
-        // Monta a resposta JSON "plana" (sem aninhar) que o JavaScript do index.html espera
-        $response = [
-            'success'               => true,
-            'layout_id'             => $simulation['layout_id'],
-            'block_layout'          => json_decode($simulation['block_layout']),
-            'data'                  => json_decode($simulation['data']),
-            'special_functions'     => json_decode($simulation['special_functions']),
-            'jumptabela_settings'   => json_decode($simulation['jumptabela_settings'])
-        ];
-        echo json_encode($response);
-    } else {
-        http_response_code(404); // Not Found
-        echo json_encode(['success' => false, 'error' => 'Simulação não encontrada.']);
-    }
-
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Erro no servidor: ' . $e->getMessage()]);
+} else {
+    send_json_error('Nenhuma simulação encontrada com o ID fornecido: ' . $simulation_id);
 }
+
+$stmt->close();
+$conn->close();
 ?>
