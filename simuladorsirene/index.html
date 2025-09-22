@@ -3764,106 +3764,112 @@ const primus47p24mRef_BlockLayout = [
         }
 
         function initializeBlocks(blocksArray) {
-            blocksContainer.innerHTML = '';
-            if (!blocksArray) return;
+    blocksContainer.innerHTML = '';
+    if (!blocksArray) return;
+    blocksArray.forEach((blockData, index) => {
+        const blockElement = document.createElement('div');
+        blockElement.className = 'block-container';
+        blockElement.dataset.index = index;
+        blockElement.style.top = blockData.top;
+        blockElement.style.left = blockData.left;
+        blockElement.style.width = `${blockData.width}px`;
+        blockElement.style.height = `${blockData.height}px`;
+        blockElement.style.transform = `rotate(${blockData.rotate}deg)`;
 
-            blocksArray.forEach((blockData, index) => {
-                const blockElement = document.createElement('div');
-                blockElement.className = 'block-container';
-                blockElement.dataset.index = index;
-                blockElement.style.top = blockData.top;
-                blockElement.style.left = blockData.left;
-                blockElement.style.width = `${blockData.width}px`;
-                blockElement.style.height = `${blockData.height}px`;
-                blockElement.style.transform = `rotate(${blockData.rotate}deg)`;
+        // --- CORREÇÃO PRINCIPAL: Ouvir o duplo clique no CONTAINER, não na parte interna ---
+        blockElement.addEventListener('dblclick', (e) => {
+            // 1. Impede a propagação e o comportamento padrão IMEDIATAMENTE
+            e.preventDefault();
+            e.stopPropagation();
 
-                if (Array.isArray(blockData.text)) { // Bloco dividido (Bicolor)
-                    const container = document.createElement('div');
-                    container.className = 'block-part-container';
-                    
-                    const topPart = document.createElement('div');
-                    topPart.className = 'block-part-top layout-color-off';
-                    topPart.textContent = blockData.text[0];
-                    topPart.dataset.blockNum = blockData.text[0];
-                    
-                    const bottomPart = document.createElement('div');
-                    bottomPart.className = 'block-part-bottom layout-color-off';
-                    bottomPart.textContent = blockData.text[1];
-                    bottomPart.dataset.blockNum = blockData.text[1];
-                    
-                    container.appendChild(topPart);
-                    container.appendChild(bottomPart);
-                    blockElement.appendChild(container);
-                } else { // Bloco único
-    const singlePart = document.createElement('div');
-    singlePart.className = 'block-part-single layout-color-off';
-    singlePart.textContent = blockData.text;
-    singlePart.dataset.blockNum = blockData.text;
+            // 2. Só funciona se o modo de edição estiver ativo
+            if (!isEditMode) return;
 
-    // --- LÓGICA DE EDIÇÃO CORRIGIDA ---
-
-    // Evento de duplo clique para INICIAR a edição
-    singlePart.addEventListener('dblclick', (e) => {
-        // 1. Só funciona se o modo de edição estiver ativo
-        if (!isEditMode) return;
-
-        e.stopPropagation(); // <-- ADICIONADO PARA SEGURANÇA
-        
-        // 2. Guarda o valor original e torna o campo editável
-        const originalValue = singlePart.textContent;
-        singlePart.contentEditable = true;
-        singlePart.focus();
-        document.execCommand('selectAll', false, null);
-
-        // 3. Define a função que será chamada ao sair do campo (blur)
-        const handleBlur = () => {
-            const blockContainer = singlePart.closest('.block-container');
-            if (!blockContainer) return;
-            
-            const index = parseInt(blockContainer.dataset.index, 10);
-            const newText = singlePart.textContent.trim();
-            const newNumber = parseInt(newText, 10);
-
-            // 4. VALIDAÇÃO: Verifica se é um número válido entre 1 e 24
-            if (!isNaN(newNumber) && newNumber >= 1 && newNumber <= 24) {
-                activeBlockLayout[index].text = String(newNumber);
-                singlePart.dataset.blockNum = String(newNumber);
-                singlePart.textContent = String(newNumber);
-            } else {
-                // Se for inválido, mostra um alerta e restaura o valor original
-                alert("Entrada inválida. Por favor, insira um número entre 1 e 24.");
-                singlePart.textContent = originalValue;
+            // 3. Encontra a parte interna do bloco (o elemento que contém o texto)
+            const singlePart = blockElement.querySelector('.block-part-single');
+            if (!singlePart) {
+                console.warn("Tentativa de editar um bloco que não é de parte única.");
+                return;
             }
 
-            // 5. Finaliza a edição e remove os listeners para não acumularem
-            singlePart.contentEditable = false;
-            singlePart.removeEventListener('blur', handleBlur);
-            singlePart.removeEventListener('keydown', handleKeyDown);
-        };
+            // 4. Guarda o valor original e torna o campo editável
+            const originalValue = singlePart.textContent;
+            singlePart.contentEditable = true;
+            singlePart.focus();
+            document.execCommand('selectAll', false, null);
 
-        // 6. Define a função para lidar com as teclas Enter e Escape
-        const handleKeyDown = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                singlePart.blur(); // Aciona o handleBlur para salvar
-            } else if (e.key === 'Escape') {
-                singlePart.textContent = originalValue; // Restaura o valor
-                singlePart.blur(); // Aciona o handleBlur para cancelar e limpar
-            }
-        };
+            // 5. Define a função que será chamada ao sair do campo (blur)
+            const handleBlur = () => {
+                const blockContainer = singlePart.closest('.block-container');
+                if (!blockContainer) return;
+                const dataIndex = parseInt(blockContainer.dataset.index, 10);
+                const newText = singlePart.textContent.trim();
+                const newNumber = parseInt(newText, 10);
 
-        // 7. Ativa os listeners de blur e keydown
-        singlePart.addEventListener('blur', handleBlur);
-        singlePart.addEventListener('keydown', handleKeyDown);
-    });
-    
-    blockElement.appendChild(singlePart);
-}
+                // 6. VALIDAÇÃO: Verifica se é um número válido entre 1 e 24
+                if (!isNaN(newNumber) && newNumber >= 1 && newNumber <= 24) {
+                    activeBlockLayout[dataIndex].text = String(newNumber);
+                    singlePart.dataset.blockNum = String(newNumber);
+                    singlePart.textContent = String(newNumber);
+                } else {
+                    // Se for inválido, mostra um alerta e restaura o valor original
+                    alert("Entrada inválida. Por favor, insira um número entre 1 e 24.");
+                    singlePart.textContent = originalValue;
+                }
 
-                blockElement.innerHTML += `<div class="interaction-handle resize-handle"></div><div class="interaction-handle rotate-handle"></div>`;
-                blocksContainer.appendChild(blockElement);
-            });
+                // 7. Finaliza a edição e remove os listeners
+                singlePart.contentEditable = false;
+                singlePart.removeEventListener('blur', handleBlur);
+                singlePart.removeEventListener('keydown', handleKeyDown);
+            };
+
+            // 8. Define a função para lidar com as teclas Enter e Escape
+            const handleKeyDown = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        singlePart.blur(); // Aciona o handleBlur para salvar
+                    } else if (e.key === 'Escape') {
+                        singlePart.textContent = originalValue; // Restaura o valor
+                        singlePart.blur(); // Aciona o handleBlur para cancelar e limpar
+                    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                        // Permite a exclusão de caracteres
+                        // Nenhuma ação adicional é necessária aqui, o navegador trata nativamente.
+                        // A validação acontecerá apenas no blur.
+                    }
+            };
+
+            // 9. Ativa os listeners de blur e keydown
+            singlePart.addEventListener('blur', handleBlur);
+            singlePart.addEventListener('keydown', handleKeyDown);
+        });
+        // --- FIM DA CORREÇÃO PRINCIPAL ---
+
+        if (Array.isArray(blockData.text)) { // Bloco dividido (Bicolor)
+            const container = document.createElement('div');
+            container.className = 'block-part-container';
+            const topPart = document.createElement('div');
+            topPart.className = 'block-part-top layout-color-off';
+            topPart.textContent = blockData.text[0];
+            topPart.dataset.blockNum = blockData.text[0];
+            const bottomPart = document.createElement('div');
+            bottomPart.className = 'block-part-bottom layout-color-off';
+            bottomPart.textContent = blockData.text[1];
+            bottomPart.dataset.blockNum = blockData.text[1];
+            container.appendChild(topPart);
+            container.appendChild(bottomPart);
+            blockElement.appendChild(container);
+        } else { // Bloco único
+            const singlePart = document.createElement('div');
+            singlePart.className = 'block-part-single layout-color-off';
+            singlePart.textContent = blockData.text;
+            singlePart.dataset.blockNum = blockData.text;
+            blockElement.appendChild(singlePart);
         }
+
+        blockElement.innerHTML += `<div class="interaction-handle resize-handle"></div><div class="interaction-handle rotate-handle"></div>`;
+        blocksContainer.appendChild(blockElement);
+    });
+}
         
         function loadDataIntoUI(loadedData) {
             console.log("--- INICIANDO O CARREGAMENTO DO TEMPLATE ---");
@@ -5223,119 +5229,224 @@ const primus47p24mRef_BlockLayout = [
             });
         }
 
-        function generateGifForSheet(sheetName, progressCallback, workerURL) {
-            return new Promise(async (resolve, reject) => {
-                const macroData = [];
-                for(const row of allMacroData[sheetName]) {
-                    const ms = parseInt(row.ms, 10);
-                    if (isNaN(ms)) continue;
-                    if (ms === 0) break;
-                    macroData.push(row);
-                }
-                if (macroData.length === 0) {
-                    macroData.push({ ms: '1000', values: Array(24).fill('') });
-                }
-                const gif = new GIF({
-                    workers: 2,
-                    quality: 1, 
-                    workerScript: workerURL
-                });
-                const simulationArea = document.getElementById('simulation-area');
-                const bgImageDataURL = await getBackgroundImageDataURL(currentLayout.image);
-                const PADDING = 80; 
-                const captureCanvas = document.createElement('div');
-                captureCanvas.style.position = 'absolute';
-                captureCanvas.style.left = '-9999px';
-                captureCanvas.style.width = `${simulationArea.offsetWidth + PADDING * 2}px`;
-                captureCanvas.style.height = `${simulationArea.offsetHeight + PADDING * 2}px`;
-                captureCanvas.style.display = 'flex';
-                captureCanvas.style.justifyContent = 'center';
-                captureCanvas.style.alignItems = 'center';
-                captureCanvas.style.backgroundColor = '#e9ecef';
-                const captureContainer = document.createElement('div');
-                captureContainer.style.position = 'relative';
-                captureContainer.style.width = `${simulationArea.offsetWidth}px`;
-                captureContainer.style.height = `${simulationArea.offsetHeight}px`;
-                if (bgImageDataURL) {
-                    captureContainer.style.backgroundImage = `url(${bgImageDataURL})`;
-                    captureContainer.style.backgroundSize = 'contain';
-                    captureContainer.style.backgroundRepeat = 'no-repeat';
-                    captureContainer.style.backgroundPosition = 'center';
-                }
-                captureCanvas.appendChild(captureContainer);
-                document.body.appendChild(captureCanvas);
-                try {
-                    for (let i = 0; i < macroData.length; i++) {
-                        const step = macroData[i];
-                        const values = step.values.map(v => parseInt(v) || 0);
-                        renderLights(values);
-                        await new Promise(r => setTimeout(r, 20));
-                        const clonedBlocks = blocksContainer.cloneNode(true);
-                        captureContainer.innerHTML = '';
-                        captureContainer.appendChild(clonedBlocks);
-                        const canvas = await html2canvas(captureCanvas, {
-                            scale: 2,
-                            logging: false,
-                            useCORS: true,
-                            backgroundColor: null
-                        });
-                        gif.addFrame(canvas, { delay: parseInt(step.ms, 10) });
-                        if (progressCallback) {
-                            progressCallback(i + 1, macroData.length);
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Falha ao capturar o quadro para a simulação ${sheetName}:`, error);
-                    return reject(new Error(`Falha na captura do quadro para ${sheetName}`));
-                } finally {
-                    document.body.removeChild(captureCanvas);
-                }
-                gif.on('finished', function(blob) {
-                    resolve(blob);
-                });
-                gif.render();
-            });
-        }
+        async function generateGifForSheet(sheetName, progressCallback, workerURL) {
+            return new Promise(async (resolve, reject) => {
+                // 1. SETUP: Coleta os dados da simulação e prepara o GIF
+                const macroData = [];
+                for(const row of allMacroData[sheetName]) {
+                    const ms = parseInt(row.ms, 10);
+                    if (isNaN(ms) || ms === 0) continue;
+                    macroData.push(row);
+                }
+                // Se não houver dados, cria um quadro padrão para evitar erro
+                if (macroData.length === 0) {
+                    macroData.push({ ms: '1000', values: Array(24).fill('') });
+                }
+
+                const gif = new GIF({
+                    workers: 2,
+                    quality: 5, // Melhor qualidade
+                    workerScript: workerURL
+                });
+
+                const simulationArea = document.getElementById('simulation-area');
+                const containerRect = simulationArea.getBoundingClientRect();
+
+                // Cria um canvas fora da tela com as dimensões exatas da área de simulação
+                const canvas = document.createElement('canvas');
+                canvas.width = containerRect.width;
+                canvas.height = containerRect.height;
+                const ctx = canvas.getContext('2d');
+
+                // Carrega a imagem de fundo
+                const backgroundImage = new Image();
+                backgroundImage.src = document.getElementById('siren-model-image').src;
+                await new Promise(res => { backgroundImage.onload = res; backgroundImage.onerror = res; });
+
+                // Mapeamento de cores para o canvas
+                const colorMap = {
+                    'red': { bg: '#ff0000', text: 'white' },
+                    'blue': { bg: '#2563eb', text: 'white' },
+                    'white': { bg: '#ffffff', text: 'black' },
+                    'yellow': { bg: '#ffc000', text: 'black' },
+                    'off': { bg: '#d1d5db', text: '#1f2937' }
+                };
+                const persistentColorMap = {
+                    'red': colorMap.red, 'blue': colorMap.blue, 'white': colorMap.white, 'yellow': colorMap.yellow
+                };
+
+                try {
+                    // 2. LOOP DE RENDERIZAÇÃO: Itera sobre cada passo da macro
+                    for (let i = 0; i < macroData.length; i++) {
+                        const step = macroData[i];
+                        const values = step.values.map(v => parseInt(v) || 0);
+
+                        // Limpa o canvas e desenha o fundo
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+                            const hRatio = canvas.width / backgroundImage.naturalWidth;
+                            const vRatio = canvas.height / backgroundImage.naturalHeight;
+                            const ratio = Math.min(hRatio, vRatio) * 0.98; // 98% para bater com o CSS
+                            const centerShift_x = (canvas.width - backgroundImage.naturalWidth * ratio) / 2;
+                            const centerShift_y = (canvas.height - backgroundImage.naturalHeight * ratio) / 2;
+                            ctx.drawImage(backgroundImage, 0, 0, backgroundImage.naturalWidth, backgroundImage.naturalHeight, centerShift_x, centerShift_y, backgroundImage.naturalWidth * ratio, backgroundImage.naturalHeight * ratio);
+                        }
+
+                        // 3. DESENHA CADA BLOCO
+                        activeBlockLayout.forEach((blockData, index) => {
+                            const { text, top, left, width, height, rotate } = blockData;
+                            
+                            const x = (parseFloat(left) / 100) * canvas.width;
+                            const y = (parseFloat(top) / 100) * canvas.height;
+
+                            ctx.save(); // Salva o estado do canvas (sem rotação/translação)
+                            ctx.translate(x + width / 2, y + height / 2); // Move o ponto de origem para o centro do bloco
+                            ctx.rotate(rotate * Math.PI / 180); // Rotaciona
+                            ctx.translate(-(x + width / 2), -(y + height / 2)); // Move a origem de volta
+
+                            if (Array.isArray(text)) { // Bloco bicolor
+                                const h = height / 2;
+                                // Parte de cima
+                                const val1 = values[parseInt(text[0]) - 1] || 0;
+                                const color1 = persistentColorMap[columnColors[parseInt(text[0]) - 1]] || (val1 ? colorMap[['red', 'blue', 'white', 'yellow'][val1 - 1]] : colorMap.off);
+                                ctx.fillStyle = color1.bg;
+                                ctx.fillRect(x, y, width, h);
+                                // Parte de baixo
+                                const val2 = values[parseInt(text[1]) - 1] || 0;
+                                const color2 = persistentColorMap[columnColors[parseInt(text[1]) - 1]] || (val2 ? colorMap[['red', 'blue', 'white', 'yellow'][val2 - 1]] : colorMap.off);
+                                ctx.fillStyle = color2.bg;
+                                ctx.fillRect(x, y + h, width, h);
+                                // Textos
+                                ctx.fillStyle = color1.text;
+                                ctx.fillText(text[0], x + width / 2, y + h / 2);
+                                ctx.fillStyle = color2.text;
+                                ctx.fillText(text[1], x + width / 2, y + h + h / 2);
+                            } else { // Bloco de cor única
+                                const val = values[parseInt(text) - 1] || 0;
+                                const color = persistentColorMap[columnColors[parseInt(text) - 1]] || (val ? colorMap[['red', 'blue', 'white', 'yellow'][val - 1]] : colorMap.off);
+                                ctx.fillStyle = color.bg;
+                                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                                ctx.lineWidth = 1;
+                                ctx.fillRect(x, y, width, height);
+                                ctx.strokeRect(x, y, width, height);
+                                // Desenha o texto
+                                ctx.fillStyle = color.text;
+                                ctx.font = 'bold 8px Inter, sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(text, x + width / 2, y + height / 2);
+                            }
+                            ctx.restore(); // Restaura o estado original do canvas
+                        });
+
+                        // 4. ADICIONA O QUADRO AO GIF
+                        gif.addFrame(canvas, { delay: parseInt(step.ms, 10), copy: true });
+                        if (progressCallback) {
+                            progressCallback(i + 1, macroData.length);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Falha ao renderizar quadro para a simulação ${sheetName}:`, error);
+                    return reject(new Error(`Falha na renderização do quadro para ${sheetName}`));
+                }
+
+                // 5. FINALIZA O GIF
+                gif.on('finished', (blob) => {
+                    resolve(blob);
+                });
+                gif.render();
+            });
+        }
 
         async function exportAllSimulationsAsGifs() {
-            const btn = document.getElementById('export-gif-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Preparando recursos...';
-            try {
-                const workerURL = await getGifWorkerURL();
-                allMacroData[activeSheet] = getCurrentTableData();
-                const zip = new JSZip();
-                for (const sheetName of sheetNames) {
-                    const progressCallback = (frame, totalFrames) => {
-                        btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Gerando ${sheetName} (${frame}/${totalFrames})...`;
-                    };
-                    const gifBlob = await generateGifForSheet(sheetName, progressCallback, workerURL);
-                    if(gifBlob) {
-                        zip.file(`${sheetName}.gif`, gifBlob);
-                    }
+    const btn = document.getElementById('export-gif-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Preparando recursos...';
+
+    try {
+        const workerURL = await getGifWorkerURL();
+        allMacroData[activeSheet] = getCurrentTableData();
+
+        const zip = new JSZip();
+        let totalSheetsToProcess = 0;
+
+        // Verifica quais abas têm dados válidos
+        for (const sheetName of sheetNames) {
+            const data = allMacroData[sheetName];
+            if (data && data.length > 0) {
+                // Verifica se há alguma linha com ms > 0
+                const hasValidData = data.some(row => {
+                    const ms = parseInt(row.ms, 10);
+                    return !isNaN(ms) && ms > 0;
+                });
+                if (hasValidData) {
+                    totalSheetsToProcess++;
                 }
-                if (Object.keys(zip.files).length === 0) {
-                   alert("Nenhuma simulação com dados válidos encontrada para exportar.");
-                } else {
-                    btn.innerHTML = '<i class="fa fa-cog fa-spin"></i> Compactando...';
-                    const zipBlob = await zip.generateAsync({ type: 'blob' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(zipBlob);
-                    link.download = `simulacoes_gifs_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.zip`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    alert("Pacote de GIFs gerado com sucesso! O download deve começar em breve.");
-                }
-            } catch(error) {
-                console.error("ERRO CRÍTICO DURANTE EXPORTAÇÃO DE GIFS:", error);
-                alert(error.message || "Ocorreu um erro grave ao tentar gerar os GIFs. Verifique o console para detalhes.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-file-image"></i> Exportar GIFs';
-                renderLights(); 
             }
         }
+
+        if (totalSheetsToProcess === 0) {
+            alert("Nenhuma simulação com dados válidos encontrada para exportar.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-file-image"></i> Exportar GIFs';
+            return;
+        }
+
+        let processedSheets = 0;
+
+        for (const sheetName of sheetNames) {
+            const data = allMacroData[sheetName];
+            if (!data || data.length === 0) continue;
+
+            // Verifica se a planilha tem dados válidos
+            const hasValidData = data.some(row => {
+                const ms = parseInt(row.ms, 10);
+                return !isNaN(ms) && ms > 0;
+            });
+
+            if (!hasValidData) {
+                console.log(`Pulando aba ${sheetName}: sem dados válidos.`);
+                continue; // Pula esta aba
+            }
+
+            const progressCallback = (frame, totalFrames) => {
+                const percent = Math.round((frame / totalFrames) * 100);
+                btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Gerando ${sheetName} (${frame}/${totalFrames})...`;
+            };
+
+            const gifBlob = await generateGifForSheet(sheetName, progressCallback, workerURL);
+
+            if (gifBlob) {
+                zip.file(`${sheetName}.gif`, gifBlob);
+            }
+
+            processedSheets++;
+            // Atualiza o texto do botão após cada aba processada
+            if (processedSheets === totalSheetsToProcess) {
+                btn.innerHTML = '<i class="fa fa-cog fa-spin"></i> Compactando...';
+            }
+        }
+
+        // Gera o ZIP com todos os GIFs
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = `simulacoes_gifs_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        alert("Pacote de GIFs gerado com sucesso! O download deve começar em breve.");
+
+    } catch (error) {
+        console.error("ERRO CRÍTICO DURANTE EXPORTAÇÃO DE GIFS:", error);
+        alert(error.message || "Ocorreu um erro grave ao tentar gerar os GIFs. Verifique o console para detalhes.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-file-image"></i> Exportar GIFs';
+        renderLights(); 
+    }
+}
         
         function applyColumnColor(colIndex, color) {
             const colorClass = `persistent-color-${color}`;
