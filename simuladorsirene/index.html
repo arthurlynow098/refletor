@@ -13,9 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .column-header { background-color: #d9e1f2; font-weight: bold; font-size: 9px; color: #333; cursor: pointer; user-select: none; }
-/* ---> ADICIONE ESTA CLASSE ABAIXO <--- */
-.column-header.selected-col { background-color: #b4c6e7; outline: 1px solid #4a89dc; }
-        /* Estilos Globais e Layout Principal */
+        .column-header.selected-col { background-color: #b4c6e7; outline: 1px solid #4a89dc; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background-color: #f8f9fa; height: 100vh; overflow: hidden; color: #333; }
         .header { background-color: #2c3e50; height: 40px; display: flex; align-items: center; padding: 0 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -475,21 +473,26 @@
                 </div>
             </div>
             <div class="right-panel">
-                <div class="panel-title">Resultado da Configuração</div>
-                <div class="config-image-container" style="position: relative; width: 100%; max-width: 500px; margin: 15px auto;">
-                    <img src="Imagemcontrole.png" alt="Controle da Barra" style="width: 100%; height: auto; display: block; border-radius: 15px; opacity: 0.5;">
-                    <button onclick="triggerMacro('FP1')" style="position: absolute; top: 20%; left: 16%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP1</button>
-                    <button onclick="triggerMacro('FP3')" style="position: absolute; top: 20%; left: 42.5%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP3</button>
-                    <button onclick="triggerMacro('FP2')" style="position: absolute; top: 20%; left: 69%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP2</button>
-                    <button id="btn-le" onclick="toggleSpecialFunction('alley_left')" class="control-btn" style="position: absolute; top: 26%; left: 6%; width: 6%; height: 50%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">LE</button>
-                    <button id="btn-ld" onclick="toggleSpecialFunction('alley_right')" class="control-btn" style="position: absolute; top: 26%; left: 88%; width: 6%; height: 50%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">LD</button>
-                    <button id="btn-td" onclick="toggleSpecialFunction('takedown')" class="control-btn" style="position: absolute; top: 51%; left: 42.5%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">TD</button>
-                    <button onclick="triggerMacro('EM1')" style="position: absolute; top: 69%; left: 15.4%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">EM1</button>
-                    <button onclick="triggerMacro('HZD')" style="position: absolute; top: 69%; left: 70%; width: 15%; height: 12%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">HZD</button>
-                    <button onclick="triggerMacro('DS-L')" style="position: absolute; top: 70%; left: 33%; width: 10%; height: 10%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">«</button>
-                    <button onclick="triggerMacro('DS-C')" style="position: absolute; top: 75%; left: 45%; width: 10%; height: 10%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">«»</button>
-                    <button onclick="triggerMacro('DS-R')" style="position: absolute; top: 70%; left: 57%; width: 10%; height: 10%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">»</button>
-                </div>
+    <div class="panel-title">Resultado da Configuração</div>
+    <div class="config-image-container" style="position: relative; width: 100%; max-width: 500px; height: 171px; margin: 15px auto;">
+        <button onclick="triggerMacro('FP1')" style="position: absolute; top: 13%; left: -25%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP1</button>
+        <button onclick="triggerMacro('FP2')" style="position: absolute; top: 13%; left: -3%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP2</button>
+        <button onclick="triggerMacro('FP3')" style="position: absolute; top: 13%; left: 19%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP3</button>
+        <button onclick="triggerMacro('FP4')" style="position: absolute; top: 13%; left: 41%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">FP4</button>                    
+        <button onclick="triggerMacro('AUX1')" style="position: absolute; top: 43%; left: -25%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">AUX1</button>
+        <button onclick="triggerMacro('AUX2')" style="position: absolute; top: 43%; left: -3%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">AUX2</button>
+        <button onclick="triggerMacro('AUX3')" style="position: absolute; top: 43%; left: 19%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">AUX3</button>
+        <button onclick="triggerMacro('AUX4')" style="position: absolute; top: 43%; left: 41%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">AUX4</button>
+        <button onclick="triggerMacro('DS-L')" style="position: absolute; top: 73%; left: -35%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">DS-L</button>
+        <button onclick="triggerMacro('DS-C')" style="position: absolute; top: 73%; left: -13%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">DS-C</button>
+        <button onclick="triggerMacro('DS-R')" style="position: absolute; top: 73%; left: 9%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">DS-R</button>
+        <button onclick="triggerMacro('EM1')" style="position: absolute; top: 73%; left: 31%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">EM1</button>
+        <button onclick="triggerMacro('HZD')" style="position: absolute; top: 73%; left: 53%; width: 20%; height: 20%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center;">HZD</button>
+        <button id="btn-le" onclick="toggleSpecialFunction('alley_left')" class="control-btn" style="position: absolute; top: 26%; right: 0%; width: 8%; height: 50%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">LE</button>
+        <button id="btn-ld" onclick="toggleSpecialFunction('alley_right')" class="control-btn" style="position: absolute; top: 26%; right: -20%; width: 8%; height: 50%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">LD</button>
+        <button id="btn-td" onclick="toggleSpecialFunction('takedown')" class="control-btn" style="position: absolute; top: 26%; right: -10%; width: 8%; height: 50%; background-color: #e9ecef; border: 1px solid #555; cursor: pointer; border-radius: 5px; color: #000; font-weight: bold; font-size: 1vw; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">TD</button>
+    </div>
+</div>
                 <div class="output-item" id="special-functions-status-output">
                     <div class="output-label">Funções Especiais Ativas</div>
                     <div id="special-functions-active-list" class="status-panel-list">
@@ -521,12 +524,10 @@
     </div>
 
     <script>
-        // --- CÓDIGO JAVASCRIPT COMPLETO ---
-
-        // === REFERÊNCIAS DE ELEMENTOS DO DOM ===
+        // Referências do DOM (manipular o conteúdo)===
         let configModal, openModalBtn, closeModalBtn, saveAndCloseModalBtn, executeMacroBtn, blocksContainer, macroTableBody, macroHeader, sheetSelectorContainer, gravarBtn, restaurarBtn, limpaBtn, colorContextMenu, layoutPanelModal, openLayoutPanelBtn, closeLayoutPanelBtn, layoutPanelBody, currentLayoutNameSpan, advancedSettingsModal, openAdvancedSettingsBtn, closeAdvancedSettingsBtn, saveAdvancedSettingsBtn, tabButtons, tabContents, jumpTabelaCheckboxes, specialFunctionCells, jumpTabelaStatusContainer, specialFunctionsStatusContainer, simulationArea, editLayoutBtn, saveLayoutBtn;
 
-        // === GERENCIAMENTO DE ESTADO ===
+        // Definição de variaveis
         let simulationStopper = null;
         let isSimulationRunning = false;
         const sheetNames = ['FP1','FP2', 'FP3', 'FP4', 'AUX1', 'AUX2', 'AUX3', 'AUX4', 'DS-L', 'DS-C', 'DS-R', 'HZD', 'EM1'];
@@ -549,13 +550,11 @@
         let backgroundImageDataURL = null;
         let currentLayout;
         let activeBlockLayout; 
-        let allAvailableLayouts = []; // Variável global para a lista de layouts
+        let allAvailableLayouts = []; // Variavel para o excel - lista de layouts
         let selectedColumns = new Set();
         let lastSelectedColumn = -1;
         
-        // ================================================================================= //
-        // ======================= MAPA DE CÓDIGOS DE ARQUIVO PARA LAYOUT ====================== //
-        // ================================================================================= //
+        // Mapeamento para importar layout/modelo
         const fileCodeToLayoutMap = {
             "00179": "primus47p18mCol", "00180": "primus47p20mRef", "00181": "primus40p18mCol",
             "00182": "primus47p20mRef", "00183": "primus47p20mRef", "00184": "primus47p20mRef",
@@ -576,9 +575,7 @@
             "00233": "primus47p20mRef", "00234": "primus47p24mCol", "00235": "primus47p13mRef",
         };
         
-        // ================================================================================= //
-		// =================== INÍCIO DOS BLOCOS DE LAYOUT PERSONALIZADOS ================== //
-		// ================================================================================= //
+        // Posicionamento de cada modelo (para os módulos)
 
 		const s_slim_bicolor_example = [
 			{ text: ['1', '2'], top: '45%', left: '30%', width: 77, height: 30, rotate: 0 }, 
@@ -3507,9 +3504,7 @@ const primus47p24mRef_BlockLayout = [
         "rotate": 0
     }
 ];
-		// ================================================================================= //
-		// ===================== LISTA PRINCIPAL DE LAYOUTS (CORRIGIDA) ==================== //
-		// ================================================================================= //
+		// Lista dos layouts corrigidas (40, 47 apenas)
 
 		const layouts = [
 			{ id: 's_slim_24_default', name: 'S-SLIM 24m Padrão', image: 'simulação.png', category: 'Padrão', blocks: s_slim_24_default_BlockLayout },
@@ -3565,7 +3560,7 @@ const primus47p24mRef_BlockLayout = [
 			{ id: 'primus61p24mRef', name: 'Primus 61p 24m Ref', image: 'ImagensSirene61P/refletor/primus61p24mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
 			{ id: 'primus61p28mRef', name: 'Primus 61p 28m Ref', image: 'ImagensSirene61P/refletor/primus61p28mRef.png', category: '61 Polegadas', blocks: s_slim_24_default_BlockLayout },
 			
-			// Venus
+			// Venus ()
 			{ id: 'venus11m', name: 'Venus 11m', image: 'VenusSirene/venus11m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
 			{ id: 'venus14m', name: 'Venus 14m', image: 'VenusSirene/venus14m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
 			{ id: 'venus15m', name: 'Venus 15m', image: 'VenusSirene/venus15m.png', category: 'Venus', blocks: s_slim_24_default_BlockLayout },
@@ -3587,7 +3582,7 @@ const primus47p24mRef_BlockLayout = [
         // =================== FIM DA LÓGICA DE LAYOUT DE BLOCOS =========================== //
         // ================================================================================= //
         
-        // === FUNÇÕES DE INICIALIZAÇÃO E LAYOUT ===
+        // Inicialização do layout
         async function initializeApp() {
             assignDomElements();
             initializeDataStructure();
@@ -3623,8 +3618,6 @@ const primus47p24mRef_BlockLayout = [
                     switchLayout(layouts[0].id, allAvailableLayouts); 
                 }
             }
-            
-            // 4. QUARTO: Continua com o resto da inicialização.
             renderTable(allMacroData[activeSheet]);
             updateActiveSheetUI();
             initializeEventListeners();
@@ -3776,29 +3769,29 @@ const primus47p24mRef_BlockLayout = [
         blockElement.style.height = `${blockData.height}px`;
         blockElement.style.transform = `rotate(${blockData.rotate}deg)`;
 
-        // --- CORREÇÃO PRINCIPAL: Ouvir o duplo clique no CONTAINER, não na parte interna ---
+        // Mudar número do modulo
         blockElement.addEventListener('dblclick', (e) => {
             // 1. Impede a propagação e o comportamento padrão IMEDIATAMENTE
             e.preventDefault();
             e.stopPropagation();
 
-            // 2. Só funciona se o modo de edição estiver ativo
+            // Funciona apenas no modo de edição
             if (!isEditMode) return;
 
-            // 3. Encontra a parte interna do bloco (o elemento que contém o texto)
+            // Encontra a parte do módulo (apenas o texto)
             const singlePart = blockElement.querySelector('.block-part-single');
             if (!singlePart) {
                 console.warn("Tentativa de editar um bloco que não é de parte única.");
                 return;
             }
 
-            // 4. Guarda o valor original e torna o campo editável
+            // Guarda o valor original e torna o campo editavel
             const originalValue = singlePart.textContent;
             singlePart.contentEditable = true;
             singlePart.focus();
             document.execCommand('selectAll', false, null);
 
-            // 5. Define a função que será chamada ao sair do campo (blur)
+            // Retorna o valor guardado
             const handleBlur = () => {
                 const blockContainer = singlePart.closest('.block-container');
                 if (!blockContainer) return;
@@ -3806,45 +3799,41 @@ const primus47p24mRef_BlockLayout = [
                 const newText = singlePart.textContent.trim();
                 const newNumber = parseInt(newText, 10);
 
-                // 6. VALIDAÇÃO: Verifica se é um número válido entre 1 e 24
+                // Verifica se é um número válido entre 1 e 24
                 if (!isNaN(newNumber) && newNumber >= 1 && newNumber <= 24) {
                     activeBlockLayout[dataIndex].text = String(newNumber);
                     singlePart.dataset.blockNum = String(newNumber);
                     singlePart.textContent = String(newNumber);
                 } else {
-                    // Se for inválido, mostra um alerta e restaura o valor original
+                    // Se for invalido, mostra um alerta e restaura o valor original
                     alert("Entrada inválida. Por favor, insira um número entre 1 e 24.");
                     singlePart.textContent = originalValue;
                 }
 
-                // 7. Finaliza a edição e remove os listeners
+                // Finaliza a edição e remove os módulos (listeners)
                 singlePart.contentEditable = false;
                 singlePart.removeEventListener('blur', handleBlur);
                 singlePart.removeEventListener('keydown', handleKeyDown);
             };
 
-            // 8. Define a função para lidar com as teclas Enter e Escape
+            // Define a função para funcionar as teclas Enter, Escape e Delete
             const handleKeyDown = (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        singlePart.blur(); // Aciona o handleBlur para salvar
+                        singlePart.blur(); 
                     } else if (e.key === 'Escape') {
                         singlePart.textContent = originalValue; // Restaura o valor
                         singlePart.blur(); // Aciona o handleBlur para cancelar e limpar
                     } else if (e.key === 'Backspace' || e.key === 'Delete') {
-                        // Permite a exclusão de caracteres
-                        // Nenhuma ação adicional é necessária aqui, o navegador trata nativamente.
-                        // A validação acontecerá apenas no blur.
                     }
             };
 
-            // 9. Ativa os listeners de blur e keydown
+            // Ativa os listeners de blur e keydown
             singlePart.addEventListener('blur', handleBlur);
             singlePart.addEventListener('keydown', handleKeyDown);
         });
-        // --- FIM DA CORREÇÃO PRINCIPAL ---
 
-        if (Array.isArray(blockData.text)) { // Bloco dividido (Bicolor)
+        if (Array.isArray(blockData.text)) { 
             const container = document.createElement('div');
             container.className = 'block-part-container';
             const topPart = document.createElement('div');
@@ -4027,11 +4016,9 @@ const primus47p24mRef_BlockLayout = [
         }
         
         
-        // ========================================================================================//
-        // =================== FUNÇÃO PRINCIPAL DE EXTRAÇÃO DO EXCEL (VERSÃO FINAL) ================== //
-        // ========================================================================================//
+        // Programa referente ao arquivo python para fazer a lógica funcionar apenas com JS
         async function processExcelLayout(file) {
-            // Configurações idênticas ao script Python
+            // Configurações idênticas ao Código Python
             const START_ROW = 2;
             const END_ROW = 14;
             const START_COL = 'A';
@@ -4055,11 +4042,10 @@ const primus47p24mRef_BlockLayout = [
                         const worksheet = workbook.Sheets[targetSheetName];
                         if (!worksheet) return reject(new Error(`A planilha '${targetSheetName}' não foi encontrada.`));
 
-                        // --- TRADUÇÃO DIRETA DE extrair_dados_da_planilha() ---
                         const col_start_idx = 0; // 'A'
                         const col_end_idx = 31; // 'AF'
 
-                        // PASSO 1: Montar a grade de dados manualmente (igual ao Python)
+                        // Montar a grade de dados manualmente (igual ao Python)
                         const grid_data = [];
                         for (let r = START_ROW; r <= END_ROW; r++) {
                             const row_data = [];
@@ -4071,7 +4057,7 @@ const primus47p24mRef_BlockLayout = [
                             grid_data.push(row_data);
                         }
 
-                        // PASSO 2: Preencher células mescladas (igual ao Python)
+                        // Preencher células mescladas (igual ao Python)
                         const merged_cells = worksheet['!merges'] || [];
                         for (const merged_range of merged_cells) {
                             const { s, e } = merged_range; // s: start, e: end
@@ -4090,9 +4076,6 @@ const primus47p24mRef_BlockLayout = [
                                 }
                             }
                         }
-                        
-                        // --- FIM DA TRADUÇÃO ---
-
                         // O restante do código agora opera sobre a grade de dados correta.
                         const numeros = [];
                         const cores = [];
@@ -4266,11 +4249,8 @@ const primus47p24mRef_BlockLayout = [
                     extractExcelBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processando...';
                     
                     try {
-                        // =========================================================================
-                        // PARTE 1: Detecta o código no nome do arquivo e TROCA O LAYOUT (MANTIDO)
-                        // =========================================================================
                         const fileName = file.name;
-                        const match = fileName.match(/(\d{5})/); // Procura por um código de 5 dígitos
+                        const match = fileName.match(/(\d{5})/); // Procura por um código de 5 dígitos (ex: 00181, 00179)
                         
                         if (match && match[1]) {
                             const fileCode = match[1];
@@ -4288,33 +4268,22 @@ const primus47p24mRef_BlockLayout = [
                                 console.log(`Nenhum layout correspondente encontrado para o código ${fileCode}. Mantendo layout atual.`);
                             }
                         }
-                        // =========================================================================
 
                         // Processa o Excel para obter a lista de módulos e cores
                         const { layout } = await processExcelLayout(file);
                         
                         if (layout.length > 0) {
-
-                            // =========================================================================
-                            // PARTE 2: Renumeração dos blocos visuais (REMOVIDO)
-                            // O loop 'for' que alterava activeBlockLayout[i].text foi removido.
-                            // A chamada initializeBlocks(activeBlockLayout) foi removida.
-                            // =========================================================================
-                            
-                            // =========================================================================
-                            // PARTE 3: Aplicação das cores nas colunas da planilha (MANTIDO)
-                            // =========================================================================
-                            columnColors = {}; // Reseta as cores
+                            columnColors = {}; 
                             layout.forEach(item => {
                                 const moduleNumber = item.module;
                                 const color = item.color;
-                                const colIndex = moduleNumber - 1; // Converte número do módulo para índice da coluna
+                                const colIndex = moduleNumber - 1; 
                                 if (colIndex >= 0 && colIndex < 24) {
                                     applyColumnColor(colIndex.toString(), color);
                                 }
                             });
                             
-                            // Mensagem de sucesso ajustada
+                            // Mensagem de sucesso
                             alert('Layout visual e cores dos módulos atualizados com sucesso!');
 
                         } else {
@@ -5231,34 +5200,34 @@ const primus47p24mRef_BlockLayout = [
 
         async function generateGifForSheet(sheetName, progressCallback, workerURL) {
             return new Promise(async (resolve, reject) => {
-                // 1. SETUP: Coleta os dados da simulação e prepara o GIF
+                // Coleta os dados da simulação e prepara o GIF
                 const macroData = [];
                 for(const row of allMacroData[sheetName]) {
                     const ms = parseInt(row.ms, 10);
                     if (isNaN(ms) || ms === 0) continue;
                     macroData.push(row);
                 }
-                // Se não houver dados, cria um quadro padrão para evitar erro
+                // Se nao tiver dados, cria um quadro padrão para evitar erro
                 if (macroData.length === 0) {
                     macroData.push({ ms: '1000', values: Array(24).fill('') });
                 }
 
                 const gif = new GIF({
                     workers: 2,
-                    quality: 5, // Melhor qualidade
+                    quality: 50, 
                     workerScript: workerURL
                 });
 
                 const simulationArea = document.getElementById('simulation-area');
                 const containerRect = simulationArea.getBoundingClientRect();
 
-                // Cria um canvas fora da tela com as dimensões exatas da área de simulação
+                // Cria um canvas fora da tela com as dimensowes exatas da área de simulação
                 const canvas = document.createElement('canvas');
                 canvas.width = containerRect.width;
                 canvas.height = containerRect.height;
                 const ctx = canvas.getContext('2d');
 
-                // Carrega a imagem de fundo
+                // Pega a imagem(modelo) de fundo
                 const backgroundImage = new Image();
                 backgroundImage.src = document.getElementById('siren-model-image').src;
                 await new Promise(res => { backgroundImage.onload = res; backgroundImage.onerror = res; });
@@ -5276,7 +5245,6 @@ const primus47p24mRef_BlockLayout = [
                 };
 
                 try {
-                    // 2. LOOP DE RENDERIZAÇÃO: Itera sobre cada passo da macro
                     for (let i = 0; i < macroData.length; i++) {
                         const step = macroData[i];
                         const values = step.values.map(v => parseInt(v) || 0);
@@ -5292,7 +5260,7 @@ const primus47p24mRef_BlockLayout = [
                             ctx.drawImage(backgroundImage, 0, 0, backgroundImage.naturalWidth, backgroundImage.naturalHeight, centerShift_x, centerShift_y, backgroundImage.naturalWidth * ratio, backgroundImage.naturalHeight * ratio);
                         }
 
-                        // 3. DESENHA CADA BLOCO
+                        // Desenha cada bloco
                         activeBlockLayout.forEach((blockData, index) => {
                             const { text, top, left, width, height, rotate } = blockData;
                             
@@ -5304,7 +5272,7 @@ const primus47p24mRef_BlockLayout = [
                             ctx.rotate(rotate * Math.PI / 180); // Rotaciona
                             ctx.translate(-(x + width / 2), -(y + height / 2)); // Move a origem de volta
 
-                            if (Array.isArray(text)) { // Bloco bicolor
+                            if (Array.isArray(text)) { 
                                 const h = height / 2;
                                 // Parte de cima
                                 const val1 = values[parseInt(text[0]) - 1] || 0;
@@ -5316,7 +5284,7 @@ const primus47p24mRef_BlockLayout = [
                                 const color2 = persistentColorMap[columnColors[parseInt(text[1]) - 1]] || (val2 ? colorMap[['red', 'blue', 'white', 'yellow'][val2 - 1]] : colorMap.off);
                                 ctx.fillStyle = color2.bg;
                                 ctx.fillRect(x, y + h, width, h);
-                                // Textos
+                                // Textos (1,2,3,4...)
                                 ctx.fillStyle = color1.text;
                                 ctx.fillText(text[0], x + width / 2, y + h / 2);
                                 ctx.fillStyle = color2.text;
@@ -5329,7 +5297,7 @@ const primus47p24mRef_BlockLayout = [
                                 ctx.lineWidth = 1;
                                 ctx.fillRect(x, y, width, height);
                                 ctx.strokeRect(x, y, width, height);
-                                // Desenha o texto
+                                // Desenha(escreve) o texto
                                 ctx.fillStyle = color.text;
                                 ctx.font = 'bold 8px Inter, sans-serif';
                                 ctx.textAlign = 'center';
@@ -5339,7 +5307,7 @@ const primus47p24mRef_BlockLayout = [
                             ctx.restore(); // Restaura o estado original do canvas
                         });
 
-                        // 4. ADICIONA O QUADRO AO GIF
+                        // Adiciona o quadro no canvas(gif)
                         gif.addFrame(canvas, { delay: parseInt(step.ms, 10), copy: true });
                         if (progressCallback) {
                             progressCallback(i + 1, macroData.length);
@@ -5350,7 +5318,7 @@ const primus47p24mRef_BlockLayout = [
                     return reject(new Error(`Falha na renderização do quadro para ${sheetName}`));
                 }
 
-                // 5. FINALIZA O GIF
+                // Termina o gif
                 gif.on('finished', (blob) => {
                     resolve(blob);
                 });
@@ -5370,11 +5338,11 @@ const primus47p24mRef_BlockLayout = [
         const zip = new JSZip();
         let totalSheetsToProcess = 0;
 
-        // Verifica quais abas têm dados válidos
+        // Verifica quais abas tem dados válidos
         for (const sheetName of sheetNames) {
             const data = allMacroData[sheetName];
             if (data && data.length > 0) {
-                // Verifica se há alguma linha com ms > 0
+                // Verifica se tem alguma linha com ms > 0 (se sim, ele não conta ela)
                 const hasValidData = data.some(row => {
                     const ms = parseInt(row.ms, 10);
                     return !isNaN(ms) && ms > 0;
@@ -5406,7 +5374,7 @@ const primus47p24mRef_BlockLayout = [
 
             if (!hasValidData) {
                 console.log(`Pulando aba ${sheetName}: sem dados válidos.`);
-                continue; // Pula esta aba
+                continue; // Pula a aba sem dados válidos ms > 0
             }
 
             const progressCallback = (frame, totalFrames) => {
@@ -5421,7 +5389,7 @@ const primus47p24mRef_BlockLayout = [
             }
 
             processedSheets++;
-            // Atualiza o texto do botão após cada aba processada
+            // Atualiza o texto do botão após cada aba vista
             if (processedSheets === totalSheetsToProcess) {
                 btn.innerHTML = '<i class="fa fa-cog fa-spin"></i> Compactando...';
             }
@@ -5431,7 +5399,7 @@ const primus47p24mRef_BlockLayout = [
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(zipBlob);
-        link.download = `simulacoes_gifs_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.zip`;
+        link.download = `SimulaçãoRefletor.zip`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -5473,11 +5441,7 @@ const primus47p24mRef_BlockLayout = [
                 applyColumnColor(colIndex, columnColors[colIndex]);
             }
         }
-        
-
-        // === INICIALIZAÇÃO ===
-        // === INICIALIZAÇÃO ===
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
