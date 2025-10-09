@@ -1,0 +1,6 @@
+openpyxl
+opencv-python-headless
+numpy
+pytesseract
+Pillow
+tk
